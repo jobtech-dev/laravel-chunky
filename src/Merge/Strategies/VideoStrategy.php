@@ -19,7 +19,7 @@ class VideoStrategy extends MergeStrategy
         return $this->mergeContents();
     }
 
-    public function handleVideoMerge() : void
+    public function handleVideoMerge(): void
     {
         $exporter = FFMpeg::fromDisk($this->manager->chunksFilesystem())
             ->open($this->mapChunksToArray())
@@ -27,13 +27,13 @@ class VideoStrategy extends MergeStrategy
 
         $exporter->concatWithoutTranscoding();
 
-        if(! empty($visibility = $this->visibility())) {
+        if (!empty($visibility = $this->visibility())) {
             $exporter->withVisibility($visibility);
         }
 
         $exporter->toDisk(
-                $this->manager->getMergeDisk()
-            )->save($this->destination);
+            $this->manager->getMergeDisk()
+        )->save($this->destination);
     }
 
     /**
@@ -41,7 +41,7 @@ class VideoStrategy extends MergeStrategy
      *
      * @return string|null
      */
-    public function visibility() : ?string
+    public function visibility(): ?string
     {
         return Arr::get(
             $this->manager->getMergeOptions(),

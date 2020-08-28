@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Merge;
 
-use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Merge\MergeHandler;
 use Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy;
 use Jobtech\LaravelChunky\Merge\Strategies\FlysystemStrategy;
@@ -24,7 +23,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_sets_and_retrieves_strategy() {
+    public function handler_sets_and_retrieves_strategy()
+    {
         $mock = $this->mock(MergeStrategy::class);
 
         $handler = new MergeHandler($this->manager);
@@ -34,7 +34,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_forward_call_to_strategy_methods() {
+    public function handler_forward_call_to_strategy_methods()
+    {
         $mock = $this->mock(MergeStrategy::class, function ($mock) {
             $mock->shouldReceive('manager')
                 ->once()
@@ -71,7 +72,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_retrieves_default_strategy() {
+    public function handler_retrieves_default_strategy()
+    {
         $strategy_1 = MergeHandler::strategyBy($this->manager, 'application/json');
         $strategy_2 = MergeHandler::strategyBy($this->manager, 'application/*');
         $strategy_3 = MergeHandler::strategyBy($this->manager, '*/*');
@@ -84,7 +86,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_retrieves_video_strategy() {
+    public function handler_retrieves_video_strategy()
+    {
         $strategy_1 = MergeHandler::strategyBy($this->manager, 'video/mp4');
         $strategy_2 = MergeHandler::strategyBy($this->manager, 'video/*');
 
@@ -93,7 +96,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_creates_new_instace() {
+    public function handler_creates_new_instace()
+    {
         $handler = MergeHandler::create(
             $this->manager,
             'foo',

@@ -1,24 +1,23 @@
 <?php
 
-
 namespace Jobtech\LaravelChunky\Merge\Strategies\Concerns;
-
 
 trait ChecksIntegrity
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function checkIntegrity(int $chunk_size, int $total_size) : bool {
+    public function checkIntegrity(int $chunk_size, int $total_size): bool
+    {
         $total = 0;
         $chunks = $this->manager()->chunks(
-             $this->chunksFolder()
-         );
+            $this->chunksFolder()
+        );
 
-        foreach($chunks->all() as $chunk) {
+        foreach ($chunks->all() as $chunk) {
             $size = $this->manager()->chunksFilesystem()->size($chunk['path']);
 
-            if($size < $chunk_size) {
+            if ($size < $chunk_size) {
                 return false;
             }
 

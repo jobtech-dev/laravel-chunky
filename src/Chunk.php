@@ -10,7 +10,6 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
@@ -97,19 +96,19 @@ class Chunk implements Arrayable, Jsonable, Responsable
      * Store the chunk into filesystem.
      *
      * @param string $folder
-     * @param array $options
+     * @param array  $options
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
      * @return Chunk
      */
-    public function storeIn(string $folder, $options = []) : Chunk
+    public function storeIn(string $folder, $options = []): Chunk
     {
         // Get extension
         $extension = $this->guessExtension();
 
         // Check file instance and retrieve file name
-        if($this->file instanceof UploadedFile) {
+        if ($this->file instanceof UploadedFile) {
             $file_name = str_replace(
                 $extension,
                 '',
@@ -143,20 +142,20 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function toArray() : array
+    public function toArray(): array
     {
         $extension = $this->file->guessExtension();
 
         $data = [
-            'name' => $this->getBasename($extension),
+            'name'      => $this->getBasename($extension),
             'extension' => $extension,
-            'index' => $this->getIndex(),
-            'last' => $this->isLast()
+            'index'     => $this->getIndex(),
+            'last'      => $this->isLast(),
         ];
 
-        if($this->show_file_info) {
+        if ($this->show_file_info) {
             $data['file'] = $this->getRealPath();
             $data['path'] = $this->getPath();
         }
@@ -165,19 +164,19 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function toJson($options = 0) : string
+    public function toJson($options = 0): string
     {
         return json_encode($this->toArray(), $options);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function toResponse($request)
     {
-        if($request->wantsJson()) {
+        if ($request->wantsJson()) {
             return $this->toResource($request);
         }
 
@@ -188,7 +187,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * Transforms the current model into a json resource
+     * Transforms the current model into a json resource.
      */
     public function toResource()
     {
@@ -200,7 +199,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
 
     public function __call($method, $parameters)
     {
-        if(!method_exists($this, $method)) {
+        if (!method_exists($this, $method)) {
             return $this->forwardCallTo($this->file, $method, $parameters);
         }
 
@@ -211,15 +210,16 @@ class Chunk implements Arrayable, Jsonable, Responsable
      * Store and return a new chunk instance.
      *
      * @param \Symfony\Component\HttpFoundation\File\File $file
-     * @param string $folder
-     * @param int $index
-     * @param array $options
+     * @param string                                      $folder
+     * @param int                                         $index
+     * @param array                                       $options
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
      * @return \Jobtech\LaravelChunky\Chunk
      */
-    public static function storeFrom(File $file, string $folder, int $index, $options = []) {
+    public static function storeFrom(File $file, string $folder, int $index, $options = [])
+    {
         $chunk = new static($index, $file);
 
         return $chunk->storeIn($folder, $options);
@@ -231,7 +231,8 @@ class Chunk implements Arrayable, Jsonable, Responsable
      *
      * @return $this
      */
-    public function hideFileInfo() {
+    public function hideFileInfo()
+    {
         $this->show_file_info = false;
 
         return $this;
@@ -243,7 +244,8 @@ class Chunk implements Arrayable, Jsonable, Responsable
      *
      * @return $this
      */
-    public function showFileInfo() {
+    public function showFileInfo()
+    {
         $this->show_file_info = true;
 
         return $this;

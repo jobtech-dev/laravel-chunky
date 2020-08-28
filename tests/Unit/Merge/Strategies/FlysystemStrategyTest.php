@@ -16,7 +16,8 @@ class FlysystemStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_merges_chunks() {
+    public function strategy_merges_chunks()
+    {
         $this->manager->chunksFilesystem()->write('foo/0_foo.txt', 'Hello');
         $this->manager->chunksFilesystem()->write('foo/1_foo.txt', ' World');
 

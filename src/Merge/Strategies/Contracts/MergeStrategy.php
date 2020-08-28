@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Merge\Strategies\Contracts;
 
-use Illuminate\Support\Collection;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 use Symfony\Component\HttpFoundation\File\File;
@@ -10,7 +9,7 @@ use Symfony\Component\HttpFoundation\File\File;
 interface MergeStrategy
 {
     /**
-     * Set and retrieve or retrieve the chunks manager
+     * Set and retrieve or retrieve the chunks manager.
      *
      * @param ChunksManager|null $manager
      *
@@ -29,7 +28,7 @@ interface MergeStrategy
      *
      * @return string
      */
-    public function chunksFolder($folder = null) : string;
+    public function chunksFolder($folder = null): string;
 
     /**
      * Retrieve the destination file for merge.
@@ -40,7 +39,7 @@ interface MergeStrategy
      *
      * @return string
      */
-    public function destination($destination = null) : string;
+    public function destination($destination = null): string;
 
     /**
      * Check the file size integrity for the chunks.
@@ -50,7 +49,7 @@ interface MergeStrategy
      *
      * @return bool
      */
-    public function checkIntegrity(int $chunk_size, int $total_size) : bool;
+    public function checkIntegrity(int $chunk_size, int $total_size): bool;
 
     /**
      * Handles the merge of the chunks into a single file.

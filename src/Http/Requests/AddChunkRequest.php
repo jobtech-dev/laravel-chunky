@@ -14,20 +14,21 @@ class AddChunkRequest extends FormRequest
      *
      * @return array
      */
-    public function indexRules() : array {
+    public function indexRules(): array
+    {
         $key = config('chunky.validation.index.key');
         $rules = array_unique(
             array_merge([
-                'required', 'integer', 'min:0'
+                'required', 'integer', 'min:0',
             ], config('chunky.validation.index.rules', []))
         );
 
-        if(empty($key)) {
-            throw new ChunkyException("Index key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('Index key cannot be null');
         }
 
         return [
-            $key => $rules
+            $key => $rules,
         ];
     }
 
@@ -36,20 +37,21 @@ class AddChunkRequest extends FormRequest
      *
      * @return array
      */
-    public function fileRules() : array {
+    public function fileRules(): array
+    {
         $key = config('chunky.validation.file.key');
         $rules = array_unique(
             array_merge([
-                'required', 'file'
+                'required', 'file',
             ], config('chunky.validation.file.rules', []))
         );
 
-        if(empty($key)) {
-            throw new ChunkyException("File key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('File key cannot be null');
         }
 
         return [
-            $key => $rules
+            $key => $rules,
         ];
     }
 
@@ -58,20 +60,21 @@ class AddChunkRequest extends FormRequest
      *
      * @return array
      */
-    public function chunkSizeRules() : array {
+    public function chunkSizeRules(): array
+    {
         $key = config('chunky.validation.chunkSize.key');
         $rules = array_unique(
             array_merge([
-                'required', 'integer', 'min:1'
+                'required', 'integer', 'min:1',
             ], config('chunky.validation.chunkSize.rules', []))
         );
 
-        if(empty($key)) {
-            throw new ChunkyException("Chunk file size key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('Chunk file size key cannot be null');
         }
 
         return [
-            $key => $rules
+            $key => $rules,
         ];
     }
 
@@ -80,28 +83,30 @@ class AddChunkRequest extends FormRequest
      *
      * @return array
      */
-    public function totalSizeRules() : array {
+    public function totalSizeRules(): array
+    {
         $key = config('chunky.validation.totalSize.key');
         $rules = array_unique(
             array_merge([
-                'required', 'integer', 'min:1'
+                'required', 'integer', 'min:1',
             ], config('chunky.validation.totalSize.rules', []))
         );
 
-        if(empty($key)) {
-            throw new ChunkyException("Total file size key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('Total file size key cannot be null');
         }
 
         return [
-            $key => $rules
+            $key => $rules,
         ];
     }
 
-    public function additionalRules() : array {
+    public function additionalRules(): array
+    {
         $rules = [];
 
-        foreach(config('chunky.validation') as $input => $config) {
-            if(
+        foreach (config('chunky.validation') as $input => $config) {
+            if (
                 !in_array($input, ['index', 'file', 'chunkSize', 'totalSize'])
                 && Arr::has($config, 'key')
                 && Arr::has($config, 'rules')
@@ -118,11 +123,12 @@ class AddChunkRequest extends FormRequest
      *
      * @return int
      */
-    public function indexInput() : int {
+    public function indexInput(): int
+    {
         $key = config('chunky.validation.index.key');
 
-        if(empty($key)) {
-            throw new ChunkyException("Index key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('Index key cannot be null');
         }
 
         return $this->input($key);
@@ -133,11 +139,12 @@ class AddChunkRequest extends FormRequest
      *
      * @return \Illuminate\Http\UploadedFile
      */
-    public function fileInput() : UploadedFile {
+    public function fileInput(): UploadedFile
+    {
         $key = config('chunky.validation.file.key');
 
-        if(empty($key)) {
-            throw new ChunkyException("File key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('File key cannot be null');
         }
 
         return $this->file($key);
@@ -148,11 +155,12 @@ class AddChunkRequest extends FormRequest
      *
      * @return int
      */
-    public function chunkSizeInput() : int {
+    public function chunkSizeInput(): int
+    {
         $key = config('chunky.validation.chunkSize.key');
 
-        if(empty($key)) {
-            throw new ChunkyException("Chunk file size key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('Chunk file size key cannot be null');
         }
 
         return $this->input($key);
@@ -163,11 +171,12 @@ class AddChunkRequest extends FormRequest
      *
      * @return int
      */
-    public function totalSizeInput() : int {
+    public function totalSizeInput(): int
+    {
         $key = config('chunky.validation.totalSize.key');
 
-        if(empty($key)) {
-            throw new ChunkyException("Total file size key cannot be null");
+        if (empty($key)) {
+            throw new ChunkyException('Total file size key cannot be null');
         }
 
         return $this->input($key);

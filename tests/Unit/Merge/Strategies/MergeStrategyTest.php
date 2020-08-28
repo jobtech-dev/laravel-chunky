@@ -24,7 +24,8 @@ class MergeStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_sets_and_retrieve_manager() {
+    public function strategy_sets_and_retrieve_manager()
+    {
         $mock = $this->mock(ChunksManager::class);
         $strategy = new TestMergeStrategy($this->manager);
 
@@ -34,7 +35,8 @@ class MergeStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_throws_strategy_exception_on_null_chunks_folder() {
+    public function strategy_throws_strategy_exception_on_null_chunks_folder()
+    {
         $strategy = new TestMergeStrategy($this->manager);
 
         $this->expectException(StrategyException::class);
@@ -43,14 +45,16 @@ class MergeStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_sets_and_retrieve_chunks_folder() {
+    public function strategy_sets_and_retrieve_chunks_folder()
+    {
         $strategy = new TestMergeStrategy($this->manager);
 
         $this->assertEquals('foo', $strategy->chunksFolder('foo'));
     }
 
     /** @test */
-    public function strategy_throws_strategy_exception_on_null_destination() {
+    public function strategy_throws_strategy_exception_on_null_destination()
+    {
         $strategy = new TestMergeStrategy($this->manager);
 
         $this->expectException(StrategyException::class);
@@ -59,14 +63,16 @@ class MergeStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_sets_and_retrieve_destination() {
+    public function strategy_sets_and_retrieve_destination()
+    {
         $strategy = new TestMergeStrategy($this->manager);
 
         $this->assertEquals('foo', $strategy->destination('foo'));
     }
 
     /** @test */
-    public function strategy_deletes_chunks() {
+    public function strategy_deletes_chunks()
+    {
         $fake_0 = UploadedFile::fake()->create('foo.txt', 2000);
         $fake_1 = UploadedFile::fake()->create('foo.txt', 2000);
 
@@ -86,7 +92,8 @@ class MergeStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_gets_merge_contents() {
+    public function strategy_gets_merge_contents()
+    {
         $this->manager->mergeFilesystem()->write('foo/foo.txt', 'Hello World');
 
         $strategy = new TestMergeStrategy($this->manager);
@@ -96,7 +103,8 @@ class MergeStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_checks_integrity() {
+    public function strategy_checks_integrity()
+    {
         $fake_0 = UploadedFile::fake()->create('foo.txt', 2000);
         $fake_1 = UploadedFile::fake()->create('foo.txt', 2000);
 

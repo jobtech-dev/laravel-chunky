@@ -23,33 +23,34 @@ class StrategyFactory implements StrategyFactoryContract
     /**
      * Returns a new instance for the given strategy class.
      *
-     * @param string $strategy
+     * @param string                                         $strategy
      * @param \Jobtech\LaravelChunky\Contracts\ChunksManager $manager
+     *
      * @return mixed
      */
     private function buildInstance(string $strategy, ChunksManager $manager)
     {
-        if(! method_exists($strategy, 'newInstance')) {
-            throw new StrategyException("Cannot instantiate strategy instance");
+        if (!method_exists($strategy, 'newInstance')) {
+            throw new StrategyException('Cannot instantiate strategy instance');
         }
 
         return $strategy::newInstance($manager);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function default(ChunksManager $manager): MergeStrategy
     {
-        if(! Arr::has($this->config, 'default')) {
-            throw new StrategyException("Default strategy cannot be null");
+        if (!Arr::has($this->config, 'default')) {
+            throw new StrategyException('Default strategy cannot be null');
         }
 
         return $this->buildInstance($this->config['default'], $manager);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function mimeTypes(): array
     {
@@ -59,7 +60,7 @@ class StrategyFactory implements StrategyFactoryContract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function strategies(): array
     {
@@ -67,19 +68,21 @@ class StrategyFactory implements StrategyFactoryContract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function buildFrom(string $mime_type, ChunksManager $manager): MergeStrategy
     {
         $mime_type_group = explode('/', $mime_type)[0].'/*';
 
-        if(in_array($mime_type, $this->mimeTypes())) {
+        if (in_array($mime_type, $this->mimeTypes())) {
             return $this->buildInstance(
-                $this->strategies()[$mime_type], $manager
+                $this->strategies()[$mime_type],
+                $manager
             );
-        } else if(in_array($mime_type_group, $this->mimeTypes())) {
+        } elseif (in_array($mime_type_group, $this->mimeTypes())) {
             return $this->buildInstance(
-                $this->strategies()[$mime_type_group], $manager
+                $this->strategies()[$mime_type_group],
+                $manager
             );
         }
 
