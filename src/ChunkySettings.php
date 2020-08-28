@@ -33,7 +33,7 @@ class ChunkySettings
      *
      * @return array
      */
-    public function config() : array
+    public function config(): array
     {
         return $this->config;
     }
@@ -43,7 +43,7 @@ class ChunkySettings
      *
      * @return string|null
      */
-    public function chunksDisk() : ?string
+    public function chunksDisk(): ?string
     {
         return Arr::get($this->config, 'disks.chunks.disk');
     }
@@ -53,13 +53,13 @@ class ChunkySettings
      *
      * @return string
      */
-    public function chunksFolder() : string
+    public function chunksFolder(): string
     {
         $folder = Arr::get($this->config, 'disks.chunks.folder');
 
-        if($folder === null) {
+        if ($folder === null) {
             return '';
-        } else if(!Str::endsWith($folder, '/')) {
+        } elseif (!Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 
@@ -71,7 +71,7 @@ class ChunkySettings
      *
      * @return string|null
      */
-    public function mergeDisk() : ?string
+    public function mergeDisk(): ?string
     {
         return Arr::get($this->config, 'disks.merge.disk');
     }
@@ -81,13 +81,13 @@ class ChunkySettings
      *
      * @return string
      */
-    public function mergeFolder() : string
+    public function mergeFolder(): string
     {
         $folder = Arr::get($this->config, 'disks.merge.folder');
 
-        if($folder === null) {
+        if ($folder === null) {
             return '';
-        } else if(!Str::endsWith($folder, '/')) {
+        } elseif (!Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 
@@ -99,7 +99,8 @@ class ChunkySettings
      *
      * @return int
      */
-    public function defaultIndex() : int {
+    public function defaultIndex(): int
+    {
         return Arr::get($this->config, 'index', self::INDEX_ZERO)
             ?: self::INDEX_ZERO;
     }
@@ -109,7 +110,7 @@ class ChunkySettings
      *
      * @return array
      */
-    public function additionalChunksOptions() : array
+    public function additionalChunksOptions(): array
     {
         return Arr::get($this->config, 'options.chunks', []);
     }
@@ -119,7 +120,7 @@ class ChunkySettings
      *
      * @return array
      */
-    public function additionalMergeOptions() : array
+    public function additionalMergeOptions(): array
     {
         return Arr::get($this->config, 'options.merge', []);
     }
@@ -129,7 +130,7 @@ class ChunkySettings
      *
      * @return bool
      */
-    public function autoMerge() : bool
+    public function autoMerge(): bool
     {
         return Arr::get($this->config, 'auto_merge', false);
     }

@@ -2,9 +2,9 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit;
 
+use Illuminate\Contracts\Config\Repository;
 use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use Illuminate\Contracts\Config\Repository;
 
 class ChunkySettingsTest extends TestCase
 {
@@ -16,18 +16,19 @@ class ChunkySettingsTest extends TestCase
             [ChunkySettings::INDEX_ONE, ChunkySettings::INDEX_ONE],
             [0, ChunkySettings::INDEX_ZERO],
             [1, ChunkySettings::INDEX_ONE],
-            [10, 10]
+            [10, 10],
         ];
     }
 
     /** @test */
-    public function settings_have_config() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_have_config()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->once()
                 ->with('chunky')
                 ->andReturn([
-                    'foo' => 'bar'
+                    'foo' => 'bar',
                 ]);
         });
 
@@ -37,8 +38,9 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_disk() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_default_disk()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
@@ -52,8 +54,9 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_folder() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_default_folder()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
@@ -67,17 +70,18 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_chunks_disk() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_default_chunks_disk()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
                     'disks' => [
                         'chunks' => [
-                            'disk' => 'foo'
-                        ]
-                    ]
+                            'disk' => 'foo',
+                        ],
+                    ],
                 ]);
         });
 
@@ -87,17 +91,18 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_chunks_folder() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_chunks_folder()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
                     'disks' => [
                         'chunks' => [
-                            'folder' => 'foo'
-                        ]
-                    ]
+                            'folder' => 'foo',
+                        ],
+                    ],
                 ]);
         });
 
@@ -107,17 +112,18 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_merge_disk() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_default_merge_disk()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
                     'disks' => [
                         'merge' => [
-                            'disk' => 'foo'
-                        ]
-                    ]
+                            'disk' => 'foo',
+                        ],
+                    ],
                 ]);
         });
 
@@ -127,17 +133,18 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_merge_folder() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_merge_folder()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
                     'disks' => [
                         'merge' => [
-                            'folder' => 'foo'
-                        ]
-                    ]
+                            'folder' => 'foo',
+                        ],
+                    ],
                 ]);
         });
 
@@ -149,17 +156,18 @@ class ChunkySettingsTest extends TestCase
     /**
      * @test
      * @dataProvider indexProvider
+     *
      * @param $index
      * @param $expected
      */
-    public function settings_retrieve_default_index($index, $expected) {
-
-        $repository = $this->mock(Repository::class, function($mock) use($index) {
+    public function settings_retrieve_default_index($index, $expected)
+    {
+        $repository = $this->mock(Repository::class, function ($mock) use ($index) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
-                    'index' => $index
+                    'index' => $index,
                 ]);
         });
 
@@ -169,8 +177,9 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_additional_chunks_options() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_default_additional_chunks_options()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
@@ -183,17 +192,18 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_additional_chunks_options() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_additional_chunks_options()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
                     'options' => [
                         'chunks' => [
-                            'foo' => 'bar'
-                        ]
-                    ]
+                            'foo' => 'bar',
+                        ],
+                    ],
                 ]);
         });
 
@@ -203,8 +213,9 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_additional_merge_options() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_default_additional_merge_options()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
@@ -217,17 +228,18 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_additional_merge_options() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_additional_merge_options()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
                     'options' => [
                         'merge' => [
-                            'foo' => 'bar'
-                        ]
-                    ]
+                            'foo' => 'bar',
+                        ],
+                    ],
                 ]);
         });
 
@@ -237,8 +249,9 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_auto_merge_option() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_default_auto_merge_option()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
@@ -251,13 +264,14 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_auto_merge_option() {
-        $repository = $this->mock(Repository::class, function($mock) {
+    public function settings_retrieve_auto_merge_option()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->with('chunky')
                 ->once()
                 ->andReturn([
-                    'auto_merge' => true
+                    'auto_merge' => true,
                 ]);
         });
 

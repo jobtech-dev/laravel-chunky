@@ -20,12 +20,12 @@ class FlysystemStrategy extends MergeStrategy
      *
      * @return bool
      */
-    protected function mergeChunks(array $chunks) : bool
+    protected function mergeChunks(array $chunks): bool
     {
         $chunk = Arr::first($chunks);
 
-        if(!$this->manager->chunksFilesystem()->concatenate($chunk, ...$chunks)) {
-            throw new StrategyException("Unable to concatenate chunks");
+        if (!$this->manager->chunksFilesystem()->concatenate($chunk, ...$chunks)) {
+            throw new StrategyException('Unable to concatenate chunks');
         }
 
         return $this->manager->mergeFilesystem()
@@ -37,7 +37,7 @@ class FlysystemStrategy extends MergeStrategy
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function merge()
     {

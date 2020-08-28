@@ -15,16 +15,16 @@ return [
 
     'disks' => [
         'chunks' => [
-            'disk' => env('CHUNKY_CHUNK_DISK'),
+            'disk'   => env('CHUNKY_CHUNK_DISK'),
             'folder' => 'chunks',
         ],
         'merge' => [
-            'disk' => env('CHUNKY_MERGE_DISK'),
+            'disk'   => env('CHUNKY_MERGE_DISK'),
             'folder' => null,
         ],
         'temp' => [
 
-        ]
+        ],
     ],
 
     /*
@@ -70,7 +70,7 @@ return [
 
         'merge' => [
             // 'visibility' => 'public'
-        ]
+        ],
     ],
 
     /*
@@ -87,25 +87,25 @@ return [
     'validation' => [
         // Mandatory
         'index' => [
-            'key' => 'index',
-            'rules' => ['required', 'integer', 'min:0']
+            'key'   => 'index',
+            'rules' => ['required', 'integer', 'min:0'],
         ],
         'file' => [
-            'key' => 'file',
-            'rules' => ['required', 'file']
+            'key'   => 'file',
+            'rules' => ['required', 'file'],
         ],
         'chunkSize' => [
-            'key' => 'chunkSize',
-            'rules' => ['required', 'integer', 'min:1']
+            'key'   => 'chunkSize',
+            'rules' => ['required', 'integer', 'min:1'],
         ],
         'totalSize' => [
-            'key' => 'totalSize',
-            'rules' => ['required', 'integer', 'min:1']
+            'key'   => 'totalSize',
+            'rules' => ['required', 'integer', 'min:1'],
         ],
         // Optional
         'folder' => [
-            'key' => 'folder',
-            'rules' => ['filled', 'string']
+            'key'   => 'folder',
+            'rules' => ['filled', 'string'],
         ],
         // --------------------------------------------------------------------------
         // Dropzone chunk uploads example
@@ -183,7 +183,7 @@ return [
         'default' => \Jobtech\LaravelChunky\Merge\Strategies\FlysystemStrategy::class,
 
         'mime_types' => [
-            'video/*' => \Jobtech\LaravelChunky\Merge\Strategies\VideoStrategy::class
-        ]
-    ]
+            'video/*' => \Jobtech\LaravelChunky\Merge\Strategies\VideoStrategy::class,
+        ],
+    ],
 ];

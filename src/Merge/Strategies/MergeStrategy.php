@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Jobtech\LaravelChunky\Merge\Strategies;
 
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
@@ -24,7 +23,8 @@ abstract class MergeStrategy implements MergeStrategyContract
      */
     protected $destination;
 
-    public function __construct(ChunksManager $manager) {
+    public function __construct(ChunksManager $manager)
+    {
         $this->manager = $manager;
     }
 
@@ -33,50 +33,52 @@ abstract class MergeStrategy implements MergeStrategyContract
      *
      * @return array
      */
-    protected function mapChunksToArray() : array
+    protected function mapChunksToArray(): array
     {
         return $this->manager->chunks(
             $this->folder
-        )->map(function($chunk) {
+        )->map(function ($chunk) {
             return $chunk['path'];
         })->toArray();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function manager($manager = null): ChunksManager
     {
-        if($manager instanceof ChunksManager) {
+        if ($manager instanceof ChunksManager) {
             $this->manager = $manager;
-        } else if($this->manager === null) {
-            throw new StrategyException("Manager cannot be empty");
+        } elseif ($this->manager === null) {
+            throw new StrategyException('Manager cannot be empty');
         }
 
         return $this->manager;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function chunksFolder($folder = null) : string {
-        if(is_string($folder)) {
+    public function chunksFolder($folder = null): string
+    {
+        if (is_string($folder)) {
             $this->folder = $folder;
-        } else if(empty($this->folder)) {
-            throw new StrategyException("Chunks folder cannot be empty");
+        } elseif (empty($this->folder)) {
+            throw new StrategyException('Chunks folder cannot be empty');
         }
 
         return $this->folder;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function destination($destination = null) : string {
-        if(is_string($destination)) {
+    public function destination($destination = null): string
+    {
+        if (is_string($destination)) {
             $this->destination = $destination;
-        } else if(empty($this->destination)) {
-            throw new StrategyException("Destination path cannot be empty");
+        } elseif (empty($this->destination)) {
+            throw new StrategyException('Destination path cannot be empty');
         }
 
         return $this->destination;
@@ -87,16 +89,16 @@ abstract class MergeStrategy implements MergeStrategyContract
      *
      * @return bool
      */
-    public function deleteChunks() : bool
+    public function deleteChunks(): bool
     {
         $files = $this->manager->chunksFilesystem()
             ->allFiles($this->folder);
 
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $deleted = $this->manager->chunksFilesystem()
                 ->delete($file);
 
-            if(!$deleted) {
+            if (!$deleted) {
                 return false;
             }
         }
@@ -108,8 +110,9 @@ abstract class MergeStrategy implements MergeStrategyContract
     /**
      * Retrieve the merge file contents.
      *
-     * @return string
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     *
+     * @return string
      */
     public function mergeContents()
     {
@@ -125,7 +128,8 @@ abstract class MergeStrategy implements MergeStrategyContract
      *
      * @return static
      */
-    public static function newInstance($manager) {
+    public static function newInstance($manager)
+    {
         return new static($manager);
     }
 }

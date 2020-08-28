@@ -10,7 +10,7 @@ class TestMergeStrategy extends MergeStrategy
     use ChecksIntegrity;
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function merge()
     {

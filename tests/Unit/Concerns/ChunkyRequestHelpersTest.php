@@ -26,17 +26,17 @@ class ChunkyRequestHelpersTest extends TestCase
         $this->manager = new ChunksManager($filesystem, $settings);
     }
 
-    public function indexProvider() : array
+    public function indexProvider(): array
     {
         return [
             [2000, 2000, 1],
             [2000, 4000, 2],
             [2000, 4001, 3],
-            [2000, 5000, 3]
+            [2000, 5000, 3],
         ];
     }
 
-    public function lastIndexProvider() : array
+    public function lastIndexProvider(): array
     {
         return [
             [ChunkySettings::INDEX_ZERO, 2000, 2000, true],
@@ -53,9 +53,10 @@ class ChunkyRequestHelpersTest extends TestCase
     }
 
     /** @test */
-    public function manager_throws_exception_on_total_size_lower_than_chunk_size() {
+    public function manager_throws_exception_on_total_size_lower_than_chunk_size()
+    {
         $request = $this->mock(AddChunkRequest::class, function ($mock) {
-           $mock->shouldReceive('totalSizeInput')
+            $mock->shouldReceive('totalSizeInput')
                ->once()
                ->andReturn(1);
             $mock->shouldReceive('chunkSizeInput')
@@ -76,8 +77,9 @@ class ChunkyRequestHelpersTest extends TestCase
      * @param $chunk_size
      * @param $total_size
      */
-    public function manager_retrieve_last_index_from_request($chunk_size, $total_size, $result) {
-        $request = $this->mock(AddChunkRequest::class, function ($mock) use($chunk_size, $total_size) {
+    public function manager_retrieve_last_index_from_request($chunk_size, $total_size, $result)
+    {
+        $request = $this->mock(AddChunkRequest::class, function ($mock) use ($chunk_size, $total_size) {
             $mock->shouldReceive('totalSizeInput')
                 ->once()
                 ->andReturn($total_size);
@@ -99,8 +101,9 @@ class ChunkyRequestHelpersTest extends TestCase
      * @param $index
      * @param $result
      */
-    public function manager_check_if_request_index_is_the_last_one($index, $chunk_size, $total_size, $result) {
-        $request = $this->mock(AddChunkRequest::class, function ($mock) use($index, $chunk_size, $total_size) {
+    public function manager_check_if_request_index_is_the_last_one($index, $chunk_size, $total_size, $result)
+    {
+        $request = $this->mock(AddChunkRequest::class, function ($mock) use ($index, $chunk_size, $total_size) {
             $mock->shouldReceive('totalSizeInput')
                 ->once()
                 ->andReturn($total_size);

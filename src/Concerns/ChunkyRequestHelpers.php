@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Jobtech\LaravelChunky\Concerns;
-
 
 use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -15,15 +13,15 @@ trait ChunkyRequestHelpers
      * request file input.
      *
      * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
-     *
-     * @param string|null $folder
+     * @param string|null                                          $folder
      *
      * @return string
      */
-    protected function checkFolder(AddChunkRequest $request, ?string $folder) {
+    protected function checkFolder(AddChunkRequest $request, ?string $folder)
+    {
         $file = $request->fileInput();
 
-        if($folder !== null) {
+        if ($folder !== null) {
             return Str::slug($folder);
         }
 
@@ -41,14 +39,16 @@ trait ChunkyRequestHelpers
      * the total size of the file divided by the size of the single chunk.
      *
      * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
+     *
      * @return int
      */
-    public function lastIndexFrom(AddChunkRequest $request) : int {
+    public function lastIndexFrom(AddChunkRequest $request): int
+    {
         $total_size = $request->totalSizeInput();
         $chunk_size = $request->chunkSizeInput();
 
-        if($total_size < $chunk_size) {
-            throw new ChunksIntegrityException("Total file size is lower than single chunk size");
+        if ($total_size < $chunk_size) {
+            throw new ChunksIntegrityException('Total file size is lower than single chunk size');
         }
 
         return ceil($total_size / $chunk_size);
@@ -58,9 +58,11 @@ trait ChunkyRequestHelpers
      * Check if current index refers to the last chunk.
      *
      * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
+     *
      * @return bool
      */
-    public function isLastIndex(AddChunkRequest $request) : bool {
+    public function isLastIndex(AddChunkRequest $request): bool
+    {
         $last_index = $this->lastIndexFrom($request)
             + ($this->settings->defaultIndex() - 1);
 

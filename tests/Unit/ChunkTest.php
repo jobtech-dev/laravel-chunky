@@ -4,11 +4,11 @@ namespace Jobtech\LaravelChunky\Tests\Unit;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 class ChunkTest extends TestCase
 {
@@ -24,7 +24,8 @@ class ChunkTest extends TestCase
         $this->upload = UploadedFile::fake()->image('foo.png');
     }
 
-    public function indexProvider() {
+    public function indexProvider()
+    {
         return [
             [1],
             [2],
@@ -38,9 +39,11 @@ class ChunkTest extends TestCase
     /**
      * @test
      * @dataProvider indexProvider
+     *
      * @param $index
      */
-    public function chunk_has_attributes($index) {
+    public function chunk_has_attributes($index)
+    {
         $chunk = new Chunk($index, $this->upload);
 
         $this->assertEquals($this->upload, $chunk->getFile());
@@ -52,7 +55,8 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_stored_on_default_disk() {
+    public function chunk_is_stored_on_default_disk()
+    {
         $chunk = new Chunk(0, $this->upload);
         $chunk->storeIn('bar');
 
@@ -60,12 +64,13 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_stored() {
+    public function chunk_is_stored()
+    {
         Storage::fake('foo');
 
         $chunk = new Chunk(0, $this->upload);
         $result = $chunk->storeIn('bar', [
-            'disk' => 'foo'
+            'disk' => 'foo',
         ]);
 
         $this->assertNotEquals($chunk, $result);
@@ -73,48 +78,51 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_transformed_into_an_array() {
+    public function chunk_is_transformed_into_an_array()
+    {
         $chunk = new Chunk(0, $this->upload);
         $file = $this->upload->getRealPath();
 
         $result = [
-            "file" => $file,
-            "path" => $this->upload->getPath(),
-            "name" => $this->upload->getBasename(
+            'file' => $file,
+            'path' => $this->upload->getPath(),
+            'name' => $this->upload->getBasename(
                 $this->upload->guessClientExtension()
             ),
-            "extension" => "png",
-            "index" => 0,
-            "last" => false
+            'extension' => 'png',
+            'index'     => 0,
+            'last'      => false,
         ];
 
         $this->assertEquals($result, $chunk->toArray());
     }
 
     /** @test */
-    public function chunk_toggles_file_info_when_transformed_into_an_array() {
+    public function chunk_toggles_file_info_when_transformed_into_an_array()
+    {
         $chunk = new Chunk(0, $this->upload);
         $file = $this->upload->getRealPath();
 
         $result = [
-            "name" => $this->upload->getBasename(
+            'name' => $this->upload->getBasename(
                 $this->upload->guessClientExtension()
             ),
-            "extension" => "png",
-            "index" => 0,
-            "last" => false
+            'extension' => 'png',
+            'index'     => 0,
+            'last'      => false,
         ];
 
         $this->assertEquals($result, $chunk->hideFileInfo()->toArray());
 
-        $result["file"] = $file;
-        $result["path"] = $this->upload->getPath();
+        $result['file'] = $file;
+        $result['path'] = $this->upload->getPath();
 
         $this->assertEquals($result, $chunk->showFileInfo()->toArray());
     }
 
     /** @test */
-    public function chunk_is_encoded_as_json() {
+    public function chunk_is_encoded_as_json()
+    {
         $chunk = new Chunk(0, $this->upload);
         $file = json_encode($this->upload->getRealPath());
         $path = json_encode($this->upload->getPath());
@@ -128,7 +136,8 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_toggles_file_info_when_is_encoded_as_json() {
+    public function chunk_toggles_file_info_when_is_encoded_as_json()
+    {
         $chunk = new Chunk(0, $this->upload);
         $file = json_encode($this->upload->getRealPath());
         $path = json_encode($this->upload->getPath());
@@ -145,9 +154,10 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_transformed_into_a_response() {
-        $mock = $this->mock(Request::class, function($mock) {
-           $mock->shouldReceive('wantsJson')
+    public function chunk_is_transformed_into_a_response()
+    {
+        $mock = $this->mock(Request::class, function ($mock) {
+            $mock->shouldReceive('wantsJson')
                ->once()
                ->andReturn(false);
         });
@@ -161,8 +171,9 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_transformed_into_a_json_resource() {
-        $mock = $this->mock(Request::class, function($mock) {
+    public function chunk_is_transformed_into_a_json_resource()
+    {
+        $mock = $this->mock(Request::class, function ($mock) {
             $mock->shouldReceive('wantsJson')
                 ->once()
                 ->andReturn(true);
@@ -174,12 +185,13 @@ class ChunkTest extends TestCase
 
         $this->assertInstanceOf(ChunkResource::class, $result);
         $this->assertEquals(json_encode([
-            'data' => $chunk->toArray()
+            'data' => $chunk->toArray(),
         ]), $result->toResponse($mock)->getContent());
     }
 
     /** @test */
-    public function chunck_forwards_calls_to_uploaded_file() {
+    public function chunck_forwards_calls_to_uploaded_file()
+    {
         $chunk = new Chunk(0, $this->upload);
 
         $this->assertEquals($this->upload->getPath(), $chunk->getPath());
@@ -200,7 +212,7 @@ class ChunkTest extends TestCase
         Storage::fake('foo');
 
         Chunk::storeFrom($this->upload, 'bar', 0, [
-            'disk' => 'foo'
+            'disk' => 'foo',
         ]);
 
         Storage::disk('foo')->assertExists('bar/0_foo.png');

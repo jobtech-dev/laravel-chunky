@@ -2,13 +2,10 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies;
 
-use FFMpeg\Media\Video;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\ChunksManager;
-use Jobtech\LaravelChunky\Merge\Strategies\FlysystemStrategy;
 use Jobtech\LaravelChunky\Merge\Strategies\VideoStrategy;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use File;
 
 class VideoStrategyTest extends TestCase
 {
@@ -20,8 +17,9 @@ class VideoStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_retrieves_visibility_from_options() {
-        $mock = $this->mock(ChunksManager::class, function($mock) {
+    public function strategy_retrieves_visibility_from_options()
+    {
+        $mock = $this->mock(ChunksManager::class, function ($mock) {
             $mock->shouldReceive('getMergeOptions')
                 ->once()
                 ->andReturn([]);
@@ -29,7 +27,7 @@ class VideoStrategyTest extends TestCase
             $mock->shouldReceive('getMergeOptions')
                 ->once()
                 ->andReturn([
-                    'visibility' => 'public'
+                    'visibility' => 'public',
                 ]);
         });
 
@@ -40,7 +38,8 @@ class VideoStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_merges_chunks_without_transcode() {
+    public function strategy_merges_chunks_without_transcode()
+    {
         $strategy = new VideoStrategy($this->manager);
         $strategy->chunksFolder('resources/mp4');
         $strategy->destination('foo/sample.mp4');
@@ -55,7 +54,8 @@ class VideoStrategyTest extends TestCase
     }
 
     /** @test */
-    public function strategy_merges_chunks_with_transcode() {
+    public function strategy_merges_chunks_with_transcode()
+    {
         $strategy = new VideoStrategy($this->manager);
         $strategy->chunksFolder('resources/avi');
         $strategy->destination('foo/sample.mp4');

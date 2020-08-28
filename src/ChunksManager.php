@@ -2,17 +2,17 @@
 
 namespace Jobtech\LaravelChunky;
 
-use Illuminate\Support\Collection;
-use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
+use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
+use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Symfony\Component\HttpFoundation\File\File;
-use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
 
 class ChunksManager implements ChunksManagerContract
 {
@@ -38,20 +38,22 @@ class ChunksManager implements ChunksManagerContract
      * Build the full path for chunks' folder.
      *
      * @param string $folder
+     *
      * @return string
      */
-    private function fullPath(string $folder) : string
+    private function fullPath(string $folder): string
     {
         return $this->getChunksFolder().$folder;
     }
 
     /**
-     * Build the merge destination path
+     * Build the merge destination path.
+     *
      * @param \Illuminate\Http\UploadedFile $file
      *
      * @return string
      */
-    private function destinationPath(UploadedFile $file) : string
+    private function destinationPath(UploadedFile $file): string
     {
         return $this->getMergeFolder().$file->getFilename();
     }
@@ -60,6 +62,7 @@ class ChunksManager implements ChunksManagerContract
      * Build chunks destination folder from file name.
      *
      * @param string $file
+     *
      * @return string
      */
     private function buildChunkFolderFor(string $file)
@@ -68,9 +71,9 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function chunksFilesystem() : Filesystem
+    public function chunksFilesystem(): Filesystem
     {
         return $this->filesystem->disk(
             $this->getChunksDisk()
@@ -78,9 +81,9 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function mergeFilesystem() : Filesystem
+    public function mergeFilesystem(): Filesystem
     {
         return $this->filesystem->disk(
             $this->getMergeDisk()
@@ -88,61 +91,66 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getChunksDisk() : ?string {
+    public function getChunksDisk(): ?string
+    {
         return $this->settings
             ->chunksDisk();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getMergeDisk() : ?string {
+    public function getMergeDisk(): ?string
+    {
         return $this->settings
             ->mergeDisk();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getChunksFolder() : string {
+    public function getChunksFolder(): string
+    {
         return $this->settings
             ->chunksFolder();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getMergeFolder() : string {
+    public function getMergeFolder(): string
+    {
         return $this->settings
             ->mergeFolder();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getChunksOptions() : array
+    public function getChunksOptions(): array
     {
         return array_merge([
-            'disk' => $this->getChunksDisk()
+            'disk' => $this->getChunksDisk(),
         ], $this->settings->additionalChunksOptions());
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getMergeOptions() : array
+    public function getMergeOptions(): array
     {
         return array_merge([
-            'disk' => $this->getMergeDisk()
+            'disk' => $this->getMergeDisk(),
         ], $this->settings->additionalMergeOptions());
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function chunks(string $folder) : Collection {
+    public function chunks(string $folder): Collection
+    {
         return collect($this->chunksFilesystem()->files($folder))
             ->map(function ($path) use ($folder) {
                 $filename = str_replace($folder.DIRECTORY_SEPARATOR, '', $path);
@@ -151,29 +159,29 @@ class ChunksManager implements ChunksManagerContract
 
                 return [
                     'index' => intval($index),
-                    'path' => $path
+                    'path'  => $path,
                 ];
-            })->sortBy(function($item) {
+            })->sortBy(function ($item) {
                 return $item['index'];
             });
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function checkChunkIntegrity(string $folder, int $index) : bool
+    public function checkChunkIntegrity(string $folder, int $index): bool
     {
         $path = $this->fullPath($folder);
         $default = $this->settings->defaultIndex();
 
-        if($this->chunksFilesystem()->exists($path)) {
-            if(ChunkySettings::INDEX_ZERO != $default) {
+        if ($this->chunksFilesystem()->exists($path)) {
+            if (ChunkySettings::INDEX_ZERO != $default) {
                 $index -= $default;
             }
 
             return count($this->chunksFilesystem()->files($path)) == $index;
-        } else if($index == $default) {
-            if(! $this->chunksFilesystem()->makeDirectory($path)) {
+        } elseif ($index == $default) {
+            if (!$this->chunksFilesystem()->makeDirectory($path)) {
                 throw new ChunksIntegrityException("Cannot create chunks folder $path");
             }
 
@@ -182,11 +190,12 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function addChunk(UploadedFile $file, int $index, string $folder) : Chunk {
+    public function addChunk(UploadedFile $file, int $index, string $folder): Chunk
+    {
         // Check integrity
-        if(!$this->checkChunkIntegrity($folder, $index)) {
+        if (!$this->checkChunkIntegrity($folder, $index)) {
             throw new ChunksIntegrityException("Uploaded chunk with index {$index} violates the integrity");
         }
 
@@ -203,13 +212,14 @@ class ChunksManager implements ChunksManagerContract
      * Handles an add chunks request.
      *
      * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
-     * @param string|null $folder
+     * @param string|null                                          $folder
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
      * @return \Jobtech\LaravelChunky\Chunk
      */
-    public function handle(AddChunkRequest $request, $folder = null) : Chunk {
+    public function handle(AddChunkRequest $request, $folder = null): Chunk
+    {
         $folder = $this->checkFolder($request, $folder);
         $chunk = $this->addChunk(
             $request->fileInput(),
@@ -217,7 +227,7 @@ class ChunksManager implements ChunksManagerContract
             $folder
         );
 
-        if($this->isLastIndex($request) && $this->settings->autoMerge()) {
+        if ($this->isLastIndex($request) && $this->settings->autoMerge()) {
             $chunk->setLast(true);
 
             dispatch(new MergeChunks(

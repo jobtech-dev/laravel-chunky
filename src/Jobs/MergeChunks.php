@@ -14,7 +14,10 @@ use Jobtech\LaravelChunky\Merge\MergeHandler;
 
 class MergeChunks implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * @var \Jobtech\LaravelChunky\Contracts\ChunksManager
@@ -39,10 +42,10 @@ class MergeChunks implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager $manager
+     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager       $manager
      * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
-     * @param string $folder
-     * @param string $destination
+     * @param string                                               $folder
+     * @param string                                               $destination
      */
     public function __construct(ChunksManager $manager, AddChunkRequest $request, string $folder, string $destination)
     {
@@ -68,8 +71,8 @@ class MergeChunks implements ShouldQueue
             $this->request->fileInput()->getMimeType()
         );
 
-        if(! $handler->checkIntegrity($this->request->chunkSizeInput(), $this->request->totalSizeInput())) {
-            throw new ChunksIntegrityException("Chunks total file size doesnt match with original file size");
+        if (!$handler->checkIntegrity($this->request->chunkSizeInput(), $this->request->totalSizeInput())) {
+            throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
         }
 
         $handler->merge();

@@ -3,12 +3,12 @@
 namespace Jobtech\LaravelChunky;
 
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Application as LaravelApplication;
+use Illuminate\Support\ServiceProvider;
+use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
 use Jobtech\LaravelChunky\Merge\Strategies\Contracts\StrategyFactory as StrategyFactoryContract;
 use Jobtech\LaravelChunky\Merge\Strategies\StrategyFactory;
 use Laravel\Lumen\Application as LumenApplication;
-use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
 
 class ChunkyServiceProvider extends ServiceProvider
 {
@@ -56,7 +56,7 @@ class ChunkyServiceProvider extends ServiceProvider
 
         if ($this->app instanceof LaravelApplication) {
             $this->publishes([
-                $source => config_path('chunky.php')
+                $source => config_path('chunky.php'),
             ], 'config');
         } elseif ($this->app instanceof LumenApplication) {
             $this->app->configure('chunky');
