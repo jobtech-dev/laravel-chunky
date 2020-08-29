@@ -3,11 +3,16 @@
 namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies;
 
 use Illuminate\Support\Facades\Storage;
-use Jobtech\LaravelChunky\Merge\Strategies\FlysystemStrategy;
+use Jobtech\LaravelChunky\Strategies\FlysystemStrategy;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
 class FlysystemStrategyTest extends TestCase
 {
+    /**
+     * @var \Jobtech\LaravelChunky\ChunksManager
+     */
+    private $manager;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -18,6 +23,8 @@ class FlysystemStrategyTest extends TestCase
     /** @test */
     public function strategy_merges_chunks()
     {
+        $this->manager->chunksFilesystem()->makeDirectory('chunks/foo');
+
         $this->manager->chunksFilesystem()->write('foo/0_foo.txt', 'Hello');
         $this->manager->chunksFilesystem()->write('foo/1_foo.txt', ' World');
 

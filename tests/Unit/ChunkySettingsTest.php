@@ -279,4 +279,72 @@ class ChunkySettingsTest extends TestCase
 
         $this->assertTrue($settings->autoMerge());
     }
+
+    /** @test */
+    public function settings_retrieve_default_connection()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
+            $mock->shouldReceive('get')
+                ->with('chunky')
+                ->once()
+                ->andReturn([]);
+        });
+
+        $settings = new ChunkySettings($repository);
+
+        $this->assertNull($settings->connection());
+    }
+
+    /** @test */
+    public function settings_retrieve_connection()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
+            $mock->shouldReceive('get')
+                ->with('chunky')
+                ->once()
+                ->andReturn([
+                    'strategies' => [
+                        'connection' => 'foo'
+                    ],
+                ]);
+        });
+
+        $settings = new ChunkySettings($repository);
+
+        $this->assertEquals('foo', $settings->connection());
+    }
+
+    /** @test */
+    public function settings_retrieve_default_queue()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
+            $mock->shouldReceive('get')
+                ->with('chunky')
+                ->once()
+                ->andReturn([]);
+        });
+
+        $settings = new ChunkySettings($repository);
+
+        $this->assertNull($settings->queue());
+    }
+
+    /** @test */
+    public function settings_retrieve_queue()
+    {
+        $repository = $this->mock(Repository::class, function ($mock) {
+            $mock->shouldReceive('get')
+                ->with('chunky')
+                ->once()
+                ->andReturn([
+                    'strategies' => [
+                        'queue' => 'foo'
+                    ],
+                ]);
+        });
+
+        $settings = new ChunkySettings($repository);
+
+        $this->assertEquals('foo', $settings->queue());
+    }
 }

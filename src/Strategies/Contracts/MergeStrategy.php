@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Merge\Strategies\Contracts;
+namespace Jobtech\LaravelChunky\Strategies\Contracts;
 
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;

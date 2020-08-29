@@ -1,10 +1,10 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Merge\Strategies;
+namespace Jobtech\LaravelChunky\Strategies;
 
 use Illuminate\Support\Arr;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
-use Jobtech\LaravelChunky\Merge\Strategies\Concerns\ChecksIntegrity;
+use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
 use Keven\Flysystem\Concatenate\Concatenate;
 
 class FlysystemStrategy extends MergeStrategy
@@ -48,7 +48,7 @@ class FlysystemStrategy extends MergeStrategy
             $this->mapChunksToArray()
         );
 
-        $this->deleteChunks();
+        $this->deleteChunks($this->folder);
 
         return $this->mergeContents();
     }

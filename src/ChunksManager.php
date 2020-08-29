@@ -7,6 +7,7 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Jobtech\LaravelChunky\Concerns\ChunksHelpers;
 use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
 use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -16,7 +17,8 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksManager implements ChunksManagerContract
 {
-    use ChunkyRequestHelpers;
+    use ChunksHelpers,
+        ChunkyRequestHelpers;
 
     /**
      * @var \Illuminate\Contracts\Filesystem\Factory
@@ -68,6 +70,30 @@ class ChunksManager implements ChunksManagerContract
     private function buildChunkFolderFor(string $file)
     {
         return Str::slug($file);
+    }
+
+    /**
+     * Dispatch a synchronous or asynchronous merge job depending on the settings.
+     *
+     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
+     * @param string $folder
+     */
+    private function dispatchMerge(AddChunkRequest $request, string $folder)
+    {
+        if(empty($connection = $this->settings->connection())) {
+            MergeChunks::dispatchNow(
+                $request,
+                $folder,
+                $this->destinationPath($request->fileInput())
+            );
+        } else {
+            MergeChunks::dispatch(
+                $request,
+                $folder,
+                $this->destinationPath($request->fileInput())
+            )->onConnection($connection)
+                ->onQueue($this->settings->queue());
+        }
     }
 
     /**
@@ -230,12 +256,7 @@ class ChunksManager implements ChunksManagerContract
         if ($this->isLastIndex($request) && $this->settings->autoMerge()) {
             $chunk->setLast(true);
 
-            dispatch(new MergeChunks(
-                $this,
-                $request,
-                $folder,
-                $this->destinationPath($request->fileInput())
-            ));
+            $this->dispatchMerge($request, $this->fullPath($folder));
         }
 
         return $chunk;

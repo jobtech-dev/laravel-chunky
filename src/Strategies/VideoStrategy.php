@@ -1,9 +1,9 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Merge\Strategies;
+namespace Jobtech\LaravelChunky\Strategies;
 
 use Illuminate\Support\Arr;
-use Jobtech\LaravelChunky\Merge\Strategies\Concerns\ChecksIntegrity;
+use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 
 class VideoStrategy extends MergeStrategy
@@ -14,7 +14,7 @@ class VideoStrategy extends MergeStrategy
     {
         $this->handleVideoMerge();
 
-        $this->deleteChunks();
+        $this->deleteChunks($this->folder);
 
         return $this->mergeContents();
     }

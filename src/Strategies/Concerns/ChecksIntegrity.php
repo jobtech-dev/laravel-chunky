@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Merge\Strategies\Concerns;
+namespace Jobtech\LaravelChunky\Strategies\Concerns;
 
 trait ChecksIntegrity
 {

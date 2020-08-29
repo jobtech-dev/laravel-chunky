@@ -5,9 +5,10 @@ namespace Jobtech\LaravelChunky;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\ServiceProvider;
+use Jobtech\LaravelChunky\Commands\ClearChunks;
 use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
-use Jobtech\LaravelChunky\Merge\Strategies\Contracts\StrategyFactory as StrategyFactoryContract;
-use Jobtech\LaravelChunky\Merge\Strategies\StrategyFactory;
+use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory as StrategyFactoryContract;
+use Jobtech\LaravelChunky\Strategies\StrategyFactory;
 use Laravel\Lumen\Application as LumenApplication;
 
 class ChunkyServiceProvider extends ServiceProvider
@@ -29,7 +30,6 @@ class ChunkyServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Bind chunks manager
         $this->app->singleton('chunky', function (Container $app) {
             $settings = new ChunkySettings(
                 $app->make('config')
@@ -46,6 +46,12 @@ class ChunkyServiceProvider extends ServiceProvider
                 $app->make('config')->get('chunky.strategies')
             );
         });
+
+        $this->app->bind('command.chunky:clear', ClearChunks::class);
+
+        $this->commands([
+            'command.chunky:clear',
+        ]);
 
         $this->app->alias('chunky', ChunksManagerContract::class);
     }

@@ -45,8 +45,20 @@ class MergeStrategyTest extends TestCase
     }
 
     /** @test */
+    public function strategy_throws_strategy_exception_on_unexisting_chunks_folder()
+    {
+        $strategy = new TestMergeStrategy($this->manager);
+
+        $this->expectException(StrategyException::class);
+
+        $strategy->chunksFolder('foo');
+    }
+
+    /** @test */
     public function strategy_sets_and_retrieve_chunks_folder()
     {
+        $this->manager->chunksFilesystem()->makeDirectory('chunks/foo');
+
         $strategy = new TestMergeStrategy($this->manager);
 
         $this->assertEquals('foo', $strategy->chunksFolder('foo'));
@@ -68,27 +80,6 @@ class MergeStrategyTest extends TestCase
         $strategy = new TestMergeStrategy($this->manager);
 
         $this->assertEquals('foo', $strategy->destination('foo'));
-    }
-
-    /** @test */
-    public function strategy_deletes_chunks()
-    {
-        $fake_0 = UploadedFile::fake()->create('foo.txt', 2000);
-        $fake_1 = UploadedFile::fake()->create('foo.txt', 2000);
-
-        $this->manager->addChunk($fake_0, 0, 'foo');
-        $this->manager->addChunk($fake_1, 1, 'foo');
-
-        Storage::assertExists('chunks/foo/0_foo.txt');
-        Storage::assertExists('chunks/foo/1_foo.txt');
-
-        $strategy = new TestMergeStrategy($this->manager);
-        $strategy->chunksFolder('foo');
-        $strategy->deleteChunks();
-
-        Storage::assertMissing('foo/0_foo.txt');
-        Storage::assertMissing('foo/1_foo.txt');
-        Storage::assertMissing('foo');
     }
 
     /** @test */

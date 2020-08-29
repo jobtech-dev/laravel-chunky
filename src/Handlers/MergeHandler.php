@@ -1,41 +1,31 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Merge;
+namespace Jobtech\LaravelChunky\Handlers;
 
 use Illuminate\Container\Container;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
-use Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy;
-use Jobtech\LaravelChunky\Merge\Strategies\Contracts\StrategyFactory;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
+use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory;
 
 /**
- * @mixin \Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy
+ * @mixin \Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy
  */
 class MergeHandler
 {
     use ForwardsCalls;
 
     /**
-     * @var \Jobtech\LaravelChunky\Contracts\ChunksManager
-     */
-    protected $manager;
-
-    /**
-     * @var \Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy
+     * @var \Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy
      */
     private $strategy;
-
-    public function __construct(ChunksManager $manager)
-    {
-        $this->manager = $manager;
-    }
 
     /**
      * Set or retrieve the merge strategy of the handler.
      *
      * @param MergeStrategy|null $strategy
      *
-     * @return \Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy|null
+     * @return \Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy|null
      */
     public function strategy($strategy = null): ?MergeStrategy
     {
@@ -58,39 +48,37 @@ class MergeHandler
     /**
      * Build a merge strategy for the given mime_type.
      *
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager $manager
      * @param string                                         $mime_type
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
-     * @return \Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy
+     * @return \Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy
      */
-    public static function strategyBy(ChunksManager $manager, string $mime_type): MergeStrategy
+    public static function strategyBy(string $mime_type): MergeStrategy
     {
         return Container::getInstance()
             ->make(StrategyFactory::class)
-            ->buildFrom($mime_type, $manager);
+            ->buildFrom($mime_type);
     }
 
     /**
      * Create a new merge handler instance and set the strategy from the given mime type.
      *
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager $manager
      * @param string                                         $chunks_folder
      * @param string                                         $destination
      * @param string                                         $mime_type
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
-     * @return \Jobtech\LaravelChunky\Merge\MergeHandler
+     * @return \Jobtech\LaravelChunky\Handlers\MergeHandler
      */
-    public static function create(ChunksManager $manager, string $chunks_folder, string $destination, string $mime_type): MergeHandler
+    public static function create(string $chunks_folder, string $destination, string $mime_type): MergeHandler
     {
-        $strategy = static::strategyBy($manager, $mime_type);
+        $strategy = static::strategyBy($mime_type);
         $strategy->chunksFolder($chunks_folder);
         $strategy->destination($destination);
 
-        $handler = new static($manager);
+        $handler = new static();
         $handler->strategy($strategy);
 
         return $handler;

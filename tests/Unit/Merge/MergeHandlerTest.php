@@ -2,16 +2,16 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Merge;
 
-use Jobtech\LaravelChunky\Merge\MergeHandler;
-use Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy;
-use Jobtech\LaravelChunky\Merge\Strategies\FlysystemStrategy;
-use Jobtech\LaravelChunky\Merge\Strategies\VideoStrategy;
+use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
+use Jobtech\LaravelChunky\Strategies\FlysystemStrategy;
+use Jobtech\LaravelChunky\Strategies\VideoStrategy;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
 class MergeHandlerTest extends TestCase
 {
     /**
-     * @var mixed
+     * @var \Jobtech\LaravelChunky\ChunksManager
      */
     private $manager;
 
@@ -74,10 +74,10 @@ class MergeHandlerTest extends TestCase
     /** @test */
     public function handler_retrieves_default_strategy()
     {
-        $strategy_1 = MergeHandler::strategyBy($this->manager, 'application/json');
-        $strategy_2 = MergeHandler::strategyBy($this->manager, 'application/*');
-        $strategy_3 = MergeHandler::strategyBy($this->manager, '*/*');
-        $strategy_4 = MergeHandler::strategyBy($this->manager, 'foo');
+        $strategy_1 = MergeHandler::strategyBy('application/json');
+        $strategy_2 = MergeHandler::strategyBy('application/*');
+        $strategy_3 = MergeHandler::strategyBy('*/*');
+        $strategy_4 = MergeHandler::strategyBy('foo');
 
         $this->assertInstanceOf(FlysystemStrategy::class, $strategy_1);
         $this->assertInstanceOf(FlysystemStrategy::class, $strategy_2);
@@ -88,8 +88,8 @@ class MergeHandlerTest extends TestCase
     /** @test */
     public function handler_retrieves_video_strategy()
     {
-        $strategy_1 = MergeHandler::strategyBy($this->manager, 'video/mp4');
-        $strategy_2 = MergeHandler::strategyBy($this->manager, 'video/*');
+        $strategy_1 = MergeHandler::strategyBy('video/mp4');
+        $strategy_2 = MergeHandler::strategyBy('video/*');
 
         $this->assertInstanceOf(VideoStrategy::class, $strategy_1);
         $this->assertInstanceOf(VideoStrategy::class, $strategy_2);
@@ -98,8 +98,9 @@ class MergeHandlerTest extends TestCase
     /** @test */
     public function handler_creates_new_instace()
     {
+        $this->manager->chunksFilesystem()->makeDirectory('chunks/foo');
+
         $handler = MergeHandler::create(
-            $this->manager,
             'foo',
             'foo/foo.ext',
             'video/*'

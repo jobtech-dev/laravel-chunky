@@ -134,4 +134,24 @@ class ChunkySettings
     {
         return Arr::get($this->config, 'auto_merge', false);
     }
+
+    /**
+     * Retrieve the queue connection for the merge job.
+     *
+     * @return string
+     */
+    public function connection()
+    {
+        return Arr::get($this->config, 'strategies.connection');
+    }
+
+    /**
+     * Retrieve the queue for the merge job.
+     *
+     * @return array|\ArrayAccess|mixed
+     */
+    public function queue()
+    {
+        return Arr::get($this->config, 'strategies.queue');
+    }
 }

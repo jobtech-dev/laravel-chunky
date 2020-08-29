@@ -2,6 +2,7 @@
 
 namespace Jobtech\LaravelChunky\Tests;
 
+use Dotenv\Dotenv;
 use File;
 use Jobtech\LaravelChunky\ChunkyServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
@@ -13,6 +14,8 @@ abstract class TestCase extends Orchestra
      */
     protected function setUp(): void
     {
+        $this->loadEnvironmentVariables();
+
         parent::setUp();
     }
 
@@ -42,5 +45,16 @@ abstract class TestCase extends Orchestra
             'driver' => 'local',
             'root'   => __DIR__.'/tmp',
         ]);
+    }
+
+    protected function loadEnvironmentVariables()
+    {
+        if (! file_exists(__DIR__.'/../.env')) {
+            return;
+        }
+
+        $dotEnv = Dotenv::createImmutable(__DIR__.'/..');
+
+        $dotEnv->load();
     }
 }

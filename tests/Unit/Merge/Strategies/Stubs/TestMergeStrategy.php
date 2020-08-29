@@ -2,8 +2,8 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies\Stubs;
 
-use Jobtech\LaravelChunky\Merge\Strategies\Concerns\ChecksIntegrity;
-use Jobtech\LaravelChunky\Merge\Strategies\MergeStrategy;
+use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
+use Jobtech\LaravelChunky\Strategies\MergeStrategy;
 
 class TestMergeStrategy extends MergeStrategy
 {

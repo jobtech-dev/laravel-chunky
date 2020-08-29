@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'auto_merge' => true,
+    'auto_merge' => env('CHUNKY_AUTO_MERGE', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -177,13 +177,20 @@ return [
     | This option defines the strategy that should be used for a given file
     | mime type. If left empty, the default strategy will be used.
     |
+    | `connection` and `queue` keys define which queue and which connection
+    | should be used for the merge job. If connection is null, a synchronous
+    | job will be dispatched
     */
 
     'strategies' => [
-        'default' => \Jobtech\LaravelChunky\Merge\Strategies\FlysystemStrategy::class,
+        'default' => \Jobtech\LaravelChunky\Strategies\FlysystemStrategy::class,
 
         'mime_types' => [
-            'video/*' => \Jobtech\LaravelChunky\Merge\Strategies\VideoStrategy::class,
+            'video/*' => \Jobtech\LaravelChunky\Strategies\VideoStrategy::class,
         ],
+
+        'connection' => env('CHUNKY_MERGE_CONNECTION', 'default'),
+
+        'queue' => env('CHUNKY_MERGE_QUEUE')
     ],
 ];

@@ -1,13 +1,20 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Merge\Strategies;
+namespace Jobtech\LaravelChunky\Strategies;
 
+use Illuminate\Container\Container;
+use Illuminate\Support\Traits\ForwardsCalls;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
-use Jobtech\LaravelChunky\Merge\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
 
+/**
+ * @mixin ChunksManager
+ */
 abstract class MergeStrategy implements MergeStrategyContract
 {
+    use ForwardsCalls;
+
     /**
      * @var string
      */
@@ -23,9 +30,10 @@ abstract class MergeStrategy implements MergeStrategyContract
      */
     protected $destination;
 
-    public function __construct(ChunksManager $manager)
+    public function __construct($manager = null)
     {
-        $this->manager = $manager;
+        $this->manager = $manager ?: Container::getInstance()
+            ->make('chunky');
     }
 
     /**
@@ -35,7 +43,7 @@ abstract class MergeStrategy implements MergeStrategyContract
      */
     protected function mapChunksToArray(): array
     {
-        return $this->manager->chunks(
+        return $this->chunks(
             $this->folder
         )->map(function ($chunk) {
             return $chunk['path'];
@@ -61,9 +69,9 @@ abstract class MergeStrategy implements MergeStrategyContract
      */
     public function chunksFolder($folder = null): string
     {
-        if (is_string($folder)) {
+        if (is_string($folder) && $this->chunksFolderExists($this->folder)) {
             $this->folder = $folder;
-        } elseif (empty($this->folder)) {
+        } elseif (empty($this->folder) || ! $this->chunksFolderExists($this->folder)) {
             throw new StrategyException('Chunks folder cannot be empty');
         }
 
@@ -85,29 +93,6 @@ abstract class MergeStrategy implements MergeStrategyContract
     }
 
     /**
-     * Delete all chunks and, once empty, delete the folder.
-     *
-     * @return bool
-     */
-    public function deleteChunks(): bool
-    {
-        $files = $this->manager->chunksFilesystem()
-            ->allFiles($this->folder);
-
-        foreach ($files as $file) {
-            $deleted = $this->manager->chunksFilesystem()
-                ->delete($file);
-
-            if (!$deleted) {
-                return false;
-            }
-        }
-
-        return $this->manager->chunksFilesystem()
-            ->deleteDirectory($this->folder);
-    }
-
-    /**
      * Retrieve the merge file contents.
      *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
@@ -121,14 +106,22 @@ abstract class MergeStrategy implements MergeStrategyContract
             ->get($this->destination);
     }
 
+    public function __call($method, $parameters)
+    {
+        if(! method_exists($this, $method)) {
+            return $this->forwardCallTo($this->manager, $method, $parameters);
+        }
+
+        return $this->{$method}(...$parameters);
+    }
+
     /**
      * Create a new instance for the strategy.
      *
-     * @param $manager
-     *
+     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $manager
      * @return static
      */
-    public static function newInstance($manager)
+    public static function newInstance($manager = null)
     {
         return new static($manager);
     }
