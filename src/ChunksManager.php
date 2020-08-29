@@ -17,8 +17,8 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksManager implements ChunksManagerContract
 {
-    use ChunksHelpers,
-        ChunkyRequestHelpers;
+    use ChunksHelpers;
+    use ChunkyRequestHelpers;
 
     /**
      * @var \Illuminate\Contracts\Filesystem\Factory
@@ -76,11 +76,11 @@ class ChunksManager implements ChunksManagerContract
      * Dispatch a synchronous or asynchronous merge job depending on the settings.
      *
      * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
-     * @param string $folder
+     * @param string                                               $folder
      */
     private function dispatchMerge(AddChunkRequest $request, string $folder)
     {
-        if(empty($connection = $this->settings->connection())) {
+        if (empty($connection = $this->settings->connection())) {
             MergeChunks::dispatchNow(
                 $request,
                 $folder,

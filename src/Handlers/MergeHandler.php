@@ -4,7 +4,6 @@ namespace Jobtech\LaravelChunky\Handlers;
 
 use Illuminate\Container\Container;
 use Illuminate\Support\Traits\ForwardsCalls;
-use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
 use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory;
 
@@ -48,7 +47,7 @@ class MergeHandler
     /**
      * Build a merge strategy for the given mime_type.
      *
-     * @param string                                         $mime_type
+     * @param string $mime_type
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
@@ -64,9 +63,9 @@ class MergeHandler
     /**
      * Create a new merge handler instance and set the strategy from the given mime type.
      *
-     * @param string                                         $chunks_folder
-     * @param string                                         $destination
-     * @param string                                         $mime_type
+     * @param string $chunks_folder
+     * @param string $destination
+     * @param string $mime_type
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *

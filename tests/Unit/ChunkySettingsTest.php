@@ -304,7 +304,7 @@ class ChunkySettingsTest extends TestCase
                 ->once()
                 ->andReturn([
                     'strategies' => [
-                        'connection' => 'foo'
+                        'connection' => 'foo',
                     ],
                 ]);
         });
@@ -338,7 +338,7 @@ class ChunkySettingsTest extends TestCase
                 ->once()
                 ->andReturn([
                     'strategies' => [
-                        'queue' => 'foo'
+                        'queue' => 'foo',
                     ],
                 ]);
         });

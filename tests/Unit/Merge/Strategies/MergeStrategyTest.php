@@ -3,7 +3,6 @@
 namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 use Jobtech\LaravelChunky\Tests\TestCase;
