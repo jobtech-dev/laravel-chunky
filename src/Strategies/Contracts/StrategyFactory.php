@@ -2,8 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Strategies\Contracts;
 
-use Jobtech\LaravelChunky\Contracts\ChunksManager;
-
 interface StrategyFactory
 {
     /**
@@ -32,9 +30,9 @@ interface StrategyFactory
     /**
      * Retrieve strategy instance from given mime type.
      *
-     * @param string $mime_type
-     *
+     * @param string                                              $mime_type
      * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $manager
+     *
      * @return MergeStrategy
      */
     public function buildFrom(string $mime_type, $manager = null): MergeStrategy;

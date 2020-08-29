@@ -73,8 +73,9 @@ class ClearChunksTest extends TestCase
     }
 
     /** @test */
-    public function command_shows_error_if_manager_delete_chunks_fail() {
-        $mock = $this->mock(ChunksManager::class, function($mock) {
+    public function command_shows_error_if_manager_delete_chunks_fail()
+    {
+        $mock = $this->mock(ChunksManager::class, function ($mock) {
             $mock->shouldReceive('getChunksFolder')
                 ->once()
                 ->andReturn('/');
@@ -85,7 +86,7 @@ class ClearChunksTest extends TestCase
                 ->andReturn(false);
         });
 
-        $this->app->bind('chunky', function() use ($mock){
+        $this->app->bind('chunky', function () use ($mock) {
             return $mock;
         });
 

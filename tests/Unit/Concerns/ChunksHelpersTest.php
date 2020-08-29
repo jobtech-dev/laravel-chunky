@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Jobtech\LaravelChunky\Tests\Unit\Concerns;
 
 use Illuminate\Http\UploadedFile;
@@ -22,7 +21,8 @@ class ChunksHelpersTest extends TestCase
     }
 
     /** @test */
-    public function manager_checks_if_chunks_folder_exists() {
+    public function manager_checks_if_chunks_folder_exists()
+    {
         $this->assertFalse($this->manager->chunksFolderExists('foo'));
         $this->assertFalse($this->manager->chunksFolderExists('chunks/foo'));
 

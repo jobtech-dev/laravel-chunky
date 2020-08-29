@@ -191,6 +191,6 @@ return [
 
         'connection' => env('CHUNKY_MERGE_CONNECTION', 'default'),
 
-        'queue' => env('CHUNKY_MERGE_QUEUE')
+        'queue' => env('CHUNKY_MERGE_QUEUE'),
     ],
 ];

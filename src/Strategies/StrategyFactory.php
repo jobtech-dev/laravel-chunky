@@ -3,7 +3,6 @@
 namespace Jobtech\LaravelChunky\Strategies;
 
 use Illuminate\Support\Arr;
-use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
 use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory as StrategyFactoryContract;
@@ -23,7 +22,7 @@ class StrategyFactory implements StrategyFactoryContract
     /**
      * Returns a new instance for the given strategy class.
      *
-     * @param string                                         $strategy
+     * @param string                                              $strategy
      * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $manager
      *
      * @return mixed
