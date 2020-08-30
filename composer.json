@@ -1,26 +1,45 @@
 {
-    "name": "ilgala/laravel-chunky",
+    "name": "jobtech/laravel-chunky",
     "description": "A laravel manager to handle chunked files upload",
     "license": "MIT",
     "authors": [
         {
             "name": "ilGala",
-            "email": "galante.filippo@gmail.com"
+            "email": "filippo.galante@jobtech.it"
         }
     ],
-    "require": {},
+    "require": {
+        "php": "^7.2",
+        "ext-fileinfo": "*",
+        "ext-json": "*",
+        "illuminate/contracts": "~5.8.0|^6.0|^7.0",
+        "illuminate/filesystem": "~5.8.0|^6.0|^7.0",
+        "illuminate/support": "~5.8.0|^6.0|^7.0",
+        "pbmedia/laravel-ffmpeg": "^7.0",
+        "keven/flysystem-concatenate": "^1.0"
+    },
     "require-dev": {
         "orchestra/testbench": "3.8.*|4.*|5.*",
         "phpunit/phpunit": "^8.4|^9.0"
     },
+    "suggest": {
+        "league/flysystem-aws-s3-v3": "Required to use AWS S3 file storage"
+    },
     "autoload": {
         "psr-4": {
-            "IlGala\\LaravelChunky\\": "src"
+            "Jobtech\\LaravelChunky\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "IlGala\\LaravelChunky\\Tests\\": "tests"
+            "Jobtech\\LaravelChunky\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jobtech\\LaravelChunky\\ChunkyServiceProvider"
+            ]
         }
     },
     "scripts": {
