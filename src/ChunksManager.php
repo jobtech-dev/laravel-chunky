@@ -17,8 +17,8 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksManager implements ChunksManagerContract
 {
-    use ChunksHelpers;
-    use ChunkyRequestHelpers;
+    use ChunksHelpers,
+        ChunkyRequestHelpers;
 
     /**
      * @var \Illuminate\Contracts\Filesystem\Factory
