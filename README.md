@@ -40,7 +40,7 @@
 
 ## Getting Started
 
-Laravel chunky has been written to easily handle chunk upload for large files in Laravel 6.x and 7.x. It will automatically handle the upload request (see the [usage](#examples) section below) and save all the chunks into the desired disk.
+Laravel chunky has been written to easily handle chunk upload for large files in Laravel 6.x and 7.x. It will automatically handle the upload request (see the [usage](#usage) section below) and save all the chunks into the desired disk.
 
 Once the upload completes, the package will dispatch a job in order to merge all the files into a single one and save in the same chunks disks or in another one.
 
@@ -120,15 +120,15 @@ $app->configure('chunky');
 
 This package has been designed to leave you the full control of the chunks upload and simple use the helper methods to handle the merge strategy as well as an _all-in-one_ solution for a fast scaffolding of the controllers delegated to handle large files upload.
 
-At the moment, this package doesn't include any wrapper for the frontend forms for the file uploads but, in the examples section, you can find two ways of integrate the package with [Dropzone](https://www.dropzonejs.com/) and [ResumableJs](http://resumablejs.com/).
+At the moment, this package doesn't include any wrapper for the frontend forms for the file uploads but, in the `config/chunky.php` configuration file, you can find two ways of integrate the package with [Dropzone](https://www.dropzonejs.com/) and [ResumableJs](http://resumablejs.com/).
 
 ### Chunks
 
 Laravel Chunky handles the chunks as an _ordered list_ of files. This is a **must** and if a wrong file index has been uploaded, an exception will be thrown in order to guarantee the integrity of the final merged file. Once all the chunks have been uploaded, and the merge strategy is executing, another integrity check will be made to all the chunks. If the sum of each file size is lower than the original file size, another exception will be thrown. For this reason a chunk request must include both the chunk and these attributes:
 
-* **An `index`**: indicates the current chunk that is uploading. The first index can be set in the configuration file.
-* **A `file size`**: the original file size. Will be used for the integrity check.
-* **A `chunk size`**: the chunk file size. Will be used for the integrity check.
+* An `index`: indicates the current chunk that is uploading. The first index can be set in the configuration file.
+* A `file size`: the original file size. Will be used for the integrity check.
+* A `chunk size`: the chunk file size. Will be used for the integrity check.
 
 #### Configuration
 
@@ -468,17 +468,15 @@ We're working on:
 
 ## Contributing
 
-Please see CONTRIBUTING.md for more details.
+Please see [CONTRIBUTING.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CONTRIBUTING.md) for more details.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [LICENSE](https://github.com/jobtech-dev/laravel-chunky/blob/master/LICENSE) for more information.
 
 ## Contact
 
 Jobtech dev team - [dev@jobtech.it](mailto:dev@jobtech.it)
-
-Project Link: [https://github.com/jobtech-dev/laravel-chunky](https://github.com/jobtech-dev/laravel-chunky)
 
 ## Credits
 
@@ -493,4 +491,7 @@ We've used these packages for the merge strategies:
 
 * Keven Godet - [Flysystem concatenate](https://github.com/kevengodet/flysystem-concatenate)
 * Protone Media - [Laravel FFMpeg](https://github.com/protonemedia/laravel-ffmpeg)
+
+And this repository for the readme boilerplate:
+
 * Othneil Drew - [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
