@@ -51,3 +51,9 @@ jobs:
       
       - name: Execute tests
         run: vendor/bin/phpunit
+        env:
+          CHUNKY_CHUNK_DISK: local
+          CHUNKY_MERGE_DISK: local
+          CHUNKY_AUTO_MERGE: true
+          CHUNKY_MERGE_CONNECTION: default
+          CHUNKY_MERGE_QUEUE: null
