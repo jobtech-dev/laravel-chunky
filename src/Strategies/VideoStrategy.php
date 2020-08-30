@@ -27,7 +27,7 @@ class VideoStrategy extends MergeStrategy
 
         $exporter->concatWithoutTranscoding();
 
-        if (!empty($visibility = $this->visibility())) {
+        if (! empty($visibility = $this->visibility())) {
             $exporter->withVisibility($visibility);
         }
 

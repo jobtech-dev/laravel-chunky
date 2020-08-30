@@ -62,7 +62,7 @@ class MergeChunks implements ShouldQueue
             $this->request->fileInput()->getMimeType()
         );
 
-        if (!$handler->checkIntegrity($this->request->chunkSizeInput(), $this->request->totalSizeInput())) {
+        if (! $handler->checkIntegrity($this->request->chunkSizeInput(), $this->request->totalSizeInput())) {
             throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
         }
 

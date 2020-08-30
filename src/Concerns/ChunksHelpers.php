@@ -17,7 +17,7 @@ trait ChunksHelpers
      */
     public function chunksFolderExists($folder = ''): bool
     {
-        if (!Str::startsWith($folder, $this->getChunksFolder())) {
+        if (! Str::startsWith($folder, $this->getChunksFolder())) {
             $folder = $this->getChunksFolder().$folder;
         }
 
@@ -37,18 +37,18 @@ trait ChunksHelpers
                 $this->getChunksFolder()
             );
 
-        if (app()->runningInConsole() && !app()->runningUnitTests()) {
+        if (app()->runningInConsole() && ! app()->runningUnitTests()) {
             $this->progress_bar = $this->output->createProgressBar(
                 count($folders)
             );
         }
 
         foreach ($folders as $folder) {
-            if (!$this->deleteChunks($folder)) {
+            if (! $this->deleteChunks($folder)) {
                 return false;
             }
 
-            if (app()->runningInConsole() && !app()->runningUnitTests()) {
+            if (app()->runningInConsole() && ! app()->runningUnitTests()) {
                 $this->progress_bar->advance();
             }
         }
@@ -65,7 +65,7 @@ trait ChunksHelpers
      */
     public function deleteChunks(string $folder): bool
     {
-        if (!$this->chunksFolderExists($folder)) {
+        if (! $this->chunksFolderExists($folder)) {
             return false;
         }
 
@@ -76,7 +76,7 @@ trait ChunksHelpers
             $deleted = $this->chunksFilesystem()
                 ->delete($file);
 
-            if (!$deleted) {
+            if (! $deleted) {
                 return false;
             }
         }
