@@ -482,7 +482,7 @@ Project Link: [https://github.com/jobtech-dev/laravel-chunky](https://github.com
 
 ## Credits
 
-Laravel Chunky is a Laravel package made with :hearth: by the JT nerds.
+Laravel Chunky is a Laravel package made with :heart: by the JT nerds.
 
 Thanks to:
 

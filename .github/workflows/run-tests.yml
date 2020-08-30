@@ -1,4 +1,4 @@
-name: PHP Composer
+name: tests
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   run-tests:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
