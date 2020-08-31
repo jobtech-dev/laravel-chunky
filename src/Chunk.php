@@ -133,7 +133,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
             ->disk($disk)
             ->putFileAs(
                 $folder,
-                $this->file->getRealPath(),
+                $this->file,
                 $chunk_name,
                 $options
             );
@@ -199,7 +199,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
 
     public function __call($method, $parameters)
     {
-        if (!method_exists($this, $method)) {
+        if (! method_exists($this, $method)) {
             return $this->forwardCallTo($this->file, $method, $parameters);
         }
 

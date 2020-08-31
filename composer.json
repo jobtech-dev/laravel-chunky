@@ -16,11 +16,13 @@
         "illuminate/filesystem": "~5.8.0|^6.0|^7.0",
         "illuminate/support": "~5.8.0|^6.0|^7.0",
         "pbmedia/laravel-ffmpeg": "^7.0",
-        "keven/flysystem-concatenate": "^1.0"
+        "keven/flysystem-concatenate": "^1.0",
+        "keven/append-stream": "^1.0.5"
     },
     "require-dev": {
         "orchestra/testbench": "3.8.*|4.*|5.*",
-        "phpunit/phpunit": "^8.4|^9.0"
+        "phpunit/phpunit": "^8.4|^9.0",
+        "mockery/mockery": "^1.4"
     },
     "suggest": {
         "league/flysystem-aws-s3-v3": "Required to use AWS S3 file storage"

@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'auto_merge' => env('CHUNKY_AUTO_MERGE', false),
+    'auto_merge' => env('CHUNKY_AUTO_MERGE', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -189,7 +189,7 @@ return [
             'video/*' => \Jobtech\LaravelChunky\Strategies\VideoStrategy::class,
         ],
 
-        'connection' => env('CHUNKY_MERGE_CONNECTION', 'default'),
+        'connection' => env('CHUNKY_MERGE_CONNECTION', 'sync'),
 
         'queue' => env('CHUNKY_MERGE_QUEUE'),
     ],

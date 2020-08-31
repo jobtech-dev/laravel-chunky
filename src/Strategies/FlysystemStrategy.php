@@ -24,7 +24,7 @@ class FlysystemStrategy extends MergeStrategy
     {
         $chunk = Arr::first($chunks);
 
-        if (!$this->manager->chunksFilesystem()->concatenate($chunk, ...$chunks)) {
+        if (! $this->manager->chunksFilesystem()->concatenate($chunk, ...$chunks)) {
             throw new StrategyException('Unable to concatenate chunks');
         }
 

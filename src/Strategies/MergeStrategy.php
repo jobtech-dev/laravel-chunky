@@ -71,7 +71,7 @@ abstract class MergeStrategy implements MergeStrategyContract
     {
         if (is_string($folder) && $this->chunksFolderExists($this->folder)) {
             $this->folder = $folder;
-        } elseif (empty($this->folder) || !$this->chunksFolderExists($this->folder)) {
+        } elseif (empty($this->folder) || ! $this->chunksFolderExists($this->folder)) {
             throw new StrategyException('Chunks folder cannot be empty');
         }
 
@@ -108,7 +108,7 @@ abstract class MergeStrategy implements MergeStrategyContract
 
     public function __call($method, $parameters)
     {
-        if (!method_exists($this, $method)) {
+        if (! method_exists($this, $method)) {
             return $this->forwardCallTo($this->manager, $method, $parameters);
         }
 
