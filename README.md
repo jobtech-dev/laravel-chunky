@@ -328,6 +328,7 @@ Once the last chunk has been uploaded, a `Jobtech\LaravelChunky\Jobs\MergeChunks
 
         'mime_types' => [
             'video/*' => \Jobtech\LaravelChunky\Strategies\VideoStrategy::class,
+            'audio/*' => \Jobtech\LaravelChunky\Strategies\AudioStrategy::class,
         ],
 
         'connection' => env('CHUNKY_MERGE_CONNECTION', 'default'),
@@ -405,7 +406,7 @@ namespace App\MergeStrategies;
 use Jobtech\LaravelChunky\Strategies\MergeStrategy;
 use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
 
-class AudioStrategy extends MergeStrategy
+class PDFStrategy extends MergeStrategy
 {
     use ChecksIntegrity;
 
@@ -414,7 +415,7 @@ class AudioStrategy extends MergeStrategy
      */
     public function merge()
     {
-        // Implement here your logic to merge audio chunks
+        // Implement here your logic to merge pdf chunks
     }
 }
 ```
@@ -432,8 +433,9 @@ Once completed, add your strategy into the configuration file, so you can automa
 
         'mime_types' => [
             'video/*' => \Jobtech\LaravelChunky\Strategies\VideoStrategy::class,
+            'audio/*' => \Jobtech\LaravelChunky\Strategies\AudioStrategy::class,
             // Add here
-            'audio/*' => \App\MergeStrategies\AudioStrategy::class,
+            'application/pdf' => \App\MergeStrategies\PDFStrategy::class,
         ],
     ],
 
@@ -443,17 +445,21 @@ Once completed, add your strategy into the configuration file, so you can automa
 
 ## Testing
 
-You can run the tests with:
+You can run the tests with PHP unit:
 
 ```sh
 $ vendor/bin/phpunit
 ```
 
-or with the composer script
+If you want to set custom environment variable, you can add a `.env` file for custom disks, queue or whatever you need. Tests anyway set a temporary local disk by default.
 
-```sh
-$ composer test
 ```
+CHUNKY_CHUNK_DISK=s3
+CHUNKY_MERGE_DISK=public
+CHUNKY_AUTO_MERGE=false
+CHUNKY_MERGE_CONNECTION=redis
+CHUNKY_MERGE_QUEUE=my-custom-queue
+``` 
 
 ## Roadmap
 
@@ -461,7 +467,8 @@ See the [open issues](https://github.com/jobtech-dev/laravel-chunky/issues) for 
 
 We're working on:
 
-* Implement more merge strategies
+* Implement more merge strategies for specific mime types
+  * Video and audio should have dedicated strategy for each codec.
 * Integrate frontend chunk upload (Not sure if necessary... there are so many packages that does it)
 * Better tests
 * Laravel 5.5+ compatibility

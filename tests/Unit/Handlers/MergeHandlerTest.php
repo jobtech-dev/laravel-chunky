@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Tests\Unit\Merge;
+namespace Jobtech\LaravelChunky\Tests\Unit\Handlers;
 
 use Jobtech\LaravelChunky\Handlers\MergeHandler;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;

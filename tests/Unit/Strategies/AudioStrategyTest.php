@@ -1,13 +1,13 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies;
+namespace Jobtech\LaravelChunky\Tests\Unit\Strategies;
 
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\ChunksManager;
-use Jobtech\LaravelChunky\Strategies\VideoStrategy;
+use Jobtech\LaravelChunky\Strategies\AudioStrategy;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
-class VideoStrategyTest extends TestCase
+class AudioStrategyTest extends TestCase
 {
     /**
      * @var ChunksManager
@@ -36,7 +36,7 @@ class VideoStrategyTest extends TestCase
                 ]);
         });
 
-        $strategy = new VideoStrategy($mock);
+        $strategy = new AudioStrategy($mock);
 
         $this->assertNull($strategy->visibility());
         $this->assertEquals('public', $strategy->visibility());
@@ -47,17 +47,17 @@ class VideoStrategyTest extends TestCase
     {
         $this->manager->chunksFilesystem()->makeDirectory('chunks');
 
-        $strategy = new VideoStrategy($this->manager);
-        $strategy->chunksFolder('resources/mp4');
-        $strategy->destination('foo/sample.mp4');
+        $strategy = new AudioStrategy($this->manager);
+        $strategy->chunksFolder('resources/mp3');
+        $strategy->destination('foo/sample.mp3');
 
         $strategy->merge();
 
-        Storage::assertExists('foo/sample.mp4');
-        Storage::assertMissing('chunks/resources/mp4/0_sample.mp4');
-        Storage::assertMissing('chunks/resources/mp4/1_sample.mp4');
-        Storage::assertMissing('chunks/resources/mp4/2_sample.mp4');
-        Storage::assertMissing('chunks/resources/mp4');
+        Storage::assertExists('foo/sample.mp3');
+        Storage::assertMissing('chunks/resources/mp3/0_sample.mp3');
+        Storage::assertMissing('chunks/resources/mp3/1_sample.mp3');
+        Storage::assertMissing('chunks/resources/mp3/2_sample.mp3');
+        Storage::assertMissing('chunks/resources/mp3');
     }
 
     /** @test */
@@ -65,16 +65,16 @@ class VideoStrategyTest extends TestCase
     {
         $this->manager->chunksFilesystem()->makeDirectory('chunks');
 
-        $strategy = new VideoStrategy($this->manager);
-        $strategy->chunksFolder('resources/avi');
-        $strategy->destination('foo/sample.mp4');
+        $strategy = new AudioStrategy($this->manager);
+        $strategy->chunksFolder('resources/mp3');
+        $strategy->destination('foo/sample.wav');
 
         $strategy->merge();
 
-        Storage::assertExists('foo/sample.mp4');
-        Storage::assertMissing('chunks/resources/avi/0_sample.avi');
-        Storage::assertMissing('chunks/resources/avi/1_sample.avi');
-        Storage::assertMissing('chunks/resources/avi/2_sample.avi');
-        Storage::assertMissing('chunks/resources/avi');
+        Storage::assertExists('foo/sample.wav');
+        Storage::assertMissing('chunks/resources/mp3/0_sample.mp3');
+        Storage::assertMissing('chunks/resources/mp3/1_sample.mp3');
+        Storage::assertMissing('chunks/resources/mp3/2_sample.mp3');
+        Storage::assertMissing('chunks/resources/mp3');
     }
 }
