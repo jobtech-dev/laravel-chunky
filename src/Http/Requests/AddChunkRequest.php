@@ -107,7 +107,7 @@ class AddChunkRequest extends FormRequest
 
         foreach (config('chunky.validation') as $input => $config) {
             if (
-                !in_array($input, ['index', 'file', 'chunkSize', 'totalSize'])
+                ! in_array($input, ['index', 'file', 'chunkSize', 'totalSize'])
                 && Arr::has($config, 'key')
                 && Arr::has($config, 'rules')
             ) {

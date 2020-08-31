@@ -59,7 +59,7 @@ class ChunkySettings
 
         if ($folder === null) {
             return '';
-        } elseif (!Str::endsWith($folder, '/')) {
+        } elseif (! Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 
@@ -87,7 +87,7 @@ class ChunkySettings
 
         if ($folder === null) {
             return '';
-        } elseif (!Str::endsWith($folder, '/')) {
+        } elseif (! Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 

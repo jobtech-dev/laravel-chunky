@@ -37,7 +37,7 @@ abstract class TestCase extends Orchestra
         }
         File::makeDirectory(__DIR__.'/tmp');
 
-        if (!File::isDirectory(__DIR__.'/tmp/resources')) {
+        if (! File::isDirectory(__DIR__.'/tmp/resources')) {
             File::copyDirectory(__DIR__.'/resources', __DIR__.'/tmp/resources');
         }
 
@@ -49,7 +49,7 @@ abstract class TestCase extends Orchestra
 
     protected function loadEnvironmentVariables()
     {
-        if (! file_exists(__DIR__ . '/../.env')) {
+        if (! file_exists(__DIR__.'/../.env')) {
             return;
         }
 

@@ -200,7 +200,7 @@ class ChunksManager implements ChunksManagerContract
         $path = $this->fullPath($folder);
         $default = $this->settings->defaultIndex();
 
-        if(! $this->chunksFilesystem()->exists($path) && $index != $default) {
+        if (! $this->chunksFilesystem()->exists($path) && $index != $default) {
             return false;
         } elseif ($this->chunksFilesystem()->exists($path)) {
             if (ChunkySettings::INDEX_ZERO != $default) {
@@ -208,8 +208,8 @@ class ChunksManager implements ChunksManagerContract
             }
 
             return count($this->chunksFilesystem()->files($path)) == $index;
-        } else if($index == $default) {
-            if (!$this->chunksFilesystem()->makeDirectory($path)) {
+        } elseif ($index == $default) {
+            if (! $this->chunksFilesystem()->makeDirectory($path)) {
                 throw new ChunksIntegrityException("Cannot create chunks folder $path");
             }
         }
@@ -223,7 +223,7 @@ class ChunksManager implements ChunksManagerContract
     public function addChunk(UploadedFile $file, int $index, string $folder): Chunk
     {
         // Check integrity
-        if (!$this->checkChunkIntegrity($folder, $index)) {
+        if (! $this->checkChunkIntegrity($folder, $index)) {
             throw new ChunksIntegrityException("Uploaded chunk with index {$index} violates the integrity");
         }
 
