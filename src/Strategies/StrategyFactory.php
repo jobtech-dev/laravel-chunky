@@ -29,7 +29,7 @@ class StrategyFactory implements StrategyFactoryContract
      */
     private function buildInstance(string $strategy, $manager = null)
     {
-        if (!method_exists($strategy, 'newInstance')) {
+        if (! method_exists($strategy, 'newInstance')) {
             throw new StrategyException('Cannot instantiate strategy instance');
         }
 
@@ -41,7 +41,7 @@ class StrategyFactory implements StrategyFactoryContract
      */
     public function default($manager = null): MergeStrategy
     {
-        if (!Arr::has($this->config, 'default')) {
+        if (! Arr::has($this->config, 'default')) {
             throw new StrategyException('Undefined default strategy');
         }
 
