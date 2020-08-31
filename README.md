@@ -33,6 +33,7 @@
   * [Merge strategies](#merge-strategies)
 * [Testing](#testing)
 * [Roadmap](#roadmap)
+* [Changelog](#changelog)
 * [Contributing](#contributing)
 * [License](#license)
 * [Contact](#contact)
@@ -472,6 +473,10 @@ We're working on:
 * Integrate frontend chunk upload (Not sure if necessary... there are so many packages that does it)
 * Better tests
 * Laravel 5.5+ compatibility
+
+## Changelog
+
+Please see [CHANGELOG.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CHANGELOG.md) for more information what has changed recently.
 
 ## Contributing
 
