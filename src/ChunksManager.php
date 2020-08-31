@@ -200,19 +200,21 @@ class ChunksManager implements ChunksManagerContract
         $path = $this->fullPath($folder);
         $default = $this->settings->defaultIndex();
 
-        if ($this->chunksFilesystem()->exists($path)) {
+        if(! $this->chunksFilesystem()->exists($path) && $index != $default) {
+            return false;
+        } elseif ($this->chunksFilesystem()->exists($path)) {
             if (ChunkySettings::INDEX_ZERO != $default) {
                 $index -= $default;
             }
 
             return count($this->chunksFilesystem()->files($path)) == $index;
-        } elseif ($index == $default) {
+        } else if($index == $default) {
             if (!$this->chunksFilesystem()->makeDirectory($path)) {
                 throw new ChunksIntegrityException("Cannot create chunks folder $path");
             }
-
-            return true;
         }
+
+        return true;
     }
 
     /**

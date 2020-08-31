@@ -32,7 +32,7 @@ class FlysystemStrategyTest extends TestCase
         $strategy->chunksFolder('foo');
         $strategy->destination('bar/bar.txt');
 
-        $strategy->merge();
+        $result = $strategy->merge();
 
         Storage::assertExists('bar/bar.txt');
         $this->assertEquals('Hello World', $strategy->mergeContents());

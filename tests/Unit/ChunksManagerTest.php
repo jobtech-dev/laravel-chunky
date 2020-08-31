@@ -171,7 +171,7 @@ class ChunksManagerTest extends TestCase
     {
         $filesystem = $this->mock(Filesystem::class, function ($mock) {
             $mock->shouldReceive('exists')
-                ->once()
+                ->times(2)
                 ->with('chunks/foo')
                 ->andReturn(false);
             $mock->shouldReceive('makeDirectory')
@@ -180,7 +180,7 @@ class ChunksManagerTest extends TestCase
                 ->andReturn(true);
 
             $mock->shouldReceive('exists')
-                ->once()
+                ->times(2)
                 ->with('chunks/foo')
                 ->andReturn(true);
 
@@ -199,7 +199,7 @@ class ChunksManagerTest extends TestCase
                 ->times(2)
                 ->andReturn('chunks/');
             $mock->shouldReceive('chunksDisk')
-                ->times(4)
+                ->times(6)
                 ->andReturn('chunks');
             $mock->shouldReceive('defaultIndex')
                 ->times(2)
@@ -217,7 +217,7 @@ class ChunksManagerTest extends TestCase
     {
         $filesystem = $this->mock(Filesystem::class, function ($mock) {
             $mock->shouldReceive('exists')
-                ->once()
+                ->times(2)
                 ->with('chunks/foo')
                 ->andReturn(false);
             $mock->shouldReceive('makeDirectory')
@@ -226,7 +226,7 @@ class ChunksManagerTest extends TestCase
                 ->andReturn(true);
 
             $mock->shouldReceive('exists')
-                ->times(2)
+                ->times(4)
                 ->with('chunks/foo')
                 ->andReturn(true);
             $mock->shouldReceive('files')
@@ -244,7 +244,7 @@ class ChunksManagerTest extends TestCase
                 ->times(3)
                 ->andReturn('chunks/');
             $mock->shouldReceive('chunksDisk')
-                ->times(6)
+                ->times(9)
                 ->andReturn('chunks');
             $mock->shouldReceive('defaultIndex')
                 ->times(3)
@@ -263,7 +263,7 @@ class ChunksManagerTest extends TestCase
     {
         $filesystem = $this->mock(Filesystem::class, function ($mock) {
             $mock->shouldReceive('exists')
-                ->once()
+                ->times(2)
                 ->with('chunks/foo')
                 ->andReturn(false);
             $mock->shouldReceive('makeDirectory')
@@ -281,7 +281,7 @@ class ChunksManagerTest extends TestCase
                 ->once()
                 ->andReturn('chunks/');
             $mock->shouldReceive('chunksDisk')
-                ->times(2)
+                ->times(3)
                 ->andReturn('chunks');
             $mock->shouldReceive('defaultIndex')
                 ->once()
@@ -303,7 +303,7 @@ class ChunksManagerTest extends TestCase
             $result = new File('/chunks/foo-file/0_foo-file.mp4', false);
 
             $mock->shouldReceive('exists')
-                ->once()
+                ->times(2)
                 ->with('chunks/foo')
                 ->andReturn(false);
             $mock->shouldReceive('makeDirectory')
@@ -312,7 +312,7 @@ class ChunksManagerTest extends TestCase
                 ->andReturn(true);
             $mock->shouldReceive('putFileAs')
                 ->once()
-                ->with('chunks/foo', $file->getRealPath(), '0_foo-file.mp4', [])
+                ->with('chunks/foo', $file, '0_foo-file.mp4', [])
                 ->andReturn($result);
         });
         $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
@@ -325,7 +325,7 @@ class ChunksManagerTest extends TestCase
                 ->times(2)
                 ->andReturn('chunks/');
             $mock->shouldReceive('chunksDisk')
-                ->times(3)
+                ->times(4)
                 ->andReturn('chunks');
             $mock->shouldReceive('defaultIndex')
                 ->once()
@@ -348,7 +348,7 @@ class ChunksManagerTest extends TestCase
         $file = UploadedFile::fake()->create('foo file.mp4', 2048);
         $filesystem = $this->mock(Filesystem::class, function ($mock) {
             $mock->shouldReceive('exists')
-                ->once()
+                ->times(2)
                 ->with('chunks/foo')
                 ->andReturn(true);
             $mock->shouldReceive('files')
@@ -366,7 +366,7 @@ class ChunksManagerTest extends TestCase
                 ->once()
                 ->andReturn('chunks/');
             $mock->shouldReceive('chunksDisk')
-                ->times(2)
+                ->times(3)
                 ->andReturn('chunks');
             $mock->shouldReceive('defaultIndex')
                 ->once()
