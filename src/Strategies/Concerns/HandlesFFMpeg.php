@@ -42,5 +42,5 @@ trait HandlesFFMpeg
      *
      * @return mixed
      */
-    abstract function guessFormat();
+    abstract public function guessFormat();
 }
