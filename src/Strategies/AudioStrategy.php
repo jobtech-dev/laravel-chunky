@@ -27,7 +27,7 @@ class AudioStrategy extends MergeStrategy
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function guessFormat()
     {
