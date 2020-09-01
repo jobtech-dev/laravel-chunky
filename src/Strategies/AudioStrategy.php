@@ -10,15 +10,15 @@ use FFMpeg\Format\Audio\Wav;
 use Illuminate\Support\Arr;
 use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
 use Jobtech\LaravelChunky\Strategies\Concerns\HandlesFFMpeg;
-use ProtoneMedia\LaravelFFMpeg\FFMpeg\CopyFormat;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
+use ProtoneMedia\LaravelFFMpeg\FFMpeg\CopyFormat;
 
 class AudioStrategy extends MergeStrategy
 {
     use ChecksIntegrity,
         HandlesFFMpeg;
 
-    public function merge() : MergeStrategyContract
+    public function merge(): MergeStrategyContract
     {
         $this->mergeWithFFMpeg();
 

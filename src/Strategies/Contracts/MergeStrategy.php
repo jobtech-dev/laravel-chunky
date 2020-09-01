@@ -58,5 +58,5 @@ interface MergeStrategy
      *
      * @return MergeStrategy
      */
-    public function merge() : MergeStrategy;
+    public function merge(): MergeStrategy;
 }
