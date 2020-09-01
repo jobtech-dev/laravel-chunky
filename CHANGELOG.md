@@ -2,6 +2,10 @@
 
 Every major / minor version release will be documented in the changelog.
 
+## v1.1.2 - 2020-09-01
+
+Fixed manager last chunk upload response
+
 ## v1.1.1 - 2020-09-01
 
 Better documentation, fixed issue with remote files mapped into a chunk object

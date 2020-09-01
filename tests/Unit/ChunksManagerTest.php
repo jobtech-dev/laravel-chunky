@@ -500,6 +500,7 @@ class ChunksManagerTest extends TestCase
         $result = $manager->handle($mock, 'foo chunk');
 
         $this->assertInstanceOf(Chunk::class, $result);
+        $this->assertTrue($result->isLast());
 
         Queue::assertPushed(MergeChunks::class);
         Event::assertDispatched(ChunkAdded::class);
