@@ -3,9 +3,7 @@
 namespace Jobtech\LaravelChunky\Concerns;
 
 use Illuminate\Support\Str;
-use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
-use Symfony\Component\HttpFoundation\File\File;
 
 trait ChunksHelpers
 {
