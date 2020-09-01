@@ -27,6 +27,9 @@ class VideoStrategy extends MergeStrategy
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function guessFormat()
     {
         $extension = strtolower(Arr::last(explode('.', $this->destination())));

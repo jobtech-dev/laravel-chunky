@@ -1,7 +1,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/jobtech-dev/laravel-chunky">
-    <img src="https://jobtech.it/img/logo.png" alt="Logo">
+    <img src="https://jobtech.it/img/logo@2x.png" alt="Logo">
   </a>
 
   <h3 align="center">Laravel Chunky</h3>
@@ -18,6 +18,8 @@
 
 [![MIT License](https://img.shields.io/github/license/jobtech-dev/laravel-chunky.svg?style=flat-square)](https://github.com/jobtech-dev/laravel-chunky/blob/master/LICENSE.txt)
 [![Build status](https://github.com/jobtech-dev/laravel-chunky/workflows/tests/badge.svg)](https://github.com/jobtech-dev/laravel-chunky/actions)
+[![StyleCI](https://github.styleci.io/repos/291024576/shield?branch=master)](https://github.styleci.io/repos/291024576?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jobtech-dev/laravel-chunky/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jobtech-dev/laravel-chunky/?branch=master)
 [![GitHub stars](https://img.shields.io/github/stars/jobtech-dev/laravel-chunky)](https://github.com/jobtech-dev/laravel-chunky/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/jobtech-dev/laravel-chunky)](https://github.com/jobtech-dev/laravel-chunky/issues)
 [![LinkedIn](https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555)](https://linkedin.com/in/jobtech-srl)
@@ -45,7 +47,7 @@ Laravel chunky has been written to easily handle chunk upload for large files in
 
 Once the upload completes, the package will dispatch a job in order to merge all the files into a single one and save in the same chunks disks or in another one.
 
-#### Main features
+### Main features
 * Handle chunks upload with custom save disks and folders.
 * Handle file merge with custom save disks and folders.
 * Different merge strategies based on the file mime type.

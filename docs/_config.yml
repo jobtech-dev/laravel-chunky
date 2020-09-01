@@ -1,1 +1,5 @@
 theme: jekyll-theme-minimal
+title: Laravel Chunky
+description: A laravel manager to handle chunked files upload
+logo: https://jobtech.it/img/logo@2x.png
+show_downloads: true
