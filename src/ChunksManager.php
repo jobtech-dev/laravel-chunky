@@ -260,9 +260,11 @@ class ChunksManager implements ChunksManagerContract
             $folder
         );
 
-        if ($this->isLastIndex($request) && $this->settings->autoMerge()) {
-            $chunk->setLast(true);
+        $chunk->setLast(
+            $this->isLastIndex($request)
+        );
 
+        if ($chunk->isLast() && $this->settings->autoMerge()) {
             $this->dispatchMerge($request, $this->fullPath($folder));
         }
 
