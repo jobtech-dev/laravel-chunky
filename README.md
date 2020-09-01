@@ -68,7 +68,7 @@ From the [php-ffmpeg docs](https://github.com/PHP-FFMpeg/PHP-FFMpeg#how-this-lib
 In order to install Laravel Chunky into your project you have to require it via composer.
 
 ```sh
-$ composer require jobtech-dev/laravel-chunky
+$ composer require jobtech/laravel-chunky
 ```
 
 Laravel uses Package Auto-Discovery and the `ChunkyServiceProvider` will be automatically registered. If you are using a Laravel version lower than 5.5 or you're not using autodiscovery, manually register the service provider:
