@@ -3,6 +3,9 @@
 namespace Jobtech\LaravelChunky\Concerns;
 
 use Illuminate\Support\Str;
+use Jobtech\LaravelChunky\Chunk;
+use Jobtech\LaravelChunky\Events\ChunkDeleted;
+use Symfony\Component\HttpFoundation\File\File;
 
 trait ChunksHelpers
 {
@@ -69,16 +72,22 @@ trait ChunksHelpers
             return false;
         }
 
-        $files = $this->chunksFilesystem()
-            ->allFiles($folder);
+        $files = $this->chunks($folder);
 
         foreach ($files as $file) {
+            $chunk = new Chunk(
+                $file['index'],
+                new File($file['path'], false)
+            );
+
             $deleted = $this->chunksFilesystem()
-                ->delete($file);
+                ->delete($file['path']);
 
             if (! $deleted) {
                 return false;
             }
+
+            event(new ChunkDeleted($chunk));
         }
 
         return $this->chunksFilesystem()

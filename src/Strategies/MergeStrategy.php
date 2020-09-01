@@ -69,7 +69,7 @@ abstract class MergeStrategy implements MergeStrategyContract
      */
     public function chunksFolder($folder = null): string
     {
-        if (is_string($folder) && $this->chunksFolderExists($this->folder)) {
+        if (is_string($folder) && $this->chunksFolderExists($folder)) {
             $this->folder = $folder;
         } elseif (empty($this->folder) || ! $this->chunksFolderExists($this->folder)) {
             throw new StrategyException('Chunks folder cannot be empty');
@@ -90,20 +90,6 @@ abstract class MergeStrategy implements MergeStrategyContract
         }
 
         return $this->destination;
-    }
-
-    /**
-     * Retrieve the merge file contents.
-     *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     *
-     * @return string
-     */
-    public function mergeContents()
-    {
-        return $this->manager
-            ->mergeFilesystem()
-            ->get($this->destination);
     }
 
     public function __call($method, $parameters)

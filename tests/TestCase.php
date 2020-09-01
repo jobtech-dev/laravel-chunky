@@ -38,7 +38,7 @@ abstract class TestCase extends Orchestra
         File::makeDirectory(__DIR__.'/tmp');
 
         if (! File::isDirectory(__DIR__.'/tmp/resources')) {
-            File::copyDirectory(__DIR__.'/resources', __DIR__.'/tmp/resources');
+            File::copyDirectory(__DIR__.'/resources', __DIR__.'/tmp/chunks/resources');
         }
 
         config()->set('filesystems.disks.local', [

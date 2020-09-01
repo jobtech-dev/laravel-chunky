@@ -45,10 +45,8 @@ class VideoStrategyTest extends TestCase
     /** @test */
     public function strategy_merges_chunks_without_transcode()
     {
-        $this->manager->chunksFilesystem()->makeDirectory('chunks');
-
         $strategy = new VideoStrategy($this->manager);
-        $strategy->chunksFolder('resources/mp4');
+        $strategy->chunksFolder('chunks/resources/mp4');
         $strategy->destination('foo/sample.mp4');
 
         $strategy->merge();
@@ -63,10 +61,8 @@ class VideoStrategyTest extends TestCase
     /** @test */
     public function strategy_merges_chunks_with_transcode()
     {
-        $this->manager->chunksFilesystem()->makeDirectory('chunks');
-
         $strategy = new VideoStrategy($this->manager);
-        $strategy->chunksFolder('resources/avi');
+        $strategy->chunksFolder('chunks/resources/avi');
         $strategy->destination('foo/sample.mp4');
 
         $strategy->merge();

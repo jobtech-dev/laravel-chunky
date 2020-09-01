@@ -56,7 +56,7 @@ interface MergeStrategy
      *
      * @throws StrategyException
      *
-     * @return mixed
+     * @return MergeStrategy
      */
-    public function merge();
+    public function merge() : MergeStrategy;
 }

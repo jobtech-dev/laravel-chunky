@@ -11,19 +11,20 @@ use Illuminate\Support\Arr;
 use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
 use Jobtech\LaravelChunky\Strategies\Concerns\HandlesFFMpeg;
 use ProtoneMedia\LaravelFFMpeg\FFMpeg\CopyFormat;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
 
 class VideoStrategy extends MergeStrategy
 {
     use ChecksIntegrity,
         HandlesFFMpeg;
 
-    public function merge()
+    public function merge() : MergeStrategyContract
     {
         $this->mergeWithFFMpeg();
 
         $this->deleteChunks($this->folder);
 
-        return $this->mergeContents();
+        return $this;
     }
 
     public function guessFormat()

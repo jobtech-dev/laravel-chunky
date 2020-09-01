@@ -23,19 +23,17 @@ class FlysystemStrategyTest extends TestCase
     /** @test */
     public function strategy_merges_chunks()
     {
-        $this->manager->chunksFilesystem()->makeDirectory('chunks/foo');
-
-        $this->manager->chunksFilesystem()->write('foo/0_foo.txt', 'Hello');
-        $this->manager->chunksFilesystem()->write('foo/1_foo.txt', ' World');
+        $this->manager->chunksFilesystem()->write('chunks/foo/0_foo.txt', 'Hello');
+        $this->manager->chunksFilesystem()->write('chunks/foo/1_foo.txt', ' World');
 
         $strategy = new FlysystemStrategy($this->manager);
-        $strategy->chunksFolder('foo');
+        $strategy->chunksFolder('chunks/foo');
         $strategy->destination('bar/bar.txt');
 
         $result = $strategy->merge();
 
         Storage::assertExists('bar/bar.txt');
-        $this->assertEquals('Hello World', $strategy->mergeContents());
+        $this->assertEquals('Hello World', $this->manager->chunksFilesystem()->get('bar/bar.txt'));
         Storage::assertMissing('foo/0_foo.txt');
         Storage::assertMissing('foo/1_foo.txt');
         Storage::assertMissing('foo');

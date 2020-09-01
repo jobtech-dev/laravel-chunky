@@ -193,7 +193,7 @@ Laravel Chunky handles the chunks as an _ordered list_ of files. This is a **mus
 
 If you want to manually save a chunk from a request you can use the `addChunk` method. It gets in input the uploaded file, the chunk index and, optionally, a folder name. If no folder is passed, the chunks anyway will be stored into a chunk's root subfolder. This folder will be named as the slug of the uploaded file basename.
 
-This method will return a `Jobtech\LaravelChunky\Chunk` object, that implements the `Illuminate\Contracts\Support\Responsable` contract so you can easily return a JSON response. If the requests has the `Accept application/json` header, the object will be automatically transformed into a `Jobtech\LaravelChunky\Http\Resources\ChunkResource` object.
+This method will return a `Jobtech\LaravelChunky\Chunk` object, that implements the `Illuminate\Contracts\Support\Responsable` contract so you can easily return a JSON response. If the requests has the `Accept application/json` header, the object will be automatically transformed into a `Jobtech\LaravelChunky\Http\Resources\ChunkResource` object. Furthermore, every time a chunk is added a `Jobtech\LaravelChunky\Events\ChunkAdded` event is fired.
 
 ```php
 // ...
@@ -244,6 +244,8 @@ return $chunk->showFileInfo()->toResponse();
 
 
 If you're using, for example, Dropzone you can block the upload action, in that case you will delete the currently uploaded chunks:
+
+Everytime a chunk is deleted a `Jobtech\LaravelChunky\Events\ChunkDeleted` event is fired.
 
 ```php
 Chunky::deleteChunk('chunks-folder');
@@ -365,6 +367,8 @@ class UploadController extends Controller {
 }
 ```
 
+Once the job is completed a `Jobtech\LaravelChunky\Events\ChunksMerged` event is fired.
+
 #### Custom strategies
 
 If you prefer to do everything on your own, without dispatching jobs but simply using the strategy:
@@ -406,6 +410,7 @@ namespace App\MergeStrategies;
 
 use Jobtech\LaravelChunky\Strategies\MergeStrategy;
 use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
 
 class PDFStrategy extends MergeStrategy
 {
@@ -414,9 +419,11 @@ class PDFStrategy extends MergeStrategy
     /**
      * @inheritDoc
      */
-    public function merge()
+    public function merge() : MergeStrategyContract
     {
         // Implement here your logic to merge pdf chunks
+
+        return $this;
     }
 }
 ```

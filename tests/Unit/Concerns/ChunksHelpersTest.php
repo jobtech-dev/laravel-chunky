@@ -3,7 +3,9 @@
 namespace Jobtech\LaravelChunky\Tests\Unit\Concerns;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
 class ChunksHelpersTest extends TestCase
@@ -35,6 +37,8 @@ class ChunksHelpersTest extends TestCase
     /** @test */
     public function manager_deletes_chunks()
     {
+        Event::fake();
+
         $fake_0 = UploadedFile::fake()->create('foo.txt', 2000);
         $fake_1 = UploadedFile::fake()->create('foo.txt', 2000);
 
@@ -44,11 +48,12 @@ class ChunksHelpersTest extends TestCase
         Storage::assertExists('chunks/foo/0_foo.txt');
         Storage::assertExists('chunks/foo/1_foo.txt');
 
-        $this->manager->deleteChunks('foo');
+        $this->manager->deleteChunks('chunks/foo');
 
-        Storage::assertMissing('foo/0_foo.txt');
-        Storage::assertMissing('foo/1_foo.txt');
-        Storage::assertMissing('foo');
+        Storage::assertMissing('chunks/foo/0_foo.txt');
+        Storage::assertMissing('chunks/foo/1_foo.txt');
+        Storage::assertMissing('chunks/foo');
+        Event::assertDispatched(ChunkDeleted::class);
     }
 
     /** @test */
@@ -60,6 +65,7 @@ class ChunksHelpersTest extends TestCase
     /** @test */
     public function manager_deletes_all_chunks()
     {
+        Event::fake();
         $fake_0 = UploadedFile::fake()->create('foo.txt', 2000);
         $fake_1 = UploadedFile::fake()->create('foo.txt', 2000);
         $fake_2 = UploadedFile::fake()->create('foo.txt', 2000);
@@ -83,5 +89,6 @@ class ChunksHelpersTest extends TestCase
         Storage::assertMissing('bar/1_foo.txt');
         Storage::assertMissing('foo');
         Storage::assertMissing('bar');
+        Event::assertDispatched(ChunkDeleted::class);
     }
 }
