@@ -5,6 +5,7 @@ namespace Jobtech\LaravelChunky\Strategies;
 use Illuminate\Support\Arr;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
 use Keven\Flysystem\Concatenate\Concatenate;
 
 class FlysystemStrategy extends MergeStrategy
@@ -39,7 +40,7 @@ class FlysystemStrategy extends MergeStrategy
     /**
      * {@inheritdoc}
      */
-    public function merge()
+    public function merge(): MergeStrategyContract
     {
         $this->manager->chunksFilesystem()
             ->addPlugin(new Concatenate());
@@ -50,6 +51,6 @@ class FlysystemStrategy extends MergeStrategy
 
         $this->deleteChunks($this->folder);
 
-        return $this->mergeContents();
+        return $this;
     }
 }

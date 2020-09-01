@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Concerns\ChunksHelpers;
 use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
 use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
+use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
@@ -228,12 +229,16 @@ class ChunksManager implements ChunksManagerContract
         }
 
         // Store chunk
-        return Chunk::storeFrom(
+        $chunk = Chunk::storeFrom(
             $file,
             $this->fullPath($folder),
             $index,
             $this->getChunksOptions()
         );
+
+        event(new ChunkAdded($chunk));
+
+        return $chunk;
     }
 
     /**

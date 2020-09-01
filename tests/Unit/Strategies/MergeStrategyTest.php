@@ -89,7 +89,7 @@ class MergeStrategyTest extends TestCase
         $strategy = new TestMergeStrategy($this->manager);
         $strategy->destination('foo/foo.txt');
 
-        $this->assertEquals('Hello World', $strategy->mergeContents());
+        $this->assertEquals('Hello World', $this->manager->mergeFilesystem()->get('foo/foo.txt'));
     }
 
     /** @test */

@@ -10,12 +10,12 @@ trait ChecksIntegrity
     public function checkIntegrity(int $chunk_size, int $total_size): bool
     {
         $total = 0;
-        $chunks = $this->manager()->chunks(
+        $chunks = $this->chunks(
             $this->chunksFolder()
         );
 
         foreach ($chunks->all() as $chunk) {
-            $size = $this->manager()->chunksFilesystem()->size($chunk['path']);
+            $size = $this->chunksFilesystem()->size($chunk['path']);
 
             if ($size < $chunk_size && ! $this->isLastChunk($chunk['index'], $total_size, $chunk_size)) {
                 return false;

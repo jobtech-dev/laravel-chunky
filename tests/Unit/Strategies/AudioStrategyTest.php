@@ -45,10 +45,8 @@ class AudioStrategyTest extends TestCase
     /** @test */
     public function strategy_merges_chunks_without_transcode()
     {
-        $this->manager->chunksFilesystem()->makeDirectory('chunks');
-
         $strategy = new AudioStrategy($this->manager);
-        $strategy->chunksFolder('resources/mp3');
+        $strategy->chunksFolder('chunks/resources/mp3');
         $strategy->destination('foo/sample.mp3');
 
         $strategy->merge();
@@ -63,10 +61,8 @@ class AudioStrategyTest extends TestCase
     /** @test */
     public function strategy_merges_chunks_with_transcode()
     {
-        $this->manager->chunksFilesystem()->makeDirectory('chunks');
-
         $strategy = new AudioStrategy($this->manager);
-        $strategy->chunksFolder('resources/mp3');
+        $strategy->chunksFolder('chunks/resources/mp3');
         $strategy->destination('foo/sample.wav');
 
         $strategy->merge();

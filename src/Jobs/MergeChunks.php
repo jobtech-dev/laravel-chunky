@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Handlers\MergeHandler;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
@@ -66,6 +67,10 @@ class MergeChunks implements ShouldQueue
             throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
         }
 
-        $handler->merge();
+        $strategy = $handler->merge();
+
+        event(new ChunksMerged(
+            $strategy, $strategy->destination()
+        ));
     }
 }

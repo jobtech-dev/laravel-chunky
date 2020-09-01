@@ -5,11 +5,13 @@ namespace Jobtech\LaravelChunky\Tests\Unit;
 use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\ChunksManager;
 use Jobtech\LaravelChunky\ChunkySettings;
+use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
@@ -298,6 +300,8 @@ class ChunksManagerTest extends TestCase
     /** @test */
     public function manager_adds_chunk()
     {
+        Event::fake();
+
         $file = UploadedFile::fake()->create('foo file.mp4', 2048);
         $filesystem = $this->mock(Filesystem::class, function ($mock) use ($file) {
             $result = new File('/chunks/foo-file/0_foo-file.mp4', false);
@@ -340,6 +344,7 @@ class ChunksManagerTest extends TestCase
         $chunk = $manager->addChunk($file, 0, 'foo');
 
         $this->assertInstanceOf(Chunk::class, $chunk);
+        Event::assertDispatched(ChunkAdded::class);
     }
 
     /** @test */
@@ -383,12 +388,16 @@ class ChunksManagerTest extends TestCase
     /** @test */
     public function manager_adds_chunks()
     {
+        Event::fake();
         $file = UploadedFile::fake()->create('foo file.mp4', 2048);
 
         $manager = $this->app->make(ChunksManager::class);
 
         $manager->addChunk($file, 0, 'foo');
+        Event::assertDispatched(ChunkAdded::class);
+
         $manager->addChunk($file, 1, 'foo');
+        Event::assertDispatched(ChunkAdded::class);
 
         Storage::assertExists('chunks/foo/0_foo-file.mp4');
         Storage::assertExists('chunks/foo/1_foo-file.mp4');
@@ -398,6 +407,7 @@ class ChunksManagerTest extends TestCase
     public function manager_handle_chunk_request()
     {
         Queue::fake();
+        Event::fake();
 
         $manager = $this->app->make(ChunksManager::class);
 
@@ -423,6 +433,7 @@ class ChunksManagerTest extends TestCase
         $this->assertInstanceOf(Chunk::class, $result);
 
         Queue::assertNothingPushed();
+        Event::assertDispatched(ChunkAdded::class);
         Storage::assertExists('chunks/foo-chunk/0_foo.mp4');
     }
 
@@ -430,6 +441,7 @@ class ChunksManagerTest extends TestCase
     public function manager_handle_last_chunk_request()
     {
         Queue::fake();
+        Event::fake();
 
         $manager = $this->app->make(ChunksManager::class);
 
@@ -455,6 +467,7 @@ class ChunksManagerTest extends TestCase
         $this->assertInstanceOf(Chunk::class, $result);
 
         Queue::assertPushed(MergeChunks::class);
+        Event::assertDispatched(ChunkAdded::class);
         Storage::assertExists('chunks/foo-chunk/0_foo.mp4');
     }
 }

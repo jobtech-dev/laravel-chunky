@@ -58,7 +58,7 @@ class MergeHandlerTest extends TestCase
 
             $mock->shouldReceive('merge')
                 ->once()
-                ->andReturn(true);
+                ->andReturnSelf();
         });
 
         $handler = new MergeHandler($this->manager);
@@ -68,7 +68,7 @@ class MergeHandlerTest extends TestCase
         $this->assertEquals('foo', $handler->chunksFolder('foo'));
         $this->assertEquals('foo', $handler->destination('foo'));
         $this->assertTrue($handler->checkIntegrity(100, 100));
-        $this->assertTrue($handler->merge());
+        $this->assertInstanceOf(MergeStrategy::class, $handler->merge());
     }
 
     /** @test */
