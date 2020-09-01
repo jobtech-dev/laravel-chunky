@@ -2,6 +2,10 @@
 
 Every major / minor version release will be documented in the changelog.
 
+## v1.1.1 - 2020-09-01
+
+Better documentation, fixed issue with remote files mapped into a chunk object
+
 ## v1.0.0 - 2020-08-31
 
 Laravel Chunky first release. Main features:

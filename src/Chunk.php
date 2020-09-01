@@ -4,6 +4,7 @@ namespace Jobtech\LaravelChunky;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Responsable;
@@ -12,12 +13,10 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
+use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
 use Symfony\Component\HttpFoundation\File\File;
 
-/**
- * @mixin \Symfony\Component\HttpFoundation\File\File
- */
 class Chunk implements Arrayable, Jsonable, Responsable
 {
     use ForwardsCalls;
@@ -28,42 +27,26 @@ class Chunk implements Arrayable, Jsonable, Responsable
     /** @var int */
     private $index;
 
-    /** @var \Symfony\Component\HttpFoundation\File\File */
-    private $file;
+    /** @var \Symfony\Component\HttpFoundation\File\File|string */
+    private $path;
+
+    /** @var string|null */
+    private $disk;
 
     /** @var bool */
     private $last;
 
-    public function __construct(int $index, File $file, $last = false)
+    public function __construct(int $index, $path, $disk = null, $last = false)
     {
         $this->index = $index;
-        $this->file = $file;
+        $this->path = $path;
+        $this->disk = $disk;
         $this->last = $last;
     }
 
-    private function sanitizeName(int $index, string $file_name, string $extension)
+    private function sanitizeName(int $index)
     {
-        return $index.'_'.Str::slug($file_name).'.'.$extension;
-    }
-
-    /**
-     * Retrieve the chunk original file upload.
-     *
-     * @return \Symfony\Component\HttpFoundation\File\File|null
-     */
-    public function getFile(): ?File
-    {
-        return $this->file;
-    }
-
-    /**
-     * Retrieve the chunk original file upload.
-     *
-     * @param \Symfony\Component\HttpFoundation\File\File $file
-     */
-    public function setFile(File $file)
-    {
-        $this->file = $file;
+        return $index.'_'.Str::slug($this->getName()).'.'.$this->guessExtension();
     }
 
     /**
@@ -74,6 +57,68 @@ class Chunk implements Arrayable, Jsonable, Responsable
     public function getIndex(): int
     {
         return $this->index;
+    }
+
+    /**
+     * Retrieve the chunk file path.
+     *
+     * @return \Symfony\Component\HttpFoundation\File\File|string
+     */
+    public function getPath(): string
+    {
+        if($this->path instanceof File) {
+            return $this->path->getRealPath();
+        }
+
+        return $this->path;
+    }
+
+    public function getFilename($suffix = null): string
+    {
+        if($this->path instanceof UploadedFile) {
+            return basename($this->path->getClientOriginalName(), $suffix);
+        } elseif($this->path instanceof File) {
+            return $this->path->getBasename($suffix);
+        }
+
+        return basename($this->path, $suffix);
+    }
+
+    public function getName(): string
+    {
+        return pathinfo(
+            $this->getFilename($this->guessExtension()),
+            PATHINFO_FILENAME
+        );
+    }
+
+    public function guessExtension()
+    {
+        if($this->path instanceof File) {
+            return $this->path->guessExtension();
+        }
+
+        return pathinfo($this->getFilename(), PATHINFO_EXTENSION);
+    }
+
+    /**
+     * Retrieve the chunk file disk.
+     *
+     * @return string|null
+     */
+    public function getDisk(): ?string
+    {
+        return $this->disk;
+    }
+
+    /**
+     * Set the chunk file disk.
+     *
+     * @param string|null $disk
+     */
+    public function setDisk($disk = null)
+    {
+        $this->disk = $disk;
     }
 
     /**
@@ -93,136 +138,31 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * Store the chunk into filesystem.
-     *
-     * @param string $folder
-     * @param array  $options
+     * Retrive file contents
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
-     * @return Chunk
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function storeIn(string $folder, $options = []): Chunk
-    {
-        // Get extension
-        $extension = $this->guessExtension();
-
-        // Check file instance and retrieve file name
-        if ($this->file instanceof UploadedFile) {
-            $file_name = str_replace(
-                $extension,
-                '',
-                $this->file->getClientOriginalName()
-            );
-        } else {
-            $file_name = $this->file->getBasename(
-                $extension
-            );
+    public function getFile() {
+        if($this->path instanceof File) {
+            return $this->path;
         }
 
-        // Sanitize name
-        $chunk_name = $this->sanitizeName(
-            $this->index,
-            $file_name,
-            $extension
-        );
-
-        // Store file
-        $disk = Arr::pull($options, 'disk');
-        $path = Container::getInstance()->make(FilesystemFactory::class)
-            ->disk($disk)
-            ->putFileAs(
-                $folder,
-                $this->file,
-                $chunk_name,
-                $options
-            );
-
-        return new static($this->getIndex(), new File($path, false));
+        $this->filesystem()
+            ->get($this->path);
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function toArray(): array
-    {
-        $extension = $this->file->guessExtension();
-
-        $data = [
-            'name'      => $this->getBasename($extension),
-            'extension' => $extension,
-            'index'     => $this->getIndex(),
-            'last'      => $this->isLast(),
-        ];
-
-        if ($this->show_file_info) {
-            $data['file'] = $this->getRealPath();
-            $data['path'] = $this->getPath();
-        }
-
-        return $data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function toJson($options = 0): string
-    {
-        return json_encode($this->toArray(), $options);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function toResponse($request)
-    {
-        if ($request->wantsJson()) {
-            return $this->toResource($request);
-        }
-
-        return new Response(
-            $this->toJson(),
-            Response::HTTP_CREATED
-        );
-    }
-
-    /**
-     * Transforms the current model into a json resource.
-     */
-    public function toResource()
-    {
-        /** @var \Illuminate\Http\Resources\Json\JsonResource $resource */
-        $resource = config('chunky.resource', ChunkResource::class);
-
-        return new $resource($this);
-    }
-
-    public function __call($method, $parameters)
-    {
-        if (! method_exists($this, $method)) {
-            return $this->forwardCallTo($this->file, $method, $parameters);
-        }
-
-        return $this->{$method}(...$parameters);
-    }
-
-    /**
-     * Store and return a new chunk instance.
-     *
-     * @param \Symfony\Component\HttpFoundation\File\File $file
-     * @param string                                      $folder
-     * @param int                                         $index
-     * @param array                                       $options
+     * Retrieve the chunk's filesystem and disk.
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
-     * @return \Jobtech\LaravelChunky\Chunk
+     * @return \Illuminate\Contracts\Filesystem\Filesystem
      */
-    public static function storeFrom(File $file, string $folder, int $index, $options = [])
-    {
-        $chunk = new static($index, $file);
-
-        return $chunk->storeIn($folder, $options);
+    public function filesystem() : Filesystem {
+        return Container::getInstance()->make(FilesystemFactory::class)
+            ->disk($this->getDisk());
     }
 
     /**
@@ -249,5 +189,103 @@ class Chunk implements Arrayable, Jsonable, Responsable
         $this->show_file_info = true;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray(): array
+    {
+        $extension = $this->guessExtension();
+
+        $data = [
+            'name'      => $this->getName(),
+            'extension' => $extension,
+            'index'     => $this->getIndex(),
+            'last'      => $this->isLast(),
+        ];
+
+        if ($this->show_file_info) {
+            $data['file'] = $this->getFilename();
+            $data['path'] = $this->getPath();
+        }
+
+        return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->toArray(), $options);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toResponse($request)
+    {
+        if ($request->wantsJson()) {
+            return $this->toResource();
+        }
+
+        return new Response(
+            $this->toJson(),
+            Response::HTTP_CREATED
+        );
+    }
+
+    /**
+     * Transforms the current model into a json resource.
+     */
+    public function toResource()
+    {
+        /** @var \Illuminate\Http\Resources\Json\JsonResource $resource */
+        $resource = config('chunky.resource', ChunkResource::class);
+
+        return new $resource($this);
+    }
+
+    /**
+     * Store the chunk into filesystem.
+     *
+     * @param string $folder
+     * @param array $options
+     *
+     * @return Chunk
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function store(string $folder, $options = []): Chunk
+    {
+        if(! $this->path instanceof File) {
+            throw new ChunkyException("Path must be a file");
+        }
+
+        $chunk_name = $this->sanitizeName($this->index);
+
+        $path = $this->filesystem()
+            ->putFileAs($folder, $this->path, $chunk_name, $options);
+
+        return new static($this->getIndex(), $path, $this->getDisk(), $this->isLast());
+    }
+
+    /**
+     * Store and return a new chunk instance.
+     *
+     * @param \Symfony\Component\HttpFoundation\File\File $file
+     * @param string                                      $folder
+     * @param int                                         $index
+     * @param array                                       $options
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
+     * @return \Jobtech\LaravelChunky\Chunk
+     */
+    public static function storeFrom(File $file, string $folder, int $index, $options = [])
+    {
+        $chunk = new static($index, $file, Arr::pull($options, 'disk'));
+
+        return $chunk->store($folder, $options);
     }
 }

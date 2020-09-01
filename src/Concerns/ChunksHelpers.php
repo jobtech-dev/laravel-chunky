@@ -74,14 +74,9 @@ trait ChunksHelpers
 
         $files = $this->chunks($folder);
 
-        foreach ($files as $file) {
-            $chunk = new Chunk(
-                $file['index'],
-                new File($file['path'], false)
-            );
-
+        foreach ($files as $chunk) {
             $deleted = $this->chunksFilesystem()
-                ->delete($file['path']);
+                ->delete($chunk->getPath());
 
             if (! $deleted) {
                 return false;

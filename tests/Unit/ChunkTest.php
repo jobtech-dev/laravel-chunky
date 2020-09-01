@@ -36,29 +36,49 @@ class ChunkTest extends TestCase
         ];
     }
 
+    /** @test */
+    public function chunk_has_attributes()
+    {
+        $chunk = new Chunk(0, 'foo.ext', 'foo');
+
+        $this->assertEquals(0, $chunk->getIndex());
+        $this->assertEquals('foo.ext', $chunk->getPath());
+        $this->assertEquals('foo', $chunk->getName());
+        $this->assertEquals('ext', $chunk->guessExtension());
+
+        $this->assertEquals('foo', $chunk->getDisk());
+        $chunk->setDisk('bar');
+        $this->assertEquals('bar', $chunk->getDisk());
+
+        $this->assertFalse($chunk->isLast());
+        $chunk->setLast(true);
+        $this->assertTrue($chunk->isLast());
+    }
+
     /**
      * @test
      * @dataProvider indexProvider
      *
      * @param $index
      */
-    public function chunk_has_attributes($index)
+    public function chunk_has_attributes_from_file($index)
     {
+
         $chunk = new Chunk($index, $this->upload);
 
-        $this->assertEquals($this->upload, $chunk->getFile());
         $this->assertEquals($index, $chunk->getIndex());
-        $this->assertFalse($chunk->isLast());
+        $this->assertEquals($this->upload->getRealPath(), $chunk->getPath());
+        $this->assertEquals('png', $extension = $chunk->guessExtension());
+        $this->assertEquals('foo', $chunk->getName());
 
-        $chunk->setLast(true);
-        $this->assertTrue($chunk->isLast());
+        $this->assertNull($chunk->getDisk());
     }
 
     /** @test */
     public function chunk_is_stored_on_default_disk()
     {
         $chunk = new Chunk(0, $this->upload);
-        $chunk->storeIn('bar');
+        $chunk->store('bar');
 
         Storage::assertExists('bar/0_foo.png');
     }
@@ -69,26 +89,23 @@ class ChunkTest extends TestCase
         Storage::fake('foo');
 
         $chunk = new Chunk(0, $this->upload);
-        $result = $chunk->storeIn('bar', [
+        $result = $chunk->store('bar', [
             'disk' => 'foo',
         ]);
 
         $this->assertNotEquals($chunk, $result);
-        Storage::disk('foo')->assertExists('bar/0_foo.png');
+        Storage::assertExists('bar/0_foo.png');
     }
 
     /** @test */
     public function chunk_is_transformed_into_an_array()
     {
         $chunk = new Chunk(0, $this->upload);
-        $file = $this->upload->getRealPath();
 
         $result = [
-            'file' => $file,
-            'path' => $this->upload->getPath(),
-            'name' => $this->upload->getBasename(
-                $this->upload->guessClientExtension()
-            ),
+            'file' => 'foo.png',
+            'path' => $this->upload->getRealPath(),
+            'name' => 'foo',
             'extension' => 'png',
             'index'     => 0,
             'last'      => false,
@@ -101,12 +118,9 @@ class ChunkTest extends TestCase
     public function chunk_toggles_file_info_when_transformed_into_an_array()
     {
         $chunk = new Chunk(0, $this->upload);
-        $file = $this->upload->getRealPath();
 
         $result = [
-            'name' => $this->upload->getBasename(
-                $this->upload->guessClientExtension()
-            ),
+            'name' => 'foo',
             'extension' => 'png',
             'index'     => 0,
             'last'      => false,
@@ -114,8 +128,8 @@ class ChunkTest extends TestCase
 
         $this->assertEquals($result, $chunk->hideFileInfo()->toArray());
 
-        $result['file'] = $file;
-        $result['path'] = $this->upload->getPath();
+        $result['file'] = 'foo.png';
+        $result['path'] = $this->upload->getRealPath();
 
         $this->assertEquals($result, $chunk->showFileInfo()->toArray());
     }
@@ -124,13 +138,9 @@ class ChunkTest extends TestCase
     public function chunk_is_encoded_as_json()
     {
         $chunk = new Chunk(0, $this->upload);
-        $file = json_encode($this->upload->getRealPath());
-        $path = json_encode($this->upload->getPath());
-        $name = json_encode($this->upload->getBasename(
-            $this->upload->guessClientExtension()
-        ));
+        $path = json_encode($this->upload->getRealPath());
 
-        $result = '{"name":'.$name.',"extension":"png","index":0,"last":false,"file":'.$file.',"path":'.$path.'}';
+        $result = '{"name":"foo","extension":"png","index":0,"last":false,"file":"foo.png","path":'.$path.'}';
 
         $this->assertEquals($result, $chunk->toJson());
     }
@@ -139,17 +149,12 @@ class ChunkTest extends TestCase
     public function chunk_toggles_file_info_when_is_encoded_as_json()
     {
         $chunk = new Chunk(0, $this->upload);
-        $file = json_encode($this->upload->getRealPath());
-        $path = json_encode($this->upload->getPath());
-        $name = json_encode($this->upload->getBasename(
-            $this->upload->guessClientExtension()
-        ));
-
-        $result = '{"name":'.$name.',"extension":"png","index":0,"last":false}';
+        $path = json_encode($this->upload->getRealPath());
+        $result = '{"name":"foo","extension":"png","index":0,"last":false}';
 
         $this->assertEquals($result, $chunk->hideFileInfo()->toJson());
 
-        $result = '{"name":'.$name.',"extension":"png","index":0,"last":false,"file":'.$file.',"path":'.$path.'}';
+        $result = '{"name":"foo","extension":"png","index":0,"last":false,"file":"foo.png","path":'.$path.'}';
         $this->assertEquals($result, $chunk->showFileInfo()->toJson());
     }
 
@@ -187,15 +192,6 @@ class ChunkTest extends TestCase
         $this->assertEquals(json_encode([
             'data' => $chunk->toArray(),
         ]), $result->toResponse($mock)->getContent());
-    }
-
-    /** @test */
-    public function chunck_forwards_calls_to_uploaded_file()
-    {
-        $chunk = new Chunk(0, $this->upload);
-
-        $this->assertEquals($this->upload->getPath(), $chunk->getPath());
-        $this->assertEquals($this->upload->getFilename(), $chunk->getFilename());
     }
 
     /** @test */

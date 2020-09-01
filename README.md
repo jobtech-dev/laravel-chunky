@@ -256,23 +256,26 @@ Chunky::deleteChunk('chunks-folder');
 The package include a method that, given the chunks folder, will return a sorted collection. Each item contains the relative chunk's path and index.
 
 ```php
-$chunks = Chunky::chunk('chunks-folder-name');
+$chunks = Chunky::chunks('chunks-folder-name');
 
 foreach($chunks as $chunk) {
-  print_r($chunk);
+  print_r($chunk->toArray());
 }
 
 //  [
 //    'index' => 0,
-//    'path'  => '/path/to/0_chunk.ext'
+//    'path'  => '/path/to/chunks-folder-name/0_chunk.ext',
+//    [...]
 //  ],
 //  [
 //    'index' => 1,
-//    'path'  => '/path/to/1_chunk.ext'
+//    'path'  => '/path/to/chunks-folder-name/1_chunk.ext',
+//    [...]
 //  ],
 //  [
 //    'index' => 2,
-//    'path'  => '/path/to/2_chunk.ext'
+//    'path'  => '/path/to/chunks-folder-name/2_chunk.ext',
+//    [...]
 //  ],
 //  ...
 ```

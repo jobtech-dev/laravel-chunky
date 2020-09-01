@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobtech\LaravelChunky;
+namespace Jobtech\LaravelChunky\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
