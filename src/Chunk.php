@@ -66,7 +66,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
      */
     public function getPath(): string
     {
-        if($this->path instanceof File) {
+        if ($this->path instanceof File) {
             return $this->path->getRealPath();
         }
 
@@ -75,9 +75,9 @@ class Chunk implements Arrayable, Jsonable, Responsable
 
     public function getFilename($suffix = null): string
     {
-        if($this->path instanceof UploadedFile) {
+        if ($this->path instanceof UploadedFile) {
             return basename($this->path->getClientOriginalName(), $suffix);
-        } elseif($this->path instanceof File) {
+        } elseif ($this->path instanceof File) {
             return $this->path->getBasename($suffix);
         }
 
@@ -94,7 +94,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
 
     public function guessExtension()
     {
-        if($this->path instanceof File) {
+        if ($this->path instanceof File) {
             return $this->path->guessExtension();
         }
 
@@ -138,14 +138,15 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * Retrive file contents
+     * Retrive file contents.
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function getFile() {
-        if($this->path instanceof File) {
+    public function getFile()
+    {
+        if ($this->path instanceof File) {
             return $this->path;
         }
 
@@ -160,7 +161,8 @@ class Chunk implements Arrayable, Jsonable, Responsable
      *
      * @return \Illuminate\Contracts\Filesystem\Filesystem
      */
-    public function filesystem() : Filesystem {
+    public function filesystem(): Filesystem
+    {
         return Container::getInstance()->make(FilesystemFactory::class)
             ->disk($this->getDisk());
     }
@@ -258,8 +260,8 @@ class Chunk implements Arrayable, Jsonable, Responsable
      */
     public function store(string $folder, $options = []): Chunk
     {
-        if(! $this->path instanceof File) {
-            throw new ChunkyException("Path must be a file");
+        if (! $this->path instanceof File) {
+            throw new ChunkyException('Path must be a file');
         }
 
         $chunk_name = $this->sanitizeName($this->index);
