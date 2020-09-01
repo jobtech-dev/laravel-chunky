@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies\Stubs;
+namespace Jobtech\LaravelChunky\Tests\Unit\Strategies\Stubs;
 
 use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
 use Jobtech\LaravelChunky\Strategies\MergeStrategy;

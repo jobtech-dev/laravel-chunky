@@ -1,12 +1,12 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies;
+namespace Jobtech\LaravelChunky\Tests\Unit\Strategies;
 
 use Illuminate\Http\UploadedFile;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies\Stubs\TestMergeStrategy;
+use Jobtech\LaravelChunky\Tests\Unit\Strategies\Stubs\TestMergeStrategy;
 
 class MergeStrategyTest extends TestCase
 {

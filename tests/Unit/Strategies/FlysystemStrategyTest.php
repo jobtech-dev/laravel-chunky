@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobtech\LaravelChunky\Tests\Unit\Merge\Strategies;
+namespace Jobtech\LaravelChunky\Tests\Unit\Strategies;
 
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Strategies\FlysystemStrategy;
