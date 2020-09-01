@@ -27,7 +27,8 @@ class MergeChunksTest extends TestCase
     }
 
     /** @test */
-    public function job_throws_exception_if_integrity_doesnt_match() {
+    public function job_throws_exception_if_integrity_doesnt_match()
+    {
         $this->manager->chunksFilesystem()->makeDirectory('chunks/foo');
 
         $request = $this->mock(AddChunkRequest::class, function ($mock) {
@@ -52,7 +53,8 @@ class MergeChunksTest extends TestCase
     }
 
     /** @test */
-    public function job_handles_merge() {
+    public function job_handles_merge()
+    {
         Event::fake();
         $this->manager->chunksFilesystem()->write('foo.txt', 'Hello World');
         $this->manager->chunksFilesystem()->write('chunks/foo/0_foo.txt', 'Hello ');

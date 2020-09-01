@@ -229,7 +229,7 @@ class ChunksManager implements ChunksManagerContract
         }
 
         // Store chunk
-        $chunk =  Chunk::storeFrom(
+        $chunk = Chunk::storeFrom(
             $file,
             $this->fullPath($folder),
             $index,
