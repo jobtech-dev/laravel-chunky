@@ -4,6 +4,7 @@ namespace Jobtech\LaravelChunky\Strategies;
 
 use Illuminate\Container\Container;
 use Illuminate\Support\Traits\ForwardsCalls;
+use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
@@ -45,8 +46,8 @@ abstract class MergeStrategy implements MergeStrategyContract
     {
         return $this->chunks(
             $this->folder
-        )->map(function ($chunk) {
-            return $chunk['path'];
+        )->map(function (Chunk $chunk) {
+            return $chunk->getPath();
         })->toArray();
     }
 

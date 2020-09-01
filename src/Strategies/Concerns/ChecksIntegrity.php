@@ -14,10 +14,10 @@ trait ChecksIntegrity
             $this->chunksFolder()
         );
 
-        foreach ($chunks->all() as $chunk) {
-            $size = $this->chunksFilesystem()->size($chunk['path']);
+        foreach ($chunks as $chunk) {
+            $size = $this->chunksFilesystem()->size($chunk->getPath());
 
-            if ($size < $chunk_size && ! $this->isLastChunk($chunk['index'], $total_size, $chunk_size)) {
+            if ($size < $chunk_size && ! $this->isLastChunk($chunk->getIndex(), $total_size, $chunk_size)) {
                 return false;
             }
 
