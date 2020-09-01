@@ -63,7 +63,6 @@ class ChunkTest extends TestCase
      */
     public function chunk_has_attributes_from_file($index)
     {
-
         $chunk = new Chunk($index, $this->upload);
 
         $this->assertEquals($index, $chunk->getIndex());

@@ -170,7 +170,8 @@ class ChunksManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_chunks_from_folder() {
+    public function manager_retrieves_chunks_from_folder()
+    {
         $filesystem = $this->mock(Filesystem::class, function ($mock) {
             $mock->shouldReceive('files')
                 ->once()
@@ -179,7 +180,7 @@ class ChunksManagerTest extends TestCase
                     'chunks/foo/0_foo.ext',
                     'chunks/foo/1_foo.ext',
                     'chunks/foo/2_foo.ext',
-                    'chunks/foo/3_foo.ext'
+                    'chunks/foo/3_foo.ext',
                 ]);
         });
         $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
@@ -187,7 +188,7 @@ class ChunksManagerTest extends TestCase
                 ->with('chunks')
                 ->andReturn($filesystem);
         });
-        $settings = $this->mock(ChunkySettings::class, function($mock) {
+        $settings = $this->mock(ChunkySettings::class, function ($mock) {
             $mock->shouldReceive('chunksDisk')
                 ->times(5)
                 ->andReturn('chunks');
@@ -198,7 +199,7 @@ class ChunksManagerTest extends TestCase
         $result = $manager->chunks('foo');
 
         $this->assertInstanceOf(Collection::class, $result);
-        $result->each(function($item) {
+        $result->each(function ($item) {
             $this->assertInstanceOf(Chunk::class, $item);
         });
     }
