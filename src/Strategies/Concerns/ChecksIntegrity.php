@@ -17,7 +17,7 @@ trait ChecksIntegrity
         foreach ($chunks as $chunk) {
             $size = $this->chunksFilesystem()->size($chunk->getPath());
 
-            if ($size < $chunk_size && ! $this->isLastChunk($chunk->getIndex(), $total_size, $chunk_size)) {
+            if ($size < $chunk_size && ! $chunk->isLast()) {
                 return false;
             }
 
@@ -25,12 +25,5 @@ trait ChecksIntegrity
         }
 
         return $total >= $total_size;
-    }
-
-    public function isLastChunk(int $index, int $total_size, int $chunk_size)
-    {
-        $last_index = ceil($total_size / $chunk_size);
-
-        return $index == $last_index;
     }
 }

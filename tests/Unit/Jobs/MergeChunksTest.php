@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
@@ -31,21 +30,15 @@ class MergeChunksTest extends TestCase
     {
         $this->manager->chunksFilesystem()->makeDirectory('chunks/foo');
 
-        $request = $this->mock(AddChunkRequest::class, function ($mock) {
-            $upload = UploadedFile::fake()->create('foo.txt', 1000);
+        $upload = UploadedFile::fake()->create('foo.txt', 1000);
 
-            $mock->shouldReceive('fileInput')
-                ->once()
-                ->andReturn($upload);
-            $mock->shouldReceive('chunkSizeInput')
-                ->once()
-                ->andReturn(1000);
-            $mock->shouldReceive('totalSizeInput')
-                ->once()
-                ->andReturn(1000);
-        });
-
-        $job = new MergeChunks($request, 'chunks/foo', 'merged.txt');
+        $job = new MergeChunks(
+            'chunks/foo',
+            'merged.txt',
+            $upload->getMimeType(),
+            1000,
+            1000
+        );
 
         $this->expectException(ChunksIntegrityException::class);
 
@@ -60,24 +53,17 @@ class MergeChunksTest extends TestCase
         $this->manager->chunksFilesystem()->write('chunks/foo/0_foo.txt', 'Hello ');
         $this->manager->chunksFilesystem()->write('chunks/foo/1_foo.txt', 'World');
 
-        $request = $this->mock(AddChunkRequest::class, function ($mock) {
-            $chunk_size = $this->manager->chunksFilesystem()->size('chunks/foo/1_foo.txt');
-            $total_size = $this->manager->chunksFilesystem()->size('foo.txt');
+        $chunk_size = $this->manager->chunksFilesystem()->size('chunks/foo/1_foo.txt');
+        $total_size = $this->manager->chunksFilesystem()->size('foo.txt');
+        $upload = UploadedFile::fake()->create('foo.txt', $chunk_size);
 
-            $upload = UploadedFile::fake()->create('foo.txt', $chunk_size);
-
-            $mock->shouldReceive('fileInput')
-                ->once()
-                ->andReturn($upload);
-            $mock->shouldReceive('chunkSizeInput')
-                ->once()
-                ->andReturn($chunk_size);
-            $mock->shouldReceive('totalSizeInput')
-                ->once()
-                ->andReturn($total_size);
-        });
-
-        $job = new MergeChunks($request, 'chunks/foo', 'merged.txt');
+        $job = new MergeChunks(
+            'chunks/foo',
+            'merged.txt',
+            $upload->getMimeType(),
+            $chunk_size,
+            $total_size
+        );
 
         $job->handle();
 

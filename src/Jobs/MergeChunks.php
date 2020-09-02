@@ -10,7 +10,6 @@ use Illuminate\Queue\SerializesModels;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Handlers\MergeHandler;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 
 class MergeChunks implements ShouldQueue
 {
@@ -18,11 +17,6 @@ class MergeChunks implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
-
-    /**
-     * @var \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest
-     */
-    private $request;
 
     /**
      * @var string
@@ -35,17 +29,36 @@ class MergeChunks implements ShouldQueue
     private $destination;
 
     /**
+     * @var string
+     */
+    private $mime_type;
+
+    /**
+     * @var int
+     */
+    private $chunk_size;
+
+    /**
+     * @var int
+     */
+    private $total_size;
+
+    /**
      * Create a new job instance.
      *
-     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
-     * @param string                                               $folder
-     * @param string                                               $destination
+     * @param string $folder
+     * @param string $destination
+     * @param string $mime_type
+     * @param int $chunk_size
+     * @param int $total_size
      */
-    public function __construct(AddChunkRequest $request, string $folder, string $destination)
+    public function __construct(string $folder, string $destination, string $mime_type, int $chunk_size, int $total_size)
     {
-        $this->request = $request;
         $this->folder = $folder;
         $this->destination = $destination;
+        $this->mime_type = $mime_type;
+        $this->chunk_size = $chunk_size;
+        $this->total_size = $total_size;
     }
 
     /**
@@ -60,10 +73,10 @@ class MergeChunks implements ShouldQueue
         $handler = MergeHandler::create(
             $this->folder,
             $this->destination,
-            $this->request->fileInput()->getMimeType()
+            $this->mime_type
         );
 
-        if (! $handler->checkIntegrity($this->request->chunkSizeInput(), $this->request->totalSizeInput())) {
+        if (! $handler->checkIntegrity($this->chunk_size, $this->total_size)) {
             throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
         }
 

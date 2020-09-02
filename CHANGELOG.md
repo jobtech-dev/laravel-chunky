@@ -2,13 +2,19 @@
 
 Every major / minor version release will be documented in the changelog.
 
+## v1.1.3 - 2020-09-02
+* Little fixes on `Chunk` model. 
+* `MergeChunks` job refactor to avoid request serialization. 
+* Fixed progress bar while running `deleteAllChunks` in console 
+* Other minor fixes.
+
 ## v1.1.2 - 2020-09-01
 
-Fixed manager last chunk upload response
+Fixed manager last chunk upload response.
 
 ## v1.1.1 - 2020-09-01
 
-Better documentation, fixed issue with remote files mapped into a chunk object
+Better documentation, fixed issue with remote files mapped into a chunk object.
 
 ## v1.0.0 - 2020-08-31
 
