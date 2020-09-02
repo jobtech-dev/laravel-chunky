@@ -6,6 +6,7 @@ Every major / minor version release will be documented in the changelog.
 * Little fixes on `Chunk` model. 
 * `MergeChunks` job refactor to avoid request serialization. 
 * Fixed progress bar while running `deleteAllChunks` in console 
+* Other minor fixes.
 
 ## v1.1.2 - 2020-09-01
 
