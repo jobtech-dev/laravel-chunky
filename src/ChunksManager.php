@@ -81,15 +81,20 @@ class ChunksManager implements ChunksManagerContract
      */
     private function dispatchMerge(AddChunkRequest $request, string $folder)
     {
-        $method = empty($connection = $this->settings->connection()) ? 'dispatchNow' : 'dispatch';
-
-        MergeChunks::{$method}(
-            $folder,
-            $this->destinationPath($request->fileInput()),
-            $request->fileInput()->getMimeType(),
-            $request->chunkSizeInput(),
-            $request->totalSizeInput()
-        );
+        if (empty($connection = $this->settings->connection())) {
+            MergeChunks::dispatchNow(
+                $request,
+                $folder,
+                $this->destinationPath($request->fileInput())
+            );
+        } else {
+            MergeChunks::dispatch(
+                $request,
+                $folder,
+                $this->destinationPath($request->fileInput())
+            )->onConnection($connection)
+                ->onQueue($this->settings->queue());
+        }
     }
 
     /**
