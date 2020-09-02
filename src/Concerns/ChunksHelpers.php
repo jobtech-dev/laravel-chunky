@@ -4,10 +4,27 @@ namespace Jobtech\LaravelChunky\Concerns;
 
 use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
+use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Style\OutputStyle;
 
 trait ChunksHelpers
 {
-    protected $progress_bar;
+    /**
+     * This method checks if the application is running in console and, if output style is not null, it creates a new
+     * progress bar instance, otherwise returns null.
+     *
+     * @param \Symfony\Component\Console\Style\OutputStyle|null $output
+     * @param int $count
+     *
+     * @return \Symfony\Component\Console\Helper\ProgressBar|null
+     */
+    public function hasProgressBar(?OutputStyle $output, int $count) : ?ProgressBar{
+        if($output !== null && app()->runningInConsole()) {
+            return $output->createProgressBar($count);
+        }
+
+        return null;
+    }
 
     /**
      * Check if the given chunks folder exists.
@@ -29,28 +46,25 @@ trait ChunksHelpers
     /**
      * Delete all chunks folders and their content.
      *
+     * @param null $output
      * @return bool
      */
-    public function deleteAllChunks(): bool
+    public function deleteAllChunks($output = null): bool
     {
         $folders = $this->chunksFilesystem()
             ->directories(
                 $this->getChunksFolder()
             );
 
-        if (app()->runningInConsole() && ! app()->runningUnitTests()) {
-            $this->progress_bar = $this->output->createProgressBar(
-                count($folders)
-            );
-        }
+        $progress_bar = $this->hasProgressBar($output, count($folders));
 
         foreach ($folders as $folder) {
             if (! $this->deleteChunks($folder)) {
                 return false;
             }
 
-            if (app()->runningInConsole() && ! app()->runningUnitTests()) {
-                $this->progress_bar->advance();
+            if ($progress_bar !== null) {
+                $progress_bar->advance();
             }
         }
 

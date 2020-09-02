@@ -485,16 +485,16 @@ class ChunksManagerTest extends TestCase
             $upload = UploadedFile::fake()->create('foo.mp4', 5000);
 
             $mock->shouldReceive('fileInput')
-                ->times(3)
+                ->times(4)
                 ->andReturn($upload);
             $mock->shouldReceive('indexInput')
                 ->times(2)
                 ->andReturn(0);
             $mock->shouldReceive('totalSizeInput')
-                ->once()
+                ->times(2)
                 ->andReturn(5000);
             $mock->shouldReceive('chunkSizeInput')
-                ->once()
+                ->times(2)
                 ->andReturn(5000);
         });
 

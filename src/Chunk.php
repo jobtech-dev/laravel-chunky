@@ -44,9 +44,14 @@ class Chunk implements Arrayable, Jsonable, Responsable
         $this->last = $last;
     }
 
-    private function sanitizeName(int $index)
+    /**
+     * Sanitize file name following this pattern {index}_{file-name-slug}.{ext}
+     *
+     * @return string
+     */
+    private function sanitizeName() : string
     {
-        return $index.'_'.Str::slug($this->getName()).'.'.$this->guessExtension();
+        return $this->index.'_'.Str::slug($this->getName()).'.'.$this->guessExtension();
     }
 
     /**
@@ -264,10 +269,8 @@ class Chunk implements Arrayable, Jsonable, Responsable
             throw new ChunkyException('Path must be a file');
         }
 
-        $chunk_name = $this->sanitizeName($this->index);
-
         $path = $this->filesystem()
-            ->putFileAs($folder, $this->path, $chunk_name, $options);
+            ->putFileAs($folder, $this->path, $this->sanitizeName(), $options);
 
         return new static($this->getIndex(), $path, $this->getDisk(), $this->isLast());
     }

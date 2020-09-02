@@ -68,7 +68,7 @@ class ClearChunks extends Command
 
             $this->info("folder {$root} cleared!");
         } else {
-            if (! $this->manager->deleteAllChunks()) {
+            if (! $this->manager->deleteAllChunks($this->output)) {
                 $this->error("An error occurred while deleting folder {$folder}");
 
                 return;
