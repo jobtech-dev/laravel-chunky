@@ -45,11 +45,11 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * Sanitize file name following this pattern {index}_{file-name-slug}.{ext}
+     * Sanitize file name following this pattern {index}_{file-name-slug}.{ext}.
      *
      * @return string
      */
-    private function sanitizeName() : string
+    private function sanitizeName(): string
     {
         return $this->index.'_'.Str::slug($this->getName()).'.'.$this->guessExtension();
     }

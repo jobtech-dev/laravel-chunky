@@ -10,7 +10,6 @@ use Illuminate\Queue\SerializesModels;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Handlers\MergeHandler;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 
 class MergeChunks implements ShouldQueue
 {
