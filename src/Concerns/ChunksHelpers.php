@@ -18,8 +18,9 @@ trait ChunksHelpers
      *
      * @return \Symfony\Component\Console\Helper\ProgressBar|null
      */
-    public function hasProgressBar(?OutputStyle $output, int $count) : ?ProgressBar{
-        if($output !== null && app()->runningInConsole()) {
+    public function hasProgressBar(?OutputStyle $output, int $count): ?ProgressBar
+    {
+        if ($output !== null && app()->runningInConsole()) {
             return $output->createProgressBar($count);
         }
 
