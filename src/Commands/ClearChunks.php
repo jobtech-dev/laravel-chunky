@@ -60,7 +60,7 @@ class ClearChunks extends Command
         if (! empty($folder)) {
             $root .= $folder;
 
-            if (! $this->manager->deleteChunks($root)) {
+            if (! $this->manager->chunksFilesystem()->delete($root)) {
                 $this->error("An error occurred while deleting folder {$root}");
 
                 return;

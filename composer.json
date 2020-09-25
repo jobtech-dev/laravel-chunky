@@ -10,12 +10,12 @@
     ],
     "homepage": "https://github.com/jobtech-dev/laravel-chunky",
     "require": {
-        "php": "^7.3",
+        "php": "^7.4",
         "ext-fileinfo": "*",
         "ext-json": "*",
-        "illuminate/contracts": "~5.8.0|^6.0|^7.0",
-        "illuminate/filesystem": "~5.8.0|^6.0|^7.0",
-        "illuminate/support": "~5.8.0|^6.0|^7.0",
+        "illuminate/contracts": "^6.0|^7.0|^8.0",
+        "illuminate/filesystem": "^6.0|^7.0|^8.0",
+        "illuminate/support": "^6.0|^7.0|^8.0",
         "pbmedia/laravel-ffmpeg": "^7.0",
         "keven/flysystem-concatenate": "^1.0",
         "keven/append-stream": "^1.0.5"

@@ -136,6 +136,16 @@ class ChunkySettings
     }
 
     /**
+     * Retrieve the default merge strategy.
+     *
+     * @return string
+     */
+    public function defaultMergeStrategy() : string
+    {
+        return Arr::get($this->config, 'strategies.default');
+    }
+
+    /**
      * Retrieve the queue connection for the merge job.
      *
      * @return string
@@ -153,5 +163,10 @@ class ChunkySettings
     public function queue()
     {
         return Arr::get($this->config, 'strategies.queue');
+    }
+
+    public function strategiesMimeTypes()
+    {
+        return Arr::get($this->config, 'strategies.mime_types');
     }
 }

@@ -25,7 +25,7 @@ trait ChunkyRequestHelpers
             return Str::slug($folder);
         }
 
-        return $this->buildChunkFolderFor(
+        return $this->chunkFolderNameFor(
             str_replace(
                 $file->guessExtension(),
                 '',

@@ -44,7 +44,7 @@ class ChunkTest extends TestCase
         $this->assertEquals(0, $chunk->getIndex());
         $this->assertEquals('foo.ext', $chunk->getPath());
         $this->assertEquals('foo', $chunk->getName());
-        $this->assertEquals('ext', $chunk->guessExtension());
+        $this->assertEquals('ext', $chunk->getExtension());
 
         $this->assertEquals('foo', $chunk->getDisk());
         $chunk->setDisk('bar');
@@ -67,7 +67,7 @@ class ChunkTest extends TestCase
 
         $this->assertEquals($index, $chunk->getIndex());
         $this->assertEquals($this->upload->getRealPath(), $chunk->getPath());
-        $this->assertEquals('png', $extension = $chunk->guessExtension());
+        $this->assertEquals('png', $extension = $chunk->getExtension());
         $this->assertEquals('foo', $chunk->getName());
 
         $this->assertNull($chunk->getDisk());

@@ -2,16 +2,12 @@
 
 namespace Jobtech\LaravelChunky\Strategies;
 
-use Illuminate\Container\Container;
 use Illuminate\Support\Traits\ForwardsCalls;
-use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
+use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
 
-/**
- * @mixin ChunksManager
- */
 abstract class MergeStrategy implements MergeStrategyContract
 {
     use ForwardsCalls;
@@ -19,50 +15,49 @@ abstract class MergeStrategy implements MergeStrategyContract
     /**
      * @var string
      */
-    protected $folder;
-
-    /**
-     * @var \Jobtech\LaravelChunky\Contracts\ChunksManager
-     */
-    protected $manager;
+    protected string $folder;
 
     /**
      * @var string
      */
-    protected $destination;
-
-    public function __construct($manager = null)
-    {
-        $this->manager = $manager ?: Container::getInstance()
-            ->make('chunky');
-    }
+    protected string $destination;
 
     /**
-     * Retrieve chunks and map the paths into an array.
-     *
-     * @return array
+     * @var \Jobtech\LaravelChunky\Contracts\ChunksManager|null
      */
-    protected function mapChunksToArray(): array
+    protected ?ChunksManager $chunksManager;
+
+    /**
+     * @var \Jobtech\LaravelChunky\Contracts\MergeManager|null
+     */
+    protected ?MergeManager $mergeManager;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function chunksManager($manager = null): ChunksManager
     {
-        return $this->chunks(
-            $this->folder
-        )->map(function (Chunk $chunk) {
-            return $chunk->getPath();
-        })->toArray();
+        if ($manager instanceof ChunksManager) {
+            $this->chunksManager = $manager;
+        } elseif ($this->chunksManager === null) {
+            throw new StrategyException('Chunks manager cannot be empty');
+        }
+
+        return $this->chunksManager;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function manager($manager = null): ChunksManager
+    public function mergeManager($manager = null): MergeManager
     {
-        if ($manager instanceof ChunksManager) {
-            $this->manager = $manager;
-        } elseif ($this->manager === null) {
-            throw new StrategyException('Manager cannot be empty');
+        if ($manager instanceof MergeManager) {
+            $this->mergeManager = $manager;
+        } elseif ($this->mergeManager === null) {
+            throw new StrategyException('Merge manager cannot be empty');
         }
 
-        return $this->manager;
+        return $this->mergeManager;
     }
 
     /**
@@ -70,47 +65,12 @@ abstract class MergeStrategy implements MergeStrategyContract
      */
     public function chunksFolder($folder = null): string
     {
-        if (is_string($folder) && $this->chunksFolderExists($folder)) {
+        if (is_string($folder) && $this->chunksManager->validFolder($folder)) {
             $this->folder = $folder;
-        } elseif (empty($this->folder) || ! $this->chunksFolderExists($this->folder)) {
+        } elseif (empty($this->folder) || ! $this->chunksManager->validFolder($this->folder)) {
             throw new StrategyException('Chunks folder cannot be empty');
         }
 
         return $this->folder;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function destination($destination = null): string
-    {
-        if (is_string($destination)) {
-            $this->destination = $destination;
-        } elseif (empty($this->destination)) {
-            throw new StrategyException('Destination path cannot be empty');
-        }
-
-        return $this->destination;
-    }
-
-    public function __call($method, $parameters)
-    {
-        if (! method_exists($this, $method)) {
-            return $this->forwardCallTo($this->manager, $method, $parameters);
-        }
-
-        return $this->{$method}(...$parameters);
-    }
-
-    /**
-     * Create a new instance for the strategy.
-     *
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $manager
-     *
-     * @return static
-     */
-    public static function newInstance($manager = null)
-    {
-        return new static($manager);
     }
 }

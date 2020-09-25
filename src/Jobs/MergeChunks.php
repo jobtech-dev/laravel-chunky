@@ -3,13 +3,17 @@
 namespace Jobtech\LaravelChunky\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Jobtech\LaravelChunky\ChunksManager;
+use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
+use Jobtech\LaravelChunky\Strategies\StrategyFactory;
 
 class MergeChunks implements ShouldQueue
 {
@@ -21,22 +25,22 @@ class MergeChunks implements ShouldQueue
     /**
      * @var string
      */
-    private $folder;
+    private string $folder;
 
     /**
      * @var string
      */
-    private $destination;
+    private string $destination;
 
     /**
      * @var string
      */
-    private $mime_type;
+    private string $mime_type;
 
     /**
      * @var int
      */
-    private $chunk_size;
+    private int $chunk_size;
 
     /**
      * @var int
@@ -70,17 +74,18 @@ class MergeChunks implements ShouldQueue
      */
     public function handle()
     {
-        $handler = MergeHandler::create(
-            $this->folder,
-            $this->destination,
-            $this->mime_type
-        );
-
-        if (! $handler->checkIntegrity($this->chunk_size, $this->total_size)) {
+        $manager = ChunksManager::getInstance();
+        if (! $manager->checkFilesIntegrity($this->folder, $this->chunk_size, $this->total_size)) {
             throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
         }
 
-        $strategy = $handler->merge();
+        $factory = StrategyFactory::getInstance();
+        /** @var MergeStrategy $strategy */
+        $strategy = $factory->buildFrom($this->mime_type, $manager, MergeManager::getInstance());
+        $strategy->chunksFolder($this->folder);
+        $strategy->destination($this->destination);
+
+        $strategy->boot()->merge();
 
         event(new ChunksMerged(
             $strategy, $strategy->destination()
