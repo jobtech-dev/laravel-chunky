@@ -211,13 +211,17 @@ class ChunksManagerTest extends TestCase
     /** @test */
     public function manager_checks_if_chunks_folder_exists()
     {
-        $this->assertFalse($this->manager->validFolder('unexisting'));
-        $this->assertFalse($this->manager->validFolder('chunks/unexisting'));
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-        $this->manager->chunksFilesystem()->makeDirectory('test');
+        $this->assertFalse($manager->validFolder('unexisting'));
+        $this->assertFalse($manager->validFolder('chunks/unexisting'));
 
-        $this->assertTrue($this->manager->validFolder('test'));
-        $this->assertTrue($this->manager->validFolder('chunks/test'));
+        $manager->chunksFilesystem()->makeDirectory('test');
+
+        $this->assertTrue($manager->validFolder('test'));
+        $this->assertTrue($manager->validFolder('chunks/test'));
     }
 
     /** @test */
@@ -225,16 +229,20 @@ class ChunksManagerTest extends TestCase
     {
         Event::fake();
 
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
         $fake_0 = $this->createFakeUpload();
         $fake_1 = $this->createFakeUpload();
 
-        $this->manager->addChunk($fake_0, 0, 'test');
-        $this->manager->addChunk($fake_1, 1, 'test');
+        $manager->addChunk($fake_0, 0, 'test');
+        $manager->addChunk($fake_1, 1, 'test');
 
         Storage::assertExists('chunks/test/0_fake-file.txt');
         Storage::assertExists('chunks/test/1_fake-file.txt');
 
-        $this->manager->deleteChunkFolder('chunks/test');
+        $manager->deleteChunkFolder('chunks/test');
 
         Storage::assertMissing('chunks/test/0_fake-file.txt');
         Storage::assertMissing('chunks/test/1_fake-file.txt');
@@ -245,26 +253,35 @@ class ChunksManagerTest extends TestCase
     /** @test */
     public function manager_delete_chunks_returns_true_on_unexisting_folder()
     {
-        $this->assertTrue($this->manager->deleteChunkFolder('unexisting'));
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertTrue($manager->deleteChunkFolder('unexisting'));
     }
 
     /** @test */
     public function manager_deletes_all_chunks()
     {
         Event::fake();
+
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
         $fake = $this->createFakeUpload();
 
-        $this->manager->addChunk($fake, 0, 'test_1');
-        $this->manager->addChunk($fake, 1, 'test_1');
-        $this->manager->addChunk($fake, 0, 'test_2');
-        $this->manager->addChunk($fake, 1, 'test_2');
+        $manager->addChunk($fake, 0, 'test_1');
+        $manager->addChunk($fake, 1, 'test_1');
+        $manager->addChunk($fake, 0, 'test_2');
+        $manager->addChunk($fake, 1, 'test_2');
 
         Storage::assertExists('chunks/test_1/0_fake-file.txt');
         Storage::assertExists('chunks/test_1/1_fake-file.txt');
         Storage::assertExists('chunks/test_2/0_fake-file.txt');
         Storage::assertExists('chunks/test_2/1_fake-file.txt');
 
-        $this->manager->deleteAllChunks();
+        $manager->deleteAllChunks();
 
         Storage::assertMissing('test_1/0_fake-file.txt');
         Storage::assertMissing('test_1/1_fake-file.txt');
