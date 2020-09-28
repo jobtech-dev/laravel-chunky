@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\ChunksManager;
 use Jobtech\LaravelChunky\ChunkySettings;
+use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
-use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
