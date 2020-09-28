@@ -7,9 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Jobtech\LaravelChunky\Events\ChunksMerged;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\ChunksManager;
 
 class MergeChunks implements ShouldQueue
 {
@@ -21,22 +19,17 @@ class MergeChunks implements ShouldQueue
     /**
      * @var string
      */
-    private $folder;
+    private string $folder;
 
     /**
      * @var string
      */
-    private $destination;
-
-    /**
-     * @var string
-     */
-    private $mime_type;
+    private string $destination;
 
     /**
      * @var int
      */
-    private $chunk_size;
+    private int $chunk_size;
 
     /**
      * @var int
@@ -48,15 +41,13 @@ class MergeChunks implements ShouldQueue
      *
      * @param string $folder
      * @param string $destination
-     * @param string $mime_type
      * @param int $chunk_size
      * @param int $total_size
      */
-    public function __construct(string $folder, string $destination, string $mime_type, int $chunk_size, int $total_size)
+    public function __construct(string $folder, string $destination, int $chunk_size, int $total_size)
     {
         $this->folder = $folder;
         $this->destination = $destination;
-        $this->mime_type = $mime_type;
         $this->chunk_size = $chunk_size;
         $this->total_size = $total_size;
     }
@@ -70,20 +61,13 @@ class MergeChunks implements ShouldQueue
      */
     public function handle()
     {
-        $handler = MergeHandler::create(
+        $manager = ChunksManager::getInstance();
+
+        $manager->handleMerge(
             $this->folder,
             $this->destination,
-            $this->mime_type
+            $this->chunk_size,
+            $this->total_size
         );
-
-        if (! $handler->checkIntegrity($this->chunk_size, $this->total_size)) {
-            throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
-        }
-
-        $strategy = $handler->merge();
-
-        event(new ChunksMerged(
-            $strategy, $strategy->destination()
-        ));
     }
 }

@@ -3,334 +3,150 @@
 namespace Jobtech\LaravelChunky\Tests\Unit;
 
 use Illuminate\Contracts\Filesystem\Factory;
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\ChunksManager;
 use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
+use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksManagerTest extends TestCase
 {
-    /** @test */
-    public function manager_retrieves_chunks_filesystem()
+    /**
+     * @var \Illuminate\Config\Repository
+     */
+    private $config;
+
+    protected function setUp(): void
     {
-        $filesystem = $this->mock(Filesystem::class);
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->once()
-                ->with('chunks')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksDisk')
-                ->once()
-                ->andReturn('chunks');
-        });
+        parent::setUp();
 
-        $manager = new ChunksManager($factory, $settings);
-
-        $this->assertEquals($filesystem, $manager->chunksFilesystem());
+        $this->config = $this->app->make('config');
     }
 
     /** @test */
-    public function manager_retrieves_merge_filesystem()
+    public function manager_retrieves_chunks_filesystem()
     {
-        $filesystem = $this->mock(Filesystem::class);
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->once()
-                ->with('merge')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('mergeDisk')
-                ->once()
-                ->andReturn('merge');
-        });
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-        $manager = new ChunksManager($factory, $settings);
-
-        $this->assertEquals($filesystem, $manager->mergeFilesystem());
+        $this->assertInstanceOf(ChunksFilesystem::class, $manager->chunksFilesystem());
+        $this->assertInstanceOf(Factory::class, $manager->chunksFilesystem()->filesystem());
     }
 
     /** @test */
     public function manager_retrieves_chunks_disk()
     {
-        $filesystem = $this->mock(Factory::class);
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksDisk')
-                ->once()
-                ->andReturn('chunks');
-        });
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-        $manager = new ChunksManager($filesystem, $settings);
-
-        $this->assertEquals('chunks', $manager->getChunksDisk());
-    }
-
-    /** @test */
-    public function manager_retrieves_merge_disk()
-    {
-        $filesystem = $this->mock(Factory::class);
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('mergeDisk')
-                ->once()
-                ->andReturn('merge');
-        });
-
-        $manager = new ChunksManager($filesystem, $settings);
-
-        $this->assertEquals('merge', $manager->getMergeDisk());
+        $this->assertEquals($this->config->get('chunky.disks.chunks.disk'), $manager->getChunksDisk());
     }
 
     /** @test */
     public function manager_retrieves_chunks_folder()
     {
-        $filesystem = $this->mock(Factory::class);
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksDisk')
-                ->once()
-                ->andReturn('chunks');
-        });
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-        $manager = new ChunksManager($filesystem, $settings);
-
-        $this->assertEquals('chunks', $manager->getChunksDisk());
-    }
-
-    /** @test */
-    public function manager_retrieves_merge_folder()
-    {
-        $filesystem = $this->mock(Factory::class);
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('mergeDisk')
-                ->once()
-                ->andReturn('merge');
-        });
-
-        $manager = new ChunksManager($filesystem, $settings);
-
-        $this->assertEquals('merge', $manager->getMergeDisk());
+        $this->assertEquals($this->config->get('chunky.disks.chunks.folder').'/', $manager->getChunksFolder());
     }
 
     /** @test */
     public function manager_retrieves_chunks_options()
     {
-        $filesystem = $this->mock(Factory::class);
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksDisk')
-                ->once()
-                ->andReturn('chunks');
-            $mock->shouldReceive('additionalChunksOptions')
-                ->once()
-                ->andReturn([
-                    'foo' => 'bar',
-                ]);
-        });
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-        $manager = new ChunksManager($filesystem, $settings);
+        $options = array_merge([
+            'disk' => $this->config->get('chunky.disks.chunks.disk'),
+        ], $this->config->get('chunky.options.chunks'));
 
-        $this->assertEquals([
-            'disk' => 'chunks',
-            'foo'  => 'bar',
-        ], $manager->getChunksOptions());
+        $this->assertEquals($options, $manager->getChunksOptions());
     }
 
     /** @test */
-    public function manager_retrieves_merge_options()
+    public function manager_creates_temporary_files_from_chunks()
     {
-        $filesystem = $this->mock(Factory::class);
+        if (! $this->canTestS3()) {
+            $this->markTestSkipped('Skipping S3 tests: missing .env values');
+        }
+
+        Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello ');
+        Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'World!');
+
         $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('mergeDisk')
+            $mock->shouldReceive('chunksDisk')
                 ->once()
-                ->andReturn('merge');
-            $mock->shouldReceive('additionalMergeOptions')
+                ->andReturn('s3_disk');
+            $mock->shouldReceive('chunksFolder')
                 ->once()
-                ->andReturn([
-                    'foo' => 'bar',
-                ]);
+                ->andReturn('chunks/');
         });
+        $manager = new ChunksManager($settings);
 
-        $manager = new ChunksManager($filesystem, $settings);
+        $files = $manager->temporaryFiles('foo');
 
-        $this->assertEquals([
-            'disk' => 'merge',
-            'foo'  => 'bar',
-        ], $manager->getMergeOptions());
+        $this->assertCount(2, $files);
+        foreach ($files as $file) {
+            $this->assertTrue(Str::startsWith($file, sys_get_temp_dir().'/foo'));
+        }
+
+        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo']);
     }
 
     /** @test */
     public function manager_retrieves_chunks_from_folder()
     {
-        $filesystem = $this->mock(Filesystem::class, function ($mock) {
-            $mock->shouldReceive('files')
-                ->once()
-                ->with('foo')
-                ->andReturn([
-                    'chunks/foo/0_foo.ext',
-                    'chunks/foo/1_foo.ext',
-                    'chunks/foo/2_foo.ext',
-                    'chunks/foo/3_foo.ext',
-                ]);
-        });
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->with('chunks')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksDisk')
-                ->times(5)
-                ->andReturn('chunks');
-        });
-
-        $manager = new ChunksManager($factory, $settings);
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
         $result = $manager->chunks('foo');
-
         $this->assertInstanceOf(Collection::class, $result);
         $result->each(function ($item) {
             $this->assertInstanceOf(Chunk::class, $item);
+
+            $index = $item->getIndex();
+
+            $this->assertEquals('chunks/foo/'.sprintf('%s_chunk.txt', $index), $item->getPath());
         });
     }
 
     /** @test */
-    public function manager_checks_integrity_with_not_existing_folder()
+    public function manager_reads_chunk_from_object()
     {
-        $filesystem = $this->mock(Filesystem::class, function ($mock) {
-            $mock->shouldReceive('exists')
-                ->times(2)
-                ->with('chunks/foo')
-                ->andReturn(false);
-            $mock->shouldReceive('makeDirectory')
-                ->once()
-                ->with('chunks/foo')
-                ->andReturn(true);
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-            $mock->shouldReceive('exists')
-                ->times(2)
-                ->with('chunks/foo')
-                ->andReturn(true);
-
-            $mock->shouldReceive('files')
-                ->once()
-                ->with('chunks/foo')
-                ->andReturn(['foo']);
-        });
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->with('chunks')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksFolder')
-                ->times(2)
-                ->andReturn('chunks/');
-            $mock->shouldReceive('chunksDisk')
-                ->times(6)
-                ->andReturn('chunks');
-            $mock->shouldReceive('defaultIndex')
-                ->times(2)
-                ->andReturn(0);
-        });
-
-        $manager = new ChunksManager($factory, $settings);
-
-        $this->assertTrue($manager->checkChunkIntegrity('foo', 0));
-        $this->assertFalse($manager->checkChunkIntegrity('foo', 0));
+        $result = $manager->chunk(new Chunk(0, 'chunks/foo/0_chunk.txt', 'chunks'));
+        $this->assertTrue(is_resource($result));
     }
 
     /** @test */
-    public function manager_checks_integrity_with_not_existing_folder_and_different_default_index()
+    public function manager_reads_chunk_from_path()
     {
-        $filesystem = $this->mock(Filesystem::class, function ($mock) {
-            $mock->shouldReceive('exists')
-                ->times(2)
-                ->with('chunks/foo')
-                ->andReturn(false);
-            $mock->shouldReceive('makeDirectory')
-                ->once()
-                ->with('chunks/foo')
-                ->andReturn(true);
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-            $mock->shouldReceive('exists')
-                ->times(4)
-                ->with('chunks/foo')
-                ->andReturn(true);
-            $mock->shouldReceive('files')
-                ->times(2)
-                ->with('chunks/foo')
-                ->andReturn(['foo']);
-        });
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->with('chunks')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksFolder')
-                ->times(3)
-                ->andReturn('chunks/');
-            $mock->shouldReceive('chunksDisk')
-                ->times(9)
-                ->andReturn('chunks');
-            $mock->shouldReceive('defaultIndex')
-                ->times(3)
-                ->andReturn(12);
-        });
-
-        $manager = new ChunksManager($factory, $settings);
-
-        $this->assertTrue($manager->checkChunkIntegrity('foo', 12));
-        $this->assertTrue($manager->checkChunkIntegrity('foo', 13));
-        $this->assertFalse($manager->checkChunkIntegrity('foo', 14));
-    }
-
-    /** @test */
-    public function manager_throws_integrity_exception_if_folder_cannot_be_created()
-    {
-        $filesystem = $this->mock(Filesystem::class, function ($mock) {
-            $mock->shouldReceive('exists')
-                ->times(2)
-                ->with('chunks/foo')
-                ->andReturn(false);
-            $mock->shouldReceive('makeDirectory')
-                ->once()
-                ->with('chunks/foo')
-                ->andReturn(false);
-        });
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->with('chunks')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksFolder')
-                ->once()
-                ->andReturn('chunks/');
-            $mock->shouldReceive('chunksDisk')
-                ->times(3)
-                ->andReturn('chunks');
-            $mock->shouldReceive('defaultIndex')
-                ->once()
-                ->andReturn(0);
-        });
-
-        $manager = new ChunksManager($factory, $settings);
-
-        $this->expectException(ChunksIntegrityException::class);
-
-        $manager->checkChunkIntegrity('foo', 0);
+        $result = $manager->chunk('chunks/foo/0_chunk.txt');
+        $this->assertTrue(is_resource($result));
     }
 
     /** @test */
@@ -338,83 +154,28 @@ class ChunksManagerTest extends TestCase
     {
         Event::fake();
 
-        $file = UploadedFile::fake()->create('foo file.mp4', 2048);
-        $filesystem = $this->mock(Filesystem::class, function ($mock) use ($file) {
-            $result = new File('/chunks/foo-file/0_foo-file.mp4', false);
+        $file = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
-            $mock->shouldReceive('exists')
-                ->times(2)
-                ->with('chunks/foo')
-                ->andReturn(false);
-            $mock->shouldReceive('makeDirectory')
-                ->once()
-                ->with('chunks/foo')
-                ->andReturn(true);
-            $mock->shouldReceive('putFileAs')
-                ->once()
-                ->with('chunks/foo', $file, '0_foo-file.mp4', [])
-                ->andReturn($result);
-        });
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->with('chunks')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksFolder')
-                ->times(2)
-                ->andReturn('chunks/');
-            $mock->shouldReceive('chunksDisk')
-                ->times(4)
-                ->andReturn('chunks');
-            $mock->shouldReceive('defaultIndex')
-                ->once()
-                ->andReturn(0);
-            $mock->shouldReceive('additionalChunksOptions')
-                ->once()
-                ->andReturn([]);
-        });
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
-        $manager = new ChunksManager($factory, $settings);
-
-        $chunk = $manager->addChunk($file, 0, 'foo');
+        $chunk = $manager->addChunk($file, 0, 'test');
 
         $this->assertInstanceOf(Chunk::class, $chunk);
+        Storage::disk('local')->exists('test/0_fake-file.mp4');
+
         Event::assertDispatched(ChunkAdded::class);
     }
 
     /** @test */
     public function manager_throws_exception_if_chunk_index_is_wrong()
     {
-        $file = UploadedFile::fake()->create('foo file.mp4', 2048);
-        $filesystem = $this->mock(Filesystem::class, function ($mock) {
-            $mock->shouldReceive('exists')
-                ->times(2)
-                ->with('chunks/foo')
-                ->andReturn(true);
-            $mock->shouldReceive('files')
-                ->once()
-                ->with('chunks/foo')
-                ->andReturn(['0_foo-file.mp4']);
-        });
-        $factory = $this->mock(Factory::class, function ($mock) use ($filesystem) {
-            $mock->shouldReceive('disk')
-                ->with('chunks')
-                ->andReturn($filesystem);
-        });
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksFolder')
-                ->once()
-                ->andReturn('chunks/');
-            $mock->shouldReceive('chunksDisk')
-                ->times(3)
-                ->andReturn('chunks');
-            $mock->shouldReceive('defaultIndex')
-                ->once()
-                ->andReturn(0);
-        });
+        $file = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
-        $manager = new ChunksManager($factory, $settings);
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
         $this->expectException(ChunksIntegrityException::class);
 
@@ -425,18 +186,105 @@ class ChunksManagerTest extends TestCase
     public function manager_adds_chunks()
     {
         Event::fake();
-        $file = UploadedFile::fake()->create('foo file.mp4', 2048);
 
-        $manager = $this->app->make(ChunksManager::class);
+        $file = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
-        $manager->addChunk($file, 0, 'foo');
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $manager->addChunk($file, 0, 'bar');
         Event::assertDispatched(ChunkAdded::class);
 
-        $manager->addChunk($file, 1, 'foo');
+        $manager->addChunk($file, 1, 'bar');
         Event::assertDispatched(ChunkAdded::class);
 
-        Storage::assertExists('chunks/foo/0_foo-file.mp4');
-        Storage::assertExists('chunks/foo/1_foo-file.mp4');
+        Storage::assertExists('chunks/bar/0_fake-file.txt');
+        Storage::assertExists('chunks/bar/1_fake-file.txt');
+    }
+
+    /** @test */
+    public function manager_checks_if_chunks_folder_exists()
+    {
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertFalse($manager->validFolder('unexisting'));
+        $this->assertFalse($manager->validFolder('chunks/unexisting'));
+
+        $manager->chunksFilesystem()->makeDirectory('test');
+
+        $this->assertTrue($manager->validFolder('test'));
+        $this->assertTrue($manager->validFolder('chunks/test'));
+    }
+
+    /** @test */
+    public function manager_deletes_chunks()
+    {
+        Event::fake();
+
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $fake_0 = $this->createFakeUpload();
+        $fake_1 = $this->createFakeUpload();
+
+        $manager->addChunk($fake_0, 0, 'test');
+        $manager->addChunk($fake_1, 1, 'test');
+
+        Storage::assertExists('chunks/test/0_fake-file.txt');
+        Storage::assertExists('chunks/test/1_fake-file.txt');
+
+        $manager->deleteChunkFolder('chunks/test');
+
+        Storage::assertMissing('chunks/test/0_fake-file.txt');
+        Storage::assertMissing('chunks/test/1_fake-file.txt');
+        Storage::assertMissing('chunks/test');
+        Event::assertDispatched(ChunkDeleted::class);
+    }
+
+    /** @test */
+    public function manager_delete_chunks_returns_true_on_unexisting_folder()
+    {
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertTrue($manager->deleteChunkFolder('unexisting'));
+    }
+
+    /** @test */
+    public function manager_deletes_all_chunks()
+    {
+        Event::fake();
+
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $fake = $this->createFakeUpload();
+
+        $manager->addChunk($fake, 0, 'test_1');
+        $manager->addChunk($fake, 1, 'test_1');
+        $manager->addChunk($fake, 0, 'test_2');
+        $manager->addChunk($fake, 1, 'test_2');
+
+        Storage::assertExists('chunks/test_1/0_fake-file.txt');
+        Storage::assertExists('chunks/test_1/1_fake-file.txt');
+        Storage::assertExists('chunks/test_2/0_fake-file.txt');
+        Storage::assertExists('chunks/test_2/1_fake-file.txt');
+
+        $manager->deleteAllChunks();
+
+        Storage::assertMissing('test_1/0_fake-file.txt');
+        Storage::assertMissing('test_1/1_fake-file.txt');
+        Storage::assertMissing('test_2/0_fake-file.txt');
+        Storage::assertMissing('test_2/1_fake-file.txt');
+        Storage::assertMissing('test_1');
+        Storage::assertMissing('test_2');
+        Event::assertDispatched(ChunkDeleted::class);
     }
 
     /** @test */
@@ -445,10 +293,12 @@ class ChunksManagerTest extends TestCase
         Queue::fake();
         Event::fake();
 
-        $manager = $this->app->make(ChunksManager::class);
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
 
         $mock = $this->mock(AddChunkRequest::class, function ($mock) {
-            $upload = UploadedFile::fake()->create('foo.mp4', 5000);
+            $upload = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
             $mock->shouldReceive('fileInput')
                 ->times(2)
@@ -470,7 +320,7 @@ class ChunksManagerTest extends TestCase
 
         Queue::assertNothingPushed();
         Event::assertDispatched(ChunkAdded::class);
-        Storage::assertExists('chunks/foo-chunk/0_foo.mp4');
+        Storage::assertExists('chunks/foo-chunk/0_fake-file.txt');
     }
 
     /** @test */
@@ -485,7 +335,7 @@ class ChunksManagerTest extends TestCase
             $upload = UploadedFile::fake()->create('foo.mp4', 5000);
 
             $mock->shouldReceive('fileInput')
-                ->times(4)
+                ->times(3)
                 ->andReturn($upload);
             $mock->shouldReceive('indexInput')
                 ->times(2)
@@ -506,5 +356,64 @@ class ChunksManagerTest extends TestCase
         Queue::assertPushed(MergeChunks::class);
         Event::assertDispatched(ChunkAdded::class);
         Storage::assertExists('chunks/foo-chunk/0_foo.mp4');
+    }
+
+    /** @test */
+    public function manager_checks_integrity_with_not_existing_folder()
+    {
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertTrue($manager->checkChunkIntegrity('foo', 3));
+        $this->assertFalse($manager->checkChunkIntegrity('wrong_index', 3));
+    }
+
+    /** @test */
+    public function manager_checks_integrity_with_not_existing_folder_and_different_default_index()
+    {
+        $this->app->config->set('chunky.index', 12);
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertTrue($manager->checkChunkIntegrity('unexisting', 12));
+        $this->assertTrue($manager->checkChunkIntegrity('foo', 15));
+        $this->assertFalse($manager->checkChunkIntegrity('wrong_index', 15));
+    }
+
+    /** @test */
+    public function manager_handle_merge_with_remote_filesystem()
+    {
+        if (! $this->canTestS3()) {
+            $this->markTestSkipped('Skipping S3 tests: missing .env values');
+        }
+
+        $this->app->config->set('chunky.disks.chunks.disk', 's3_disk');
+        $this->app->config->set('chunky.disks.merge.disk', 's3_disk');
+
+        Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('chunks/foo/2_foo.txt', 'Hello');
+
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+        $chunk_size_0 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/0_foo.txt');
+        $chunk_size_1 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/1_foo.txt');
+        $chunk_size_2 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/2_foo.txt');
+        $total_size = $chunk_size_0 + $chunk_size_1 + $chunk_size_2;
+
+        $manager->handleMerge(
+            'foo',
+            'merge.txt',
+            $chunk_size_0,
+            $total_size
+        );
+
+        $this->assertTrue(Storage::disk('s3_disk')->exists('merge.txt'));
+        $this->assertEquals($total_size, Storage::disk('s3_disk')->size('merge.txt'));
+
+        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo/2_foo.txt', 'chunks/foo', 'merge.txt']);
     }
 }

@@ -6,22 +6,23 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Jobtech\LaravelChunky\Chunk;
+use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
+use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
+use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 
+/**
+ * @mixin ManagerHelpers
+ * @mixin ChunkyRequestHelpers
+ */
 interface ChunksManager
 {
     /**
      * Retrieve the chunks' filesystem depending on chunk's disk setting.
      *
-     * @return \Illuminate\Contracts\Filesystem\Filesystem
+     * @return \Jobtech\LaravelChunky\Support\ChunksFilesystem
      */
-    public function chunksFilesystem(): Filesystem;
-
-    /**
-     * Retrieve the merge's filesystem depending on merge's disk setting.
-     *
-     * @return \Illuminate\Contracts\Filesystem\Filesystem
-     */
-    public function mergeFilesystem(): Filesystem;
+    public function chunksFilesystem(): ChunksFilesystem;
 
     /**
      * Get the chunks disk from settings.
@@ -31,13 +32,6 @@ interface ChunksManager
     public function getChunksDisk(): ?string;
 
     /**
-     * Get the merge disk from settings.
-     *
-     * @return string|null
-     */
-    public function getMergeDisk(): ?string;
-
-    /**
      * Get the chunks folder from settings.
      *
      * @return string
@@ -45,40 +39,41 @@ interface ChunksManager
     public function getChunksFolder(): string;
 
     /**
-     * Get the merge disk from settings.
-     *
-     * @return string
-     */
-    public function getMergeFolder(): string;
-
-    /**
      * Return the additional options for chunk file saving.
      */
     public function getChunksOptions(): array;
 
     /**
-     * Return the additional options for chunk file saving.
+     * @param string $folder
+     * @return bool
      */
-    public function getMergeOptions(): array;
+    public function validFolder(string $folder): bool;
+
+    /**
+     * Move chunks contained in folder into temporary files.
+     *
+     * @param string $folder
+     * @return \Illuminate\Support\Collection
+     */
+    public function temporaryFiles(string $folder): Collection;
 
     /**
      * Builds an ordered chunks collection.
      *
-     * @param string $folder
+     * @param string|null $folder
      *
      * @return \Illuminate\Support\Collection
      */
-    public function chunks(string $folder): Collection;
+    public function chunks($folder = null): Collection;
 
     /**
-     * Check if the given chunk is the missing one or breaks the chunks integrity.
+     * Returns chunk as stream.
      *
-     * @param string $folder
-     * @param int    $index
-     *
-     * @return bool
+     * @param Chunk|string $chunk
+     * @return resource|null
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function checkChunkIntegrity(string $folder, int $index): bool;
+    public function chunk($chunk);
 
     /**
      * Add a chunk from uploaded file. This method will also check the integrity of the
@@ -93,4 +88,61 @@ interface ChunksManager
      * @return \Jobtech\LaravelChunky\Chunk
      */
     public function addChunk(UploadedFile $file, int $index, string $folder): Chunk;
+
+    /**
+     * Delete all chunks folders and their content.
+     *
+     * @param string $folder
+     * @return bool
+     */
+    public function deleteChunkFolder(string $folder): bool;
+
+    /**
+     * Delete all chunks folders and their content.
+     *
+     * @param null $output
+     * @return bool
+     */
+    public function deleteAllChunks($output = null): bool;
+
+    /**
+     * Handles an add chunks request.
+     *
+     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
+     * @param string|null                                          $folder
+     *
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
+     * @return \Jobtech\LaravelChunky\Chunk
+     */
+    public function handle(AddChunkRequest $request, $folder = null): Chunk;
+
+    /**
+     * @param string $folder
+     * @param string $destination
+     * @param int $chunk_size
+     * @param int $total_size
+     */
+    public function handleMerge(string $folder, string $destination, int $chunk_size, int $total_size);
+
+    /**
+     * Check if the given chunk is the missing one or breaks the chunks integrity.
+     *
+     * @param string $folder
+     * @param int    $index
+     *
+     * @return bool
+     */
+    public function checkChunkIntegrity(string $folder, int $index): bool;
+
+    /**
+     * Check the chunk's integrity for the given folder.
+     *
+     * @param string $folder
+     * @param int $chunk_size
+     * @param int $total_size
+     *
+     * @return bool
+     */
+    public function checkFilesIntegrity(string $folder, int $chunk_size, int $total_size): bool;
 }

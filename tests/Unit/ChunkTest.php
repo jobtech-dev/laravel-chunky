@@ -5,7 +5,6 @@ namespace Jobtech\LaravelChunky\Tests\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
 use Jobtech\LaravelChunky\Tests\TestCase;
@@ -44,7 +43,7 @@ class ChunkTest extends TestCase
         $this->assertEquals(0, $chunk->getIndex());
         $this->assertEquals('foo.ext', $chunk->getPath());
         $this->assertEquals('foo', $chunk->getName());
-        $this->assertEquals('ext', $chunk->guessExtension());
+        $this->assertEquals('ext', $chunk->getExtension());
 
         $this->assertEquals('foo', $chunk->getDisk());
         $chunk->setDisk('bar');
@@ -67,33 +66,10 @@ class ChunkTest extends TestCase
 
         $this->assertEquals($index, $chunk->getIndex());
         $this->assertEquals($this->upload->getRealPath(), $chunk->getPath());
-        $this->assertEquals('png', $extension = $chunk->guessExtension());
+        $this->assertEquals('png', $extension = $chunk->getExtension());
         $this->assertEquals('foo', $chunk->getName());
 
         $this->assertNull($chunk->getDisk());
-    }
-
-    /** @test */
-    public function chunk_is_stored_on_default_disk()
-    {
-        $chunk = new Chunk(0, $this->upload);
-        $chunk->store('bar');
-
-        Storage::assertExists('bar/0_foo.png');
-    }
-
-    /** @test */
-    public function chunk_is_stored()
-    {
-        Storage::fake('foo');
-
-        $chunk = new Chunk(0, $this->upload);
-        $result = $chunk->store('bar', [
-            'disk' => 'foo',
-        ]);
-
-        $this->assertNotEquals($chunk, $result);
-        Storage::assertExists('bar/0_foo.png');
     }
 
     /** @test */
@@ -191,25 +167,5 @@ class ChunkTest extends TestCase
         $this->assertEquals(json_encode([
             'data' => $chunk->toArray(),
         ]), $result->toResponse($mock)->getContent());
-    }
-
-    /** @test */
-    public function chunk_stores_from_file_in_default_disk()
-    {
-        Chunk::storeFrom($this->upload, 'bar', 0);
-
-        Storage::assertExists('bar/0_foo.png');
-    }
-
-    /** @test */
-    public function chunk_stores_from_file()
-    {
-        Storage::fake('foo');
-
-        Chunk::storeFrom($this->upload, 'bar', 0, [
-            'disk' => 'foo',
-        ]);
-
-        Storage::disk('foo')->assertExists('bar/0_foo.png');
     }
 }

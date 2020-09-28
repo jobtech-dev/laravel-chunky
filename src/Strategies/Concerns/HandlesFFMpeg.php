@@ -9,7 +9,7 @@ trait HandlesFFMpeg
 {
     public function mergeWithFFMpeg(): void
     {
-        $exporter = FFMpeg::fromDisk($this->manager->chunksFilesystem())
+        $exporter = FFMpeg::fromDisk($this->manager->getChunksDisk())
             ->open($this->mapChunksToArray())
             ->export()
             ->inFormat($this->guessFormat())

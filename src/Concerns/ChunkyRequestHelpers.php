@@ -25,7 +25,7 @@ trait ChunkyRequestHelpers
             return Str::slug($folder);
         }
 
-        return $this->buildChunkFolderFor(
+        return $this->chunkFolderNameFor(
             str_replace(
                 $file->guessExtension(),
                 '',
@@ -66,6 +66,8 @@ trait ChunkyRequestHelpers
         $last_index = $this->lastIndexFrom($request)
             + ($this->settings->defaultIndex() - 1);
 
-        return $request->indexInput() == $last_index;
+        $result = $request->indexInput() == $last_index;
+
+        return $result;
     }
 }

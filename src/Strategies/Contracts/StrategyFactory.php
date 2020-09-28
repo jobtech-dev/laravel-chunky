@@ -7,33 +7,17 @@ interface StrategyFactory
     /**
      * Retrieve the default strategy.
      *
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $manager
-     *
-     * @return \Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy
+     * @return mixed
      */
-    public function default($manager = null): MergeStrategy;
-
-    /**
-     * Retrieve the mapped mime types.
-     *
-     * @return array
-     */
-    public function mimeTypes(): array;
-
-    /**
-     * Retrieve the mapped strategies.
-     *
-     * @return array
-     */
-    public function strategies(): array;
+    public function strategyInstance();
 
     /**
      * Retrieve strategy instance from given mime type.
      *
-     * @param string                                              $mime_type
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $manager
+     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $chunksManager
+     * @param \Jobtech\LaravelChunky\Contracts\MergeManager|null $mergeManager
      *
-     * @return MergeStrategy
+     * @return mixed
      */
-    public function buildFrom(string $mime_type, $manager = null): MergeStrategy;
+    public function buildFrom($chunksManager = null, $mergeManager = null);
 }

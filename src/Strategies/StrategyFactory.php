@@ -2,89 +2,78 @@
 
 namespace Jobtech\LaravelChunky\Strategies;
 
-use Illuminate\Support\Arr;
+use Illuminate\Container\Container;
+use Jobtech\LaravelChunky\ChunkySettings;
+use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
-use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
 use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory as StrategyFactoryContract;
 
 class StrategyFactory implements StrategyFactoryContract
 {
+    private static $instance;
     /**
-     * @var array
+     * @var \Jobtech\LaravelChunky\ChunkySettings
      */
-    private $config;
+    private ChunkySettings $settings;
 
-    public function __construct(array $config)
+    public function __construct(ChunkySettings $settings)
     {
-        $this->config = $config;
+        $this->settings = $settings;
     }
 
     /**
      * Returns a new instance for the given strategy class.
      *
-     * @param string                                              $strategy
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager|null $manager
+     * @param string                                         $strategy
      *
      * @return mixed
      */
-    private function buildInstance(string $strategy, $manager = null)
+    private function buildInstance(string $strategy)
     {
-        if (! method_exists($strategy, 'newInstance')) {
+        if (! method_exists($strategy, 'instance')) {
             throw new StrategyException('Cannot instantiate strategy instance');
         }
 
-        return $strategy::newInstance($manager);
+        return $strategy::instance();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function default($manager = null): MergeStrategy
+    public function strategyInstance()
     {
-        if (! Arr::has($this->config, 'default')) {
+        $default = $this->settings->defaultMergeStrategy();
+
+        if ($default === null) {
             throw new StrategyException('Undefined default strategy');
         }
 
-        return $this->buildInstance($this->config['default'], $manager);
+        return $this->buildInstance($default);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function mimeTypes(): array
+    public function buildFrom($chunksManager = null, $mergeManager = null)
     {
-        return array_keys(
-            Arr::get($this->config, 'mime_types', [])
-        );
-    }
+        $strategy = $this->strategyInstance();
 
-    /**
-     * {@inheritdoc}
-     */
-    public function strategies(): array
-    {
-        return Arr::get($this->config, 'mime_types', []);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function buildFrom(string $mime_type, $manager = null): MergeStrategy
-    {
-        $mime_type_group = explode('/', $mime_type)[0].'/*';
-
-        if (in_array($mime_type, $this->mimeTypes())) {
-            return $this->buildInstance(
-                $this->strategies()[$mime_type],
-                $manager
-            );
-        } elseif (in_array($mime_type_group, $this->mimeTypes())) {
-            return $this->buildInstance(
-                $this->strategies()[$mime_type_group],
-                $manager
-            );
+        if ($strategy === null) {
+            throw new ChunkyException('Undefined strategy for mime type or no default strategy');
         }
 
-        return $this->default($manager);
+        $strategy->chunksManager($chunksManager);
+        $strategy->mergeManager($mergeManager);
+
+        return $strategy;
+    }
+
+    public static function getInstance(): StrategyFactory
+    {
+        if (static::$instance === null) {
+            static::$instance = Container::getInstance()->make(StrategyFactoryContract::class);
+        }
+
+        return static::$instance;
     }
 }

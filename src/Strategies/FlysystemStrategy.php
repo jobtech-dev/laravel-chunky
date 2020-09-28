@@ -2,55 +2,58 @@
 
 namespace Jobtech\LaravelChunky\Strategies;
 
-use Illuminate\Support\Arr;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
-use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
-use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
-use Keven\Flysystem\Concatenate\Concatenate;
 
 class FlysystemStrategy extends MergeStrategy
 {
-    use ChecksIntegrity;
-
     /**
-     * Merge destination file with the chunk stream.
-     *
-     * @param array $chunks
-     *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     *
-     * @return bool
+     * {@inheritdoc}
      */
-    protected function mergeChunks(array $chunks): bool
+    protected function mergeChunks(string $destination, array $chunks): bool
     {
-        $chunk = Arr::first($chunks);
-
-        if (! $this->manager->chunksFilesystem()->concatenate($chunk, ...$chunks)) {
+        if (! $this->chunksManager->chunksFilesystem()->concatenate($destination, $chunks)) {
             throw new StrategyException('Unable to concatenate chunks');
         }
 
-        return $this->manager->mergeFilesystem()
-            ->put(
-                $this->destination,
-                $this->manager->chunksFilesystem()->get($chunk),
-                $this->manager->getMergeOptions()
-            );
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function merge(): MergeStrategyContract
+    public function merge(): string
     {
-        $this->manager->chunksFilesystem()
-            ->addPlugin(new Concatenate());
+        // Retrieve chunks
+        $chunks = $this->chunksManager->temporaryFiles(
+            $this->chunksFolder()
+        )->values();
+        $chunk = $this->chunksManager->chunks(
+            $this->chunksFolder()
+        )->first();
 
-        $this->mergeChunks(
-            $this->mapChunksToArray()
+        // Merge chunks
+        $this->mergeChunks($chunk->getPath(), $chunks->toArray());
+
+        // Move chunks to destination
+        $origin = $this->chunksManager->chunk($chunk);
+        $path = $this->mergeManager->store(
+            $this->destination,
+            $origin,
+            $this->mergeManager->getMergeOptions()
         );
 
-        $this->deleteChunks($this->folder);
+        if (! $path) {
+            throw new StrategyException('An error occurred while moving merge to destination');
+        }
 
-        return $this;
+        // Cleanup
+        $this->chunksManager->deleteChunkFolder($this->folder);
+
+        return $path;
+    }
+
+    public static function instance()
+    {
+        return new FlysystemStrategy;
     }
 }

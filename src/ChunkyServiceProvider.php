@@ -7,8 +7,11 @@ use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\ServiceProvider;
 use Jobtech\LaravelChunky\Commands\ClearChunks;
 use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
+use Jobtech\LaravelChunky\Contracts\MergeManager as MergeManagerContract;
 use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory as StrategyFactoryContract;
 use Jobtech\LaravelChunky\Strategies\StrategyFactory;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
+use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Laravel\Lumen\Application as LumenApplication;
 
 class ChunkyServiceProvider extends ServiceProvider
@@ -30,30 +33,10 @@ class ChunkyServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('chunky', function (Container $app) {
-            $settings = new ChunkySettings(
-                $app->make('config')
-            );
+        $this->registerBindings();
+        $this->registerCommands();
 
-            return new ChunksManager(
-                $app->make('filesystem'),
-                $settings
-            );
-        });
-
-        $this->app->singleton(StrategyFactoryContract::class, function (Container $app) {
-            return new StrategyFactory(
-                $app->make('config')->get('chunky.strategies')
-            );
-        });
-
-        $this->app->bind('command.chunky:clear', ClearChunks::class);
-
-        $this->commands([
-            'command.chunky:clear',
-        ]);
-
-        $this->app->alias('chunky', ChunksManagerContract::class);
+        $this->app->alias(ChunksManagerContract::class, 'chunky');
     }
 
     protected function setupConfig()
@@ -69,5 +52,37 @@ class ChunkyServiceProvider extends ServiceProvider
         }
 
         $this->mergeConfigFrom($source, 'chunky');
+    }
+
+    private function registerCommands()
+    {
+        $this->app->bind('command.chunky:clear', ClearChunks::class);
+
+        $this->commands([
+            'command.chunky:clear',
+        ]);
+    }
+
+    private function registerBindings()
+    {
+        $this->app->bind(ChunksFilesystem::class, ChunksFilesystem::class);
+        $this->app->bind(MergeFilesystem::class, MergeFilesystem::class);
+
+        $this->app->singleton(ChunksManagerContract::class, function (Container $app) {
+            return new ChunksManager(new ChunkySettings(
+                $app->make('config')
+            ));
+        });
+        $this->app->singleton(MergeManagerContract::class, function (Container $app) {
+            return new MergeManager(new ChunkySettings(
+                $app->make('config')
+            ));
+        });
+
+        $this->app->singleton(StrategyFactoryContract::class, function (Container $app) {
+            return new StrategyFactory(new ChunkySettings(
+                $app->make('config')
+            ));
+        });
     }
 }
