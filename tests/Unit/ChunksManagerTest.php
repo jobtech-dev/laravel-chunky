@@ -3,7 +3,6 @@
 namespace Jobtech\LaravelChunky\Tests\Unit;
 
 use Illuminate\Contracts\Filesystem\Factory;
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
@@ -20,7 +19,6 @@ use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksManagerTest extends TestCase
 {
@@ -75,14 +73,15 @@ class ChunksManagerTest extends TestCase
         ));
 
         $options = array_merge([
-            'disk' => $this->config->get('chunky.disks.chunks.disk')
+            'disk' => $this->config->get('chunky.disks.chunks.disk'),
         ], $this->config->get('chunky.options.chunks'));
 
         $this->assertEquals($options, $manager->getChunksOptions());
     }
 
     /** @test */
-    public function manager_creates_temporary_files_from_chunks() {
+    public function manager_creates_temporary_files_from_chunks()
+    {
         if (! $this->canTestS3()) {
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }
@@ -92,7 +91,7 @@ class ChunksManagerTest extends TestCase
 
         $chunks = collect([
             new Chunk(0, 'chunks/foo/0_foo.txt', '', false),
-            new Chunk(1, 'chunks/foo/1_foo.txt', '', true)
+            new Chunk(1, 'chunks/foo/1_foo.txt', '', true),
         ]);
 
         $settings = $this->mock(ChunkySettings::class, function ($mock) {
@@ -108,7 +107,7 @@ class ChunksManagerTest extends TestCase
         $files = $manager->temporaryFiles('foo');
 
         $this->assertCount(2, $files);
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $this->assertTrue(Str::startsWith($file, sys_get_temp_dir().'/foo'));
         }
 

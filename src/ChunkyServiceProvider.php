@@ -13,7 +13,6 @@ use Jobtech\LaravelChunky\Strategies\StrategyFactory;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Laravel\Lumen\Application as LumenApplication;
-use Spatie\MediaLibrary\MediaCollections\Filesystem;
 
 class ChunkyServiceProvider extends ServiceProvider
 {
@@ -37,7 +36,7 @@ class ChunkyServiceProvider extends ServiceProvider
         $this->registerBindings();
         $this->registerCommands();
 
-        $this->app->alias(ChunksManagerContract::class,'chunky');
+        $this->app->alias(ChunksManagerContract::class, 'chunky');
     }
 
     protected function setupConfig()

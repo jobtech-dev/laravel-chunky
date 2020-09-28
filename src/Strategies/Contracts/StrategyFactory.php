@@ -4,14 +4,12 @@ namespace Jobtech\LaravelChunky\Strategies\Contracts;
 
 interface StrategyFactory
 {
-
     /**
      * Retrieve the default strategy.
      *
      * @return mixed
      */
     public function strategyInstance();
-
 
     /**
      * Retrieve strategy instance from given mime type.

@@ -9,7 +9,6 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
-
     private function setupS3($app): void
     {
         config()->set('filesystems.disks.s3_disk', [
@@ -76,7 +75,8 @@ abstract class TestCase extends Orchestra
     /**
      * @return \Illuminate\Http\UploadedFile
      */
-    public function createFakeUpload() : UploadedFile {
+    public function createFakeUpload(): UploadedFile
+    {
         return new UploadedFile(__DIR__.'/tmp/upload/fake_file.txt', 'fake_file.txt');
     }
 

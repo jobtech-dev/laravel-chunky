@@ -5,7 +5,6 @@ namespace Jobtech\LaravelChunky\Tests\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
 use Jobtech\LaravelChunky\Tests\TestCase;

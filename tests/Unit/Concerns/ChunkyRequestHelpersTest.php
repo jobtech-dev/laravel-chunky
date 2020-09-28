@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Concerns;
 
-use Illuminate\Contracts\Filesystem\Factory;
 use Jobtech\LaravelChunky\ChunksManager;
 use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -41,7 +40,7 @@ class ChunkyRequestHelpersTest extends TestCase
             [ChunkySettings::INDEX_ZERO, 2000, 2000, true],
             [ChunkySettings::INDEX_ZERO, 2000, 4000, false],
             [0, 2000, 2000, true],
-            [0, 2000, 4000, false]
+            [0, 2000, 4000, false],
         ];
     }
 

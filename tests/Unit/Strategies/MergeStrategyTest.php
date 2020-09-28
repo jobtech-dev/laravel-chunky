@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Strategies;
 
-use Illuminate\Http\UploadedFile;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
 use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;

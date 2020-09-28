@@ -6,8 +6,8 @@ use Illuminate\Container\Container;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
 use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
+use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
 use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -128,11 +128,12 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function temporaryFiles(string $folder): Collection {
+    public function temporaryFiles(string $folder): Collection
+    {
         $chunks = $this->chunks($folder);
-        if(! $this->chunksFilesystem->isLocal()) {
+        if (! $this->chunksFilesystem->isLocal()) {
             return $this->chunksFilesystem->createTemporaryFiles($folder, $chunks);
         }
 
@@ -154,7 +155,7 @@ class ChunksManager implements ChunksManagerContract
      */
     public function chunk($chunk)
     {
-        if($chunk instanceof Chunk) {
+        if ($chunk instanceof Chunk) {
             $chunk = $chunk->getPath();
         }
 
@@ -219,7 +220,7 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function handle(AddChunkRequest $request, $folder = null): Chunk
     {
@@ -244,9 +245,10 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function handleMerge(string $folder, string $destination, int $chunk_size, int $total_size) {
+    public function handleMerge(string $folder, string $destination, int $chunk_size, int $total_size)
+    {
         if (! $this->checkFilesIntegrity($folder, $chunk_size, $total_size)) {
             throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
         }
@@ -267,7 +269,7 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function checkChunkIntegrity(string $folder, int $index): bool
     {
@@ -292,7 +294,7 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function checkFilesIntegrity(string $folder, int $chunk_size, int $total_size): bool
     {
@@ -314,7 +316,7 @@ class ChunksManager implements ChunksManagerContract
 
     public static function getInstance(): ChunksManager
     {
-        if(static::$instance === null) {
+        if (static::$instance === null) {
             static::$instance = Container::getInstance()->make(ChunksManagerContract::class);
         }
 

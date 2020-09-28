@@ -3,11 +3,7 @@
 namespace Jobtech\LaravelChunky\Tests\Unit\Concerns;
 
 use Illuminate\Console\OutputStyle;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
-use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
 class ChunksHelpersTest extends TestCase
