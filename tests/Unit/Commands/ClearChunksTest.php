@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Commands;
 
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\ChunksManager;
 use Jobtech\LaravelChunky\ChunkySettings;

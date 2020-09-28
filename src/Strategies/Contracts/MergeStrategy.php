@@ -12,7 +12,7 @@ interface MergeStrategy
      * @param string|null $destination
      * @return mixed
      */
-    public function destination($destination = null) : string;
+    public function destination($destination = null): string;
 
     /**
      * Set and retrieve or retrieve the chunks manager.
@@ -55,5 +55,4 @@ interface MergeStrategy
      * @return string
      */
     public function merge(): string;
-
 }

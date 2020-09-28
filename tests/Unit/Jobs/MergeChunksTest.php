@@ -59,7 +59,7 @@ class MergeChunksTest extends TestCase
             $total_size
         );
 
-         $job->handle();
+        $job->handle();
 
         Storage::assertMissing('chunks/foo/0_foo.txt');
         Storage::assertMissing('chunks/foo/1_foo.txt');

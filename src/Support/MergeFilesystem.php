@@ -6,20 +6,20 @@ use Illuminate\Support\Str;
 
 class MergeFilesystem extends FileSystem
 {
-    /** {@inheritDoc} */
-    function disk($disk = null): ?string
+    /** {@inheritdoc} */
+    public function disk($disk = null): ?string
     {
-        if(!empty($disk) && is_string($disk)) {
+        if (! empty($disk) && is_string($disk)) {
             $this->disk = $disk;
         }
 
         return  $this->disk;
     }
 
-    /** {@inheritDoc} */
-    function folder($folder = null): ?string
+    /** {@inheritdoc} */
+    public function folder($folder = null): ?string
     {
-        if(!empty($folder) && is_string($folder)) {
+        if (! empty($folder) && is_string($folder)) {
             $this->folder = $folder;
         }
 
@@ -32,7 +32,7 @@ class MergeFilesystem extends FileSystem
      */
     public function destinationPath(string $path): string
     {
-        if(Str::startsWith($path, $this->folder())) {
+        if (Str::startsWith($path, $this->folder())) {
             return $path;
         }
 
@@ -52,14 +52,15 @@ class MergeFilesystem extends FileSystem
      */
     public function store(string $destination, $origin, $options = []): string
     {
-        if($this->filesystem()->disk($this->disk)->writeStream($destination, $origin, $options)) {
+        if ($this->filesystem()->disk($this->disk)->writeStream($destination, $origin, $options)) {
             return $destination;
         }
 
         return false;
     }
 
-    public function createTemporaryChunk($origin) {
+    public function createTemporaryChunk($origin)
+    {
         $this->filesystem()->disk();
     }
 }

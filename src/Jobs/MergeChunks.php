@@ -8,11 +8,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Jobtech\LaravelChunky\ChunksManager;
-use Jobtech\LaravelChunky\MergeManager;
-use Jobtech\LaravelChunky\Events\ChunksMerged;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
-use Jobtech\LaravelChunky\Strategies\StrategyFactory;
 
 class MergeChunks implements ShouldQueue
 {

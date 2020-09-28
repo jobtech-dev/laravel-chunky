@@ -2,10 +2,7 @@
 
 namespace Jobtech\LaravelChunky\Handlers;
 
-use Illuminate\Container\Container;
-use Illuminate\Support\Traits\ForwardsCalls;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
-use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory;
 
 class MergeHandler
 {

@@ -5,12 +5,12 @@ namespace Jobtech\LaravelChunky;
 use Illuminate\Container\Container;
 use Jobtech\LaravelChunky\Contracts\MergeManager as MergeManagerContract;
 use Jobtech\LaravelChunky\Handlers\MergeHandler;
-use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
+use Jobtech\LaravelChunky\Support\MergeFilesystem;
 
 class MergeManager implements MergeManagerContract
 {
-    /** @var ?MergeManager $instance */
+    /** @var ?MergeManager */
     private static $instance;
 
     /** @var \Jobtech\LaravelChunky\ChunkySettings */
@@ -38,10 +38,11 @@ class MergeManager implements MergeManagerContract
         return $this->settings->defaultMergeStrategy();
     }
 
-    public function setStrategy($strategy = null) : MergeManager {
-        if($strategy instanceof MergeStrategy) {
+    public function setStrategy($strategy = null): MergeManager
+    {
+        if ($strategy instanceof MergeStrategy) {
             $this->strategy = $strategy;
-        } else if($strategy === null) {
+        } elseif ($strategy === null) {
             $this->defaultMergeStrategy();
         }
 
@@ -102,7 +103,7 @@ class MergeManager implements MergeManagerContract
 
     public static function getInstance(): MergeManager
     {
-        if(static::$instance === null) {
+        if (static::$instance === null) {
             static::$instance = Container::getInstance()->make(MergeManagerContract::class);
         }
 

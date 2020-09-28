@@ -9,19 +9,20 @@ use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Keven\Flysystem\Concatenate\Concatenate;
-use Symfony\Component\HttpFoundation\File\File;
 use Neutron\TemporaryFilesystem\Manager;
+use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksFilesystem extends FileSystem
 {
-    /** @var Manager|null $manager */
+    /** @var Manager|null */
     private static $manager;
 
     /** @var array */
     private static $collections = [];
 
-    private function temporaryFilesystem() : Manager {
-        if(static::$manager === null) {
+    private function temporaryFilesystem(): Manager
+    {
+        if (static::$manager === null) {
             static::$manager = Manager::create();
         }
 
@@ -33,20 +34,20 @@ class ChunksFilesystem extends FileSystem
         array_push(static::$collections, $folder);
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritdoc} */
     public function disk($disk = null): ?string
     {
-        if(!empty($disk) && is_string($disk)) {
+        if (! empty($disk) && is_string($disk)) {
             $this->disk = $disk;
         }
 
         return $this->disk;
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritdoc} */
     public function folder($folder = null): ?string
     {
-        if(!empty($folder) && is_string($folder)) {
+        if (! empty($folder) && is_string($folder)) {
             $this->folder = $folder;
         }
 
@@ -129,7 +130,7 @@ class ChunksFilesystem extends FileSystem
     public function delete(string $folder): bool
     {
         // Check temporary files
-        if(in_array($folder, static::$collections)) {
+        if (in_array($folder, static::$collections)) {
             $this->temporaryFilesystem()->clean($folder);
         }
 
@@ -164,7 +165,7 @@ class ChunksFilesystem extends FileSystem
             ->disk($this->disk)
             ->delete($chunk->getPath());
 
-        if($deleted) {
+        if ($deleted) {
             event(new ChunkDeleted($chunk));
         }
 
@@ -197,7 +198,7 @@ class ChunksFilesystem extends FileSystem
      * @param string $path
      * @return bool
      */
-    public function exists(string $path) : bool
+    public function exists(string $path): bool
     {
         return $this->filesystem()->disk($this->disk)->exists($path);
     }
@@ -206,7 +207,7 @@ class ChunksFilesystem extends FileSystem
      * @param string $folder
      * @return int
      */
-    public function chunksCount(string $folder) : int
+    public function chunksCount(string $folder): int
     {
         $folder = $this->fullPath($folder);
 
@@ -217,7 +218,7 @@ class ChunksFilesystem extends FileSystem
      * @param string $path
      * @return int
      */
-    public function chunkSize(string $path) : int
+    public function chunkSize(string $path): int
     {
         return $this->filesystem()->disk($this->disk)->size($path);
     }
@@ -241,13 +242,13 @@ class ChunksFilesystem extends FileSystem
     {
         $this->addTemporaryContext($folder);
 
-        return $chunks->map(function (Chunk $chunk) use($folder) {
+        return $chunks->map(function (Chunk $chunk) use ($folder) {
             $resource = $this->filesystem()->disk($this->disk)->readStream($chunk->getPath());
             $location = $this->temporaryFilesystem()->createTemporaryFile($folder);
 
             $stream = fopen($location, 'w+b');
 
-            if ( ! $stream || stream_copy_to_stream($resource, $stream) === false || ! fclose($stream)) {
+            if (! $stream || stream_copy_to_stream($resource, $stream) === false || ! fclose($stream)) {
                 return false;
             }
 
@@ -262,7 +263,8 @@ class ChunksFilesystem extends FileSystem
      * @param array $chunks
      * @return bool
      */
-    public function concatenate(string $chunk, array $chunks): bool {
+    public function concatenate(string $chunk, array $chunks): bool
+    {
         $this->filesystem()->disk($this->disk)->addPlugin(new Concatenate);
 
         return $this->filesystem()->disk($this->disk)->concatenate($chunk, ...$chunks);

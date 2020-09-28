@@ -61,11 +61,11 @@ abstract class MergeStrategy implements MergeStrategyContract
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function destination($destination = null) : string
+    public function destination($destination = null): string
     {
-        if(is_string($destination) && ! empty($destination)) {
+        if (is_string($destination) && ! empty($destination)) {
             $this->destination = $this->mergeManager->destinationPath($destination);
         }
 

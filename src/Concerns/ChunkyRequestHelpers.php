@@ -47,7 +47,6 @@ trait ChunkyRequestHelpers
         $total_size = $request->totalSizeInput();
         $chunk_size = $request->chunkSizeInput();
 
-
         if ($total_size < $chunk_size) {
             throw new ChunksIntegrityException('Total file size is lower than single chunk size');
         }

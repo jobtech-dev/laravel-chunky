@@ -136,7 +136,7 @@ class ChunkySettings
      *
      * @return string
      */
-    public function defaultMergeStrategy() : string
+    public function defaultMergeStrategy(): string
     {
         return Arr::get($this->config, 'strategies.default');
     }

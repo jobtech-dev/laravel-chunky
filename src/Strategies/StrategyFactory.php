@@ -30,13 +30,12 @@ class StrategyFactory implements StrategyFactoryContract
      */
     private function buildInstance(string $strategy)
     {
-        if (!method_exists($strategy, 'instance')) {
+        if (! method_exists($strategy, 'instance')) {
             throw new StrategyException('Cannot instantiate strategy instance');
         }
 
         return $strategy::instance();
     }
-
 
     /**
      * {@inheritdoc}
@@ -59,8 +58,8 @@ class StrategyFactory implements StrategyFactoryContract
     {
         $strategy = $this->strategyInstance();
 
-        if($strategy === null) {
-            throw new ChunkyException("Undefined strategy for mime type or no default strategy");
+        if ($strategy === null) {
+            throw new ChunkyException('Undefined strategy for mime type or no default strategy');
         }
 
         $strategy->chunksManager($chunksManager);
@@ -71,8 +70,8 @@ class StrategyFactory implements StrategyFactoryContract
 
     public static function getInstance(): StrategyFactory
     {
-        if(static::$instance === null) {
-            static::$instance = Container::getInstance()->make(StrategyFactoryContract::class);;
+        if (static::$instance === null) {
+            static::$instance = Container::getInstance()->make(StrategyFactoryContract::class);
         }
 
         return static::$instance;

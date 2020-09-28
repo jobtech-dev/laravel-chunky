@@ -6,12 +6,10 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Jobtech\LaravelChunky\Chunk;
-use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
 use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
-use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
-use Jobtech\LaravelChunky\Support\MergeFilesystem;
 
 /**
  * @mixin ManagerHelpers
@@ -52,7 +50,7 @@ interface ChunksManager
     public function validFolder(string $folder): bool;
 
     /**
-     * Move chunks contained in folder into temporary files
+     * Move chunks contained in folder into temporary files.
      *
      * @param string $folder
      * @return \Illuminate\Support\Collection

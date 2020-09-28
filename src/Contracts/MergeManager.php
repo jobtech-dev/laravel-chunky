@@ -3,19 +3,11 @@
 namespace Jobtech\LaravelChunky\Contracts;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Collection;
 use Jobtech\LaravelChunky\Chunk;
-use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
-use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
-use Jobtech\LaravelChunky\Handlers\MergeHandler;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
-use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
 
 interface MergeManager
 {
-
     /**
      * Retrieve the merge's filesystem depending on merge's disk setting.
      *

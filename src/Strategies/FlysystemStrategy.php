@@ -4,13 +4,11 @@ namespace Jobtech\LaravelChunky\Strategies;
 
 use Illuminate\Support\Arr;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
-use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
 
 class FlysystemStrategy extends MergeStrategy
 {
-
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function mergeChunks(string $chunk, array $chunks): bool
     {
@@ -43,8 +41,8 @@ class FlysystemStrategy extends MergeStrategy
             $this->mergeManager->getMergeOptions()
         );
 
-        if(!$path) {
-            throw new StrategyException("An error occurred while moving merge to destination");
+        if (! $path) {
+            throw new StrategyException('An error occurred while moving merge to destination');
         }
 
         // Cleanup
@@ -53,7 +51,8 @@ class FlysystemStrategy extends MergeStrategy
         return $path;
     }
 
-    public static function instance() {
+    public static function instance()
+    {
         return new FlysystemStrategy;
     }
 }

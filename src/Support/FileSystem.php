@@ -16,10 +16,10 @@ abstract class FileSystem
     /** @var \Illuminate\Contracts\Filesystem\Factory */
     private Factory $filesystem;
 
-    /** @var string|null  */
+    /** @var string|null */
     protected ?string $disk = null;
 
-    /** @var string|null  */
+    /** @var string|null */
     protected ?string $folder = null;
 
     public function __construct(Factory $filesystem)
@@ -35,13 +35,12 @@ abstract class FileSystem
         return $this->filesystem;
     }
 
-
     /**
-     * Check if filesystem is using local adapter
+     * Check if filesystem is using local adapter.
      *
      * @return bool
      */
-    public function isLocal() : bool
+    public function isLocal(): bool
     {
         $driver = $this->filesystem()
             ->disk($this->disk)
@@ -55,7 +54,8 @@ abstract class FileSystem
      * @param string $folder
      * @return bool
      */
-    public function makeDirectory(string $folder) : bool {
+    public function makeDirectory(string $folder): bool
+    {
         if (! Str::startsWith($folder, $this->folder)) {
             $folder = $this->folder.$folder;
         }
@@ -69,7 +69,7 @@ abstract class FileSystem
      * @param string|null $disk
      * @return string|null
      */
-    abstract function disk($disk = null) : ?string;
+    abstract public function disk($disk = null): ?string;
 
     /**
      * Folder getter and setter.
@@ -77,9 +77,10 @@ abstract class FileSystem
      * @param string|null $folder
      * @return string|null
      */
-    abstract function folder($folder = null): ?string;
+    abstract public function folder($folder = null): ?string;
 
-    public static function instance(array $config) : FileSystem {
+    public static function instance(array $config): FileSystem
+    {
         $filesystem = Container::getInstance()->make(get_called_class());
 
         $filesystem->disk(Arr::get($config, 'disk'));

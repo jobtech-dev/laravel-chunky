@@ -7,7 +7,6 @@ use Jobtech\LaravelChunky\Strategies\MergeStrategy;
 
 class TestMergeStrategy extends MergeStrategy implements MergeStrategyContract
 {
-
     /**
      * {@inheritdoc}
      */
