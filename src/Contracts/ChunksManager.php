@@ -50,14 +50,6 @@ interface ChunksManager
     public function validFolder(string $folder): bool;
 
     /**
-     * Move chunks contained in folder into temporary files.
-     *
-     * @param string $folder
-     * @return \Illuminate\Support\Collection
-     */
-    public function temporaryFiles(string $folder): Collection;
-
-    /**
      * Builds an ordered chunks collection.
      *
      * @param string|null $folder

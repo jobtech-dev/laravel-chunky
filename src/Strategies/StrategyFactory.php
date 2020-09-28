@@ -10,7 +10,6 @@ use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory as StrategyFactor
 
 class StrategyFactory implements StrategyFactoryContract
 {
-    private static $instance;
     /**
      * @var \Jobtech\LaravelChunky\ChunkySettings
      */
@@ -70,10 +69,6 @@ class StrategyFactory implements StrategyFactoryContract
 
     public static function getInstance(): StrategyFactory
     {
-        if (static::$instance === null) {
-            static::$instance = Container::getInstance()->make(StrategyFactoryContract::class);
-        }
-
-        return static::$instance;
+        return Container::getInstance()->make(StrategyFactoryContract::class);
     }
 }

@@ -5,6 +5,7 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Jobs;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
+use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -61,9 +62,9 @@ class MergeChunksTest extends TestCase
 
         $job->handle();
 
-        Storage::disk('local')->assertMissing('chunks/foo/0_foo.txt');
-        Storage::disk('local')->assertMissing('chunks/foo/1_foo.txt');
-        Storage::disk('local')->assertExists('merged.txt');
+        Storage::assertMissing('chunks/foo/0_foo.txt');
+        Storage::assertMissing('chunks/foo/1_foo.txt');
+        Storage::assertExists('merged.txt');
         Event::assertDispatched(ChunkDeleted::class);
         Event::assertDispatched(ChunksMerged::class);
     }
