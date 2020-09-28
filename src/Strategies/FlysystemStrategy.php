@@ -36,7 +36,7 @@ class FlysystemStrategy extends MergeStrategy
         $this->mergeChunks($chunk, $chunks->toArray());
 
         // Move chunks to destination
-        $origin = $this->chunksManager->origin($chunk);
+        $origin = $this->chunksManager->chunk($chunk);
         $path = $this->mergeManager->store(
             $this->destination,
             $origin,

@@ -120,6 +120,14 @@ interface ChunksManager
     public function handle(AddChunkRequest $request, $folder = null): Chunk;
 
     /**
+     * @param string $folder
+     * @param string $destination
+     * @param int $chunk_size
+     * @param int $total_size
+     */
+    public function handleMerge(string $folder, string $destination, int $chunk_size, int $total_size);
+
+    /**
      * Check if the given chunk is the missing one or breaks the chunks integrity.
      *
      * @param string $folder

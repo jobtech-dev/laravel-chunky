@@ -5,7 +5,6 @@ namespace Jobtech\LaravelChunky;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Jobtech\LaravelChunky\Merge\MergeSettings;
 
 class ChunkySettings
 {
@@ -14,9 +13,6 @@ class ChunkySettings
 
     /** @var int */
     const INDEX_ONE = 1;
-
-    /** @var MergeSettings|null */
-    private static $merge_settings;
 
     /**
      * @var array

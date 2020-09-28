@@ -133,20 +133,12 @@ class ChunksManager implements ChunksManagerContract
     public function temporaryFiles(string $folder): Collection {
         $chunks = $this->chunks($folder);
         if(! $this->chunksFilesystem->isLocal()) {
-            return $this->chunksFilesystem->createTemporaryFiles($chunks);
+            return $this->chunksFilesystem->createTemporaryFiles($folder, $chunks);
         }
 
         return $chunks->map(function (Chunk $chunk) {
             return $chunk->getPath();
         });
-    }
-
-    public function origin($path) {
-        if(! $this->chunksFilesystem->isLocal()) {
-            return fopen($path, 'r');
-        }
-
-        return $this->chunk($path);
     }
 
     /**
@@ -252,10 +244,7 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
-     * @param string $folder
-     * @param string $destination
-     * @param int $chunk_size
-     * @param int $total_size
+     * {@inheritDoc}
      */
     public function handleMerge(string $folder, string $destination, int $chunk_size, int $total_size) {
         if (! $this->checkFilesIntegrity($folder, $chunk_size, $total_size)) {
@@ -266,13 +255,15 @@ class ChunksManager implements ChunksManagerContract
         /** @var MergeStrategy $strategy */
         $strategy = $factory->buildFrom($this, MergeManager::getInstance());
         $strategy->chunksFolder($folder);
-        $strategy->destination($destination);
+        $destination = $strategy->destination($destination);
 
         $strategy->merge();
 
         event(new ChunksMerged(
-            $strategy, $strategy->destination()
+            $strategy, $destination
         ));
+
+        return $destination;
     }
 
     /**

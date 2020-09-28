@@ -37,7 +37,6 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
-            \ProtoneMedia\LaravelFFMpeg\Support\ServiceProvider::class,
             \Jobtech\LaravelChunky\ChunkyServiceProvider::class,
         ];
     }
@@ -79,5 +78,10 @@ abstract class TestCase extends Orchestra
      */
     public function createFakeUpload() : UploadedFile {
         return new UploadedFile(__DIR__.'/tmp/upload/fake_file.txt', 'fake_file.txt');
+    }
+
+    public function canTestS3()
+    {
+        return ! empty(getenv('AWS_ACCESS_KEY_ID'));
     }
 }
