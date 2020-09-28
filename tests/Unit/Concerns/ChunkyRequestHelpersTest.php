@@ -20,10 +20,9 @@ class ChunkyRequestHelpersTest extends TestCase
     {
         parent::setUp();
 
-        $filesystem = $this->mock(Factory::class);
-        $settings = $this->mock(ChunkySettings::class);
-
-        $this->manager = new ChunksManager($filesystem, $settings);
+        $this->manager = new ChunksManager(new ChunkySettings(
+            $this->app->make('config')
+        ));
     }
 
     public function indexProvider(): array
@@ -41,14 +40,8 @@ class ChunkyRequestHelpersTest extends TestCase
         return [
             [ChunkySettings::INDEX_ZERO, 2000, 2000, true],
             [ChunkySettings::INDEX_ZERO, 2000, 4000, false],
-            [ChunkySettings::INDEX_ONE, 2000, 2000, true],
-            [ChunkySettings::INDEX_ONE, 2000, 4000, false],
             [0, 2000, 2000, true],
-            [0, 2000, 4000, false],
-            [1, 2000, 2000, true],
-            [1, 2000, 4000, false],
-            [10, 2000, 2000, true],
-            [10, 2000, 4000, false],
+            [0, 2000, 4000, false]
         ];
     }
 
@@ -115,14 +108,6 @@ class ChunkyRequestHelpersTest extends TestCase
                 ->andReturn($index);
         });
 
-        $filesystem = $this->mock(Factory::class);
-        $settings = $this->mock(ChunkySettings::class);
-        $settings->shouldReceive('defaultIndex')
-            ->once()
-            ->andReturn($index);
-
-        $manager = new ChunksManager($filesystem, $settings);
-
-        $this->assertEquals($result, $manager->isLastIndex($request));
+        $this->assertEquals($result, $this->manager->isLastIndex($request));
     }
 }

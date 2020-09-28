@@ -71,11 +71,11 @@ interface ChunksManager
     /**
      * Returns chunk as stream.
      *
-     * @param Chunk $chunk
+     * @param Chunk|string $chunk
      * @return resource|null
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function chunk(Chunk $chunk);
+    public function chunk($chunk);
 
     /**
      * Add a chunk from uploaded file. This method will also check the integrity of the

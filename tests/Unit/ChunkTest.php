@@ -74,29 +74,6 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_stored_on_default_disk()
-    {
-        $chunk = new Chunk(0, $this->upload);
-        $chunk->store('bar');
-
-        Storage::assertExists('bar/0_foo.png');
-    }
-
-    /** @test */
-    public function chunk_is_stored()
-    {
-        Storage::fake('foo');
-
-        $chunk = new Chunk(0, $this->upload);
-        $result = $chunk->store('bar', [
-            'disk' => 'foo',
-        ]);
-
-        $this->assertNotEquals($chunk, $result);
-        Storage::assertExists('bar/0_foo.png');
-    }
-
-    /** @test */
     public function chunk_is_transformed_into_an_array()
     {
         $chunk = new Chunk(0, $this->upload);
@@ -191,25 +168,5 @@ class ChunkTest extends TestCase
         $this->assertEquals(json_encode([
             'data' => $chunk->toArray(),
         ]), $result->toResponse($mock)->getContent());
-    }
-
-    /** @test */
-    public function chunk_stores_from_file_in_default_disk()
-    {
-        Chunk::storeFrom($this->upload, 'bar', 0);
-
-        Storage::assertExists('bar/0_foo.png');
-    }
-
-    /** @test */
-    public function chunk_stores_from_file()
-    {
-        Storage::fake('foo');
-
-        Chunk::storeFrom($this->upload, 'bar', 0, [
-            'disk' => 'foo',
-        ]);
-
-        Storage::disk('foo')->assertExists('bar/0_foo.png');
     }
 }

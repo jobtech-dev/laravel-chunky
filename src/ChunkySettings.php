@@ -164,9 +164,4 @@ class ChunkySettings
     {
         return Arr::get($this->config, 'strategies.queue');
     }
-
-    public function strategiesMimeTypes()
-    {
-        return Arr::get($this->config, 'strategies.mime_types');
-    }
 }

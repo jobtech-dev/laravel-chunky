@@ -16,7 +16,6 @@
         "illuminate/contracts": "^6.0|^7.0|^8.0",
         "illuminate/filesystem": "^6.0|^7.0|^8.0",
         "illuminate/support": "^6.0|^7.0|^8.0",
-        "pbmedia/laravel-ffmpeg": "^7.0",
         "keven/flysystem-concatenate": "^1.0",
         "keven/append-stream": "^1.0.5"
     },

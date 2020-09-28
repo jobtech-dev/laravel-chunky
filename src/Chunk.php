@@ -49,7 +49,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * @return \Symfony\Component\HttpFoundation\File\File|string
+     * @return string
      */
     public function getPath(): string
     {
@@ -57,6 +57,14 @@ class Chunk implements Arrayable, Jsonable, Responsable
             return $this->path->getRealPath();
         }
 
+        return $this->path;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOriginalPath()
+    {
         return $this->path;
     }
 

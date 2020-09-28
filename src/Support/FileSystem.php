@@ -17,10 +17,10 @@ abstract class FileSystem
     private Factory $filesystem;
 
     /** @var string|null  */
-    protected ?string $disk;
+    protected ?string $disk = null;
 
     /** @var string|null  */
-    protected ?string $folder;
+    protected ?string $folder = null;
 
     public function __construct(Factory $filesystem)
     {
@@ -43,7 +43,10 @@ abstract class FileSystem
      */
     public function isLocal() : bool
     {
-        $driver = $this->filesystem()->disk($this->disk)->getDriver();
+        $driver = $this->filesystem()
+            ->disk($this->disk)
+            ->getDriver()
+            ->getAdapter();
 
         return $driver instanceof Local;
     }
@@ -77,7 +80,7 @@ abstract class FileSystem
     abstract function folder($folder = null): ?string;
 
     public static function instance(array $config) : FileSystem {
-        $filesystem = Container::getInstance()->make(self::class);
+        $filesystem = Container::getInstance()->make(get_called_class());
 
         $filesystem->disk(Arr::get($config, 'disk'));
         $filesystem->folder(Arr::get($config, 'folder'));

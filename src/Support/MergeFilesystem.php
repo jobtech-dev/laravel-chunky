@@ -2,6 +2,8 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
+use Illuminate\Support\Str;
+
 class MergeFilesystem extends FileSystem
 {
     /** {@inheritDoc} */
@@ -30,6 +32,10 @@ class MergeFilesystem extends FileSystem
      */
     public function destinationPath(string $path): string
     {
+        if(Str::startsWith($path, $this->folder())) {
+            return $path;
+        }
+
         return $this->folder.$path;
     }
 

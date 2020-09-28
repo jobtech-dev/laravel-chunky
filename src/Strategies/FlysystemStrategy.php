@@ -8,14 +8,9 @@ use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyCon
 
 class FlysystemStrategy extends MergeStrategy
 {
+
     /**
-     * Merge destination file with the chunk stream.
-     *
-     * @param array $chunks
-     *
-     * @throws StrategyException
-     *
-     * @return bool
+     * {@inheritDoc}
      */
     protected function mergeChunks(string $chunk, array $chunks): bool
     {
@@ -29,7 +24,7 @@ class FlysystemStrategy extends MergeStrategy
     /**
      * {@inheritdoc}
      */
-    public function merge(): MergeStrategyContract
+    public function merge(): string
     {
         // Retrieve chunks
         $chunks = $this->chunksManager->temporaryFiles(
@@ -56,5 +51,9 @@ class FlysystemStrategy extends MergeStrategy
         $this->chunksManager->deleteChunkFolder($this->folder);
 
         return $path;
+    }
+
+    public static function instance() {
+        return new FlysystemStrategy;
     }
 }

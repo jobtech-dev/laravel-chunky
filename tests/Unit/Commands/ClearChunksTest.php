@@ -5,6 +5,7 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Commands;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\ChunksManager;
+use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
 class ClearChunksTest extends TestCase
@@ -18,80 +19,56 @@ class ClearChunksTest extends TestCase
     {
         parent::setUp();
 
-        $this->manager = $this->app->make('chunky');
+        $this->manager = new ChunksManager(
+            new ChunkySettings($this->app->make('config'))
+        );
     }
 
     /** @test */
     public function command_clears_chunks()
     {
-        $fake_0 = UploadedFile::fake()->create('foo.txt', 2000);
-        $fake_1 = UploadedFile::fake()->create('foo.txt', 2000);
+        $fake_0 = $this->createFakeUpload();
+        $fake_1 = $this->createFakeUpload();
 
-        $this->manager->addChunk($fake_0, 0, 'foo');
-        $this->manager->addChunk($fake_1, 1, 'foo');
+        $this->manager->addChunk($fake_0, 0, 'test');
+        $this->manager->addChunk($fake_1, 1, 'test');
 
-        Storage::assertExists('chunks/foo/0_foo.txt');
-        Storage::assertExists('chunks/foo/1_foo.txt');
+        Storage::assertExists('chunks/test/0_fake-file.txt');
+        Storage::assertExists('chunks/test/1_fake-file.txt');
 
-        $this->artisan('chunky:clear', ['folder' => 'foo'])
-            ->expectsOutput('folder chunks/foo cleared!')
+        $this->artisan('chunky:clear', ['folder' => 'test'])
+            ->expectsOutput('folder chunks/test cleared!')
             ->assertExitCode(0);
 
-        Storage::assertMissing('foo/0_foo.txt');
-        Storage::assertMissing('foo/1_foo.txt');
-        Storage::assertMissing('foo');
+        Storage::assertMissing('test/0_fake-file.txt');
+        Storage::assertMissing('test/1_fake-file.txt');
+        Storage::assertMissing('test');
     }
 
     /** @test */
     public function command_clears_all_chunks()
     {
-        $fake_0 = UploadedFile::fake()->create('foo.txt', 2000);
-        $fake_1 = UploadedFile::fake()->create('foo.txt', 2000);
-        $fake_2 = UploadedFile::fake()->create('foo.txt', 2000);
-        $fake_3 = UploadedFile::fake()->create('foo.txt', 2000);
+        $fake = $this->createFakeUpload();
 
-        $this->manager->addChunk($fake_0, 0, 'foo');
-        $this->manager->addChunk($fake_1, 1, 'foo');
-        $this->manager->addChunk($fake_2, 0, 'bar');
-        $this->manager->addChunk($fake_3, 1, 'bar');
+        $this->manager->addChunk($fake, 0, 'test_1');
+        $this->manager->addChunk($fake, 1, 'test_1');
+        $this->manager->addChunk($fake, 0, 'test_2');
+        $this->manager->addChunk($fake, 1, 'test_2');
 
-        Storage::assertExists('chunks/foo/0_foo.txt');
-        Storage::assertExists('chunks/foo/1_foo.txt');
-        Storage::assertExists('chunks/bar/0_foo.txt');
-        Storage::assertExists('chunks/bar/1_foo.txt');
+        Storage::assertExists('chunks/test_1/0_fake-file.txt');
+        Storage::assertExists('chunks/test_1/1_fake-file.txt');
+        Storage::assertExists('chunks/test_2/0_fake-file.txt');
+        Storage::assertExists('chunks/test_2/1_fake-file.txt');
 
         $this->artisan('chunky:clear')
             ->expectsOutput('Chunks folder cleared!')
             ->assertExitCode(0);
 
-        Storage::assertMissing('foo/0_foo.txt');
-        Storage::assertMissing('foo/1_foo.txt');
-        Storage::assertMissing('bar/0_foo.txt');
-        Storage::assertMissing('bar/1_foo.txt');
-        Storage::assertMissing('foo');
-        Storage::assertMissing('bar');
-    }
-
-    /** @test */
-    public function command_shows_error_if_manager_delete_chunks_fail()
-    {
-        $mock = $this->mock(ChunksManager::class, function ($mock) {
-            $mock->shouldReceive('getChunksFolder')
-                ->once()
-                ->andReturn('/');
-
-            $mock->shouldReceive('deleteChunks')
-                ->once()
-                ->with('/foo')
-                ->andReturn(false);
-        });
-
-        $this->app->bind('chunky', function () use ($mock) {
-            return $mock;
-        });
-
-        $this->artisan('chunky:clear', ['folder' => 'foo'])
-            ->expectsOutput('An error occurred while deleting folder /foo')
-            ->assertExitCode(0);
+        Storage::assertMissing('test_1/0_fake-file.txt');
+        Storage::assertMissing('test_1/1_fake-file.txt');
+        Storage::assertMissing('test_2/0_fake-file.txt');
+        Storage::assertMissing('test_2/1_fake-file.txt');
+        Storage::assertMissing('test_1');
+        Storage::assertMissing('test_2');
     }
 }

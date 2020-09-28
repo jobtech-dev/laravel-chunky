@@ -4,11 +4,23 @@ namespace Jobtech\LaravelChunky\Tests;
 
 use Dotenv\Dotenv;
 use File;
-use Jobtech\LaravelChunky\ChunkyServiceProvider;
+use Illuminate\Http\UploadedFile;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
+
+    private function setupS3($app): void
+    {
+        config()->set('filesystems.disks.s3_disk', [
+            'driver' => 's3',
+            'key' => getenv('AWS_ACCESS_KEY_ID'),
+            'secret' => getenv('AWS_SECRET_ACCESS_KEY'),
+            'region' => getenv('AWS_DEFAULT_REGION'),
+            'bucket' => getenv('AWS_BUCKET'),
+        ]);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -26,7 +38,7 @@ abstract class TestCase extends Orchestra
     {
         return [
             \ProtoneMedia\LaravelFFMpeg\Support\ServiceProvider::class,
-            ChunkyServiceProvider::class,
+            \Jobtech\LaravelChunky\ChunkyServiceProvider::class,
         ];
     }
 
@@ -38,13 +50,17 @@ abstract class TestCase extends Orchestra
         File::makeDirectory(__DIR__.'/tmp');
 
         if (! File::isDirectory(__DIR__.'/tmp/resources')) {
-            File::copyDirectory(__DIR__.'/resources', __DIR__.'/tmp/chunks/resources');
+            File::copyDirectory(__DIR__.'/resources', __DIR__.'/tmp');
         }
 
         config()->set('filesystems.disks.local', [
             'driver' => 'local',
             'root'   => __DIR__.'/tmp',
         ]);
+
+        config()->set('app.key', 'base64:+XjCO29J0UznAKkeY5K+Tfd/3WWUiRUsefaxScOF3fM=');
+
+        $this->setupS3($app);
     }
 
     protected function loadEnvironmentVariables()
@@ -56,5 +72,12 @@ abstract class TestCase extends Orchestra
         $dotEnv = Dotenv::createImmutable(__DIR__.'/..');
 
         $dotEnv->load();
+    }
+
+    /**
+     * @return \Illuminate\Http\UploadedFile
+     */
+    public function createFakeUpload() : UploadedFile {
+        return new UploadedFile(__DIR__.'/tmp/upload/fake_file.txt', 'fake_file.txt');
     }
 }

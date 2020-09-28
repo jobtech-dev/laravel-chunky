@@ -22,9 +22,6 @@ return [
             'disk'   => env('CHUNKY_MERGE_DISK'),
             'folder' => null,
         ],
-        'temp' => [
-
-        ],
     ],
 
     /*

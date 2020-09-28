@@ -10,6 +10,8 @@ use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
 
 class MergeManager implements MergeManagerContract
 {
+    /** @var ?MergeManager $instance */
+    private static $instance;
 
     /** @var \Jobtech\LaravelChunky\ChunkySettings */
     private ChunkySettings $settings;
@@ -26,8 +28,8 @@ class MergeManager implements MergeManagerContract
     {
         $this->settings = $settings;
         $this->mergeFilesystem = MergeFilesystem::instance([
-            'disk' => $settings->chunksDisk(),
-            'folder' => $settings->chunksFolder(),
+            'disk' => $settings->mergeDisk(),
+            'folder' => $settings->mergeFolder(),
         ]);
     }
 
@@ -87,7 +89,7 @@ class MergeManager implements MergeManagerContract
      */
     public function store(string $destination, $origin, $options = [])
     {
-        $this->mergeFilesystem->store($destination, $origin, $options);
+        return $this->mergeFilesystem->store($destination, $origin, $options);
     }
 
     /**
@@ -100,6 +102,10 @@ class MergeManager implements MergeManagerContract
 
     public static function getInstance(): MergeManager
     {
-        return Container::getInstance()->make(MergeManagerContract::class);
+        if(static::$instance === null) {
+            static::$instance = Container::getInstance()->make(MergeManagerContract::class);
+        }
+
+        return static::$instance;
     }
 }

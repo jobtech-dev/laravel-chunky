@@ -47,6 +47,7 @@ trait ChunkyRequestHelpers
         $total_size = $request->totalSizeInput();
         $chunk_size = $request->chunkSizeInput();
 
+
         if ($total_size < $chunk_size) {
             throw new ChunksIntegrityException('Total file size is lower than single chunk size');
         }
@@ -66,6 +67,8 @@ trait ChunkyRequestHelpers
         $last_index = $this->lastIndexFrom($request)
             + ($this->settings->defaultIndex() - 1);
 
-        return $request->indexInput() == $last_index;
+        $result = $request->indexInput() == $last_index;
+
+        return $result;
     }
 }

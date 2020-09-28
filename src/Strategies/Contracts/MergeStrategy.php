@@ -9,6 +9,12 @@ use Jobtech\LaravelChunky\Exceptions\StrategyException;
 interface MergeStrategy
 {
     /**
+     * @param string|null $destination
+     * @return mixed
+     */
+    public function destination($destination = null) : string;
+
+    /**
      * Set and retrieve or retrieve the chunks manager.
      *
      * @param ChunksManager|null $manager
@@ -42,12 +48,12 @@ interface MergeStrategy
     public function chunksFolder($folder = null): string;
 
     /**
-     * Handles the merge of the chunks into a single file.
+     * Handles the merge of the chunks into a single file and returns the final path.
      *
      * @throws StrategyException
      *
-     * @return MergeStrategy
+     * @return string
      */
-    public function merge(): MergeStrategy;
+    public function merge(): string;
 
 }

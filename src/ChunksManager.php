@@ -9,15 +9,21 @@ use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
 use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
 use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
+use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
+use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy;
+use Jobtech\LaravelChunky\Strategies\StrategyFactory;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 
 class ChunksManager implements ChunksManagerContract
 {
     use ManagerHelpers;
     use ChunkyRequestHelpers;
+
+    /** @var \Jobtech\LaravelChunky\ChunksManager|null */
+    public static ?ChunksManager $instance = null;
 
     /** @var \Jobtech\LaravelChunky\ChunkySettings */
     private ChunkySettings $settings;
@@ -58,18 +64,16 @@ class ChunksManager implements ChunksManagerContract
         // TODO: Refactor
 
         if (empty($connection = $this->settings->connection())) {
-            MergeChunks::dispatchNow(
+            $this->handleMerge(
                 $this->chunksFilesystem->fullPath($folder),
-                $this->mergeFilesystem->destinationPath($request->fileInput()),
-                $request->fileInput()->getMimeType(),
+                $request->fileInput(),
                 $request->chunkSizeInput(),
                 $request->totalSizeInput()
             );
         } else {
             MergeChunks::dispatch(
                 $this->chunksFilesystem->fullPath($folder),
-                $this->mergeFilesystem->destinationPath($request->fileInput()),
-                $request->fileInput()->getMimeType(),
+                $request->fileInput(),
                 $request->chunkSizeInput(),
                 $request->totalSizeInput()
             )->onConnection($connection)
@@ -118,7 +122,9 @@ class ChunksManager implements ChunksManagerContract
      */
     public function validFolder(string $folder): bool
     {
-        return $this->chunksFilesystem()->exists($folder);
+        return $this->chunksFilesystem()->exists(
+            $this->chunksFilesystem->fullPath($folder)
+        );
     }
 
     /**
@@ -154,11 +160,14 @@ class ChunksManager implements ChunksManagerContract
     /**
      * {@inheritdoc}
      */
-    public function chunk(Chunk $chunk): string
+    public function chunk($chunk)
     {
-        return $this->chunksFilesystem()->readChunk(
-            $chunk->getPath()
-        );
+        if($chunk instanceof Chunk) {
+            $chunk = $chunk->getPath();
+        }
+
+        return $this->chunksFilesystem()
+            ->readChunk($chunk);
     }
 
     /**
@@ -243,6 +252,30 @@ class ChunksManager implements ChunksManagerContract
     }
 
     /**
+     * @param string $folder
+     * @param string $destination
+     * @param int $chunk_size
+     * @param int $total_size
+     */
+    public function handleMerge(string $folder, string $destination, int $chunk_size, int $total_size) {
+        if (! $this->checkFilesIntegrity($folder, $chunk_size, $total_size)) {
+            throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
+        }
+
+        $factory = StrategyFactory::getInstance();
+        /** @var MergeStrategy $strategy */
+        $strategy = $factory->buildFrom($this, MergeManager::getInstance());
+        $strategy->chunksFolder($folder);
+        $strategy->destination($destination);
+
+        $strategy->merge();
+
+        event(new ChunksMerged(
+            $strategy, $strategy->destination()
+        ));
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function checkChunkIntegrity(string $folder, int $index): bool
@@ -290,6 +323,10 @@ class ChunksManager implements ChunksManagerContract
 
     public static function getInstance(): ChunksManager
     {
-        return Container::getInstance()->make(ChunksManagerContract::class);
+        if(static::$instance === null) {
+            static::$instance = Container::getInstance()->make(ChunksManagerContract::class);
+        }
+
+        return static::$instance;
     }
 }
