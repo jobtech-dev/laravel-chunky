@@ -22,9 +22,6 @@ class ChunksManager implements ChunksManagerContract
     use ManagerHelpers;
     use ChunkyRequestHelpers;
 
-    /** @var \Jobtech\LaravelChunky\ChunksManager|null */
-    public static ?ChunksManager $instance = null;
-
     /** @var \Jobtech\LaravelChunky\ChunkySettings */
     private ChunkySettings $settings;
 
@@ -66,14 +63,14 @@ class ChunksManager implements ChunksManagerContract
         if (empty($connection = $this->settings->connection())) {
             $this->handleMerge(
                 $this->chunksFilesystem->fullPath($folder),
-                $request->fileInput(),
+                $request->fileInput()->getClientOriginalName(),
                 $request->chunkSizeInput(),
                 $request->totalSizeInput()
             );
         } else {
             MergeChunks::dispatch(
                 $this->chunksFilesystem->fullPath($folder),
-                $request->fileInput(),
+                $request->fileInput()->getClientOriginalName(),
                 $request->chunkSizeInput(),
                 $request->totalSizeInput()
             )->onConnection($connection)
@@ -125,21 +122,6 @@ class ChunksManager implements ChunksManagerContract
         return $this->chunksFilesystem()->exists(
             $this->chunksFilesystem->fullPath($folder)
         );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function temporaryFiles(string $folder): Collection
-    {
-        $chunks = $this->chunks($folder);
-        if (! $this->chunksFilesystem->isLocal()) {
-            return $this->chunksFilesystem->createTemporaryFiles($folder, $chunks);
-        }
-
-        return $chunks->map(function (Chunk $chunk) {
-            return $chunk->getPath();
-        });
     }
 
     /**
@@ -316,10 +298,6 @@ class ChunksManager implements ChunksManagerContract
 
     public static function getInstance(): ChunksManager
     {
-        if (static::$instance === null) {
-            static::$instance = Container::getInstance()->make(ChunksManagerContract::class);
-        }
-
-        return static::$instance;
+        return Container::getInstance()->make(ChunksManagerContract::class);
     }
 }

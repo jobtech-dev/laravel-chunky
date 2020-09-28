@@ -2,6 +2,7 @@
 
 namespace Jobtech\LaravelChunky\Strategies;
 
+use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 
 class FlysystemStrategy extends MergeStrategy
@@ -24,9 +25,11 @@ class FlysystemStrategy extends MergeStrategy
     public function merge(): string
     {
         // Retrieve chunks
-        $chunks = $this->chunksManager->temporaryFiles(
+        $chunks = $this->chunksManager->chunks(
             $this->chunksFolder()
-        )->values();
+        )->map(function (Chunk $item) {
+            return $item->getPath();
+        });
         $chunk = $this->chunksManager->chunks(
             $this->chunksFolder()
         )->first();

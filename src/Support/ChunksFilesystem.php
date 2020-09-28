@@ -2,40 +2,16 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
-use Keven\AppendStream\AppendStream;
 use Keven\Flysystem\Concatenate\Concatenate;
-use Neutron\TemporaryFilesystem\Manager;
 use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksFilesystem extends FileSystem
 {
-    /** @var Manager|null */
-    private static $manager;
-
-    /** @var array */
-    private static $collections = [];
-
-    private function temporaryFilesystem(): Manager
-    {
-        if (static::$manager === null) {
-            static::$manager = Manager::create();
-        }
-
-        return static::$manager;
-    }
-
-    private function addTemporaryContext(string $folder)
-    {
-        array_push(static::$collections, $folder);
-    }
-
     /** {@inheritdoc} */
     public function disk($disk = null): ?string
     {
@@ -137,11 +113,6 @@ class ChunksFilesystem extends FileSystem
      */
     public function delete(string $folder): bool
     {
-        // Check temporary files
-        if (in_array($folder, static::$collections)) {
-            $this->temporaryFilesystem()->clean($folder);
-        }
-
         $folder = $this->fullPath($folder);
 
         if (! $this->filesystem()->disk($this->disk)->exists($folder)) {
@@ -152,8 +123,10 @@ class ChunksFilesystem extends FileSystem
             $this->deleteChunk($chunk);
         }
 
-        return $this->filesystem()->disk($this->disk)
+        $result = $this->filesystem()->disk($this->disk)
             ->deleteDirectory($folder);
+
+        return $result;
     }
 
     /**
@@ -242,55 +215,16 @@ class ChunksFilesystem extends FileSystem
     }
 
     /**
-     * @param string $folder
-     * @param \Illuminate\Support\Collection $chunks
-     * @return \Illuminate\Support\Collection
-     */
-    public function createTemporaryFiles(string $folder, Collection $chunks): Collection
-    {
-        $this->addTemporaryContext($folder);
-
-        return $chunks->map(function (Chunk $chunk) use ($folder) {
-            $resource = $this->filesystem()->disk($this->disk)->readStream($chunk->getPath());
-            $location = $this->temporaryFilesystem()->createTemporaryFile($folder);
-
-            $stream = fopen($location, 'w+b');
-
-            if (! $stream || stream_copy_to_stream($resource, $stream) === false || ! fclose($stream)) {
-                return false;
-            }
-
-            return $location;
-        });
-    }
-
-    /**
      * Concatenate all chunks into final merge.
      *
      * @param string $chunk
      * @param array $chunks
      * @return bool
      */
-    public function concatenate(string $destination, array $chunks): bool
+    public function concatenate(string $chunk, array $chunks): bool
     {
-        $first = Arr::first($chunks);
-        $stream = new AppendStream;
+        $this->filesystem()->disk($this->disk)->addPlugin(new Concatenate);
 
-        foreach ($chunks as $chunk) {
-            if (! $this->isLocal()) {
-                $temp = fopen($chunk, 'rb');
-                $stream->append($temp);
-            } else {
-                $stream->append($this->filesystem()->disk($this->disk)->readStream($chunk));
-            }
-        }
-
-        if (! $this->isLocal()) {
-            file_put_contents($first, $stream->getResource());
-
-            return $this->filesystem()->disk($this->disk)->put($destination, fopen($first, 'rb'));
-        }
-
-        return $this->filesystem()->disk($this->disk)->put($destination, $stream->getResource());
+        return $this->filesystem()->disk($this->disk)->concatenate($chunk, ...$chunks);
     }
 }

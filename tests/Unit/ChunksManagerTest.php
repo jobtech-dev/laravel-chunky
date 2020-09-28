@@ -8,10 +8,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\ChunksManager;
 use Jobtech\LaravelChunky\ChunkySettings;
+use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -77,36 +77,6 @@ class ChunksManagerTest extends TestCase
         ], $this->config->get('chunky.options.chunks'));
 
         $this->assertEquals($options, $manager->getChunksOptions());
-    }
-
-    /** @test */
-    public function manager_creates_temporary_files_from_chunks()
-    {
-        if (! $this->canTestS3()) {
-            $this->markTestSkipped('Skipping S3 tests: missing .env values');
-        }
-
-        Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello ');
-        Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'World!');
-
-        $settings = $this->mock(ChunkySettings::class, function ($mock) {
-            $mock->shouldReceive('chunksDisk')
-                ->once()
-                ->andReturn('s3_disk');
-            $mock->shouldReceive('chunksFolder')
-                ->once()
-                ->andReturn('chunks/');
-        });
-        $manager = new ChunksManager($settings);
-
-        $files = $manager->temporaryFiles('foo');
-
-        $this->assertCount(2, $files);
-        foreach ($files as $file) {
-            $this->assertTrue(Str::startsWith($file, sys_get_temp_dir().'/foo'));
-        }
-
-        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo']);
     }
 
     /** @test */
@@ -242,6 +212,7 @@ class ChunksManagerTest extends TestCase
         Storage::assertMissing('chunks/test/0_fake-file.txt');
         Storage::assertMissing('chunks/test/1_fake-file.txt');
         Storage::assertMissing('chunks/test');
+
         Event::assertDispatched(ChunkDeleted::class);
     }
 
@@ -372,7 +343,7 @@ class ChunksManagerTest extends TestCase
     /** @test */
     public function manager_checks_integrity_with_not_existing_folder_and_different_default_index()
     {
-        $this->app->config->set('chunky.index', 12);
+        $this->config->set('chunky.index', 12);
         $manager = new ChunksManager(new ChunkySettings(
             $this->config
         ));
@@ -389,9 +360,6 @@ class ChunksManagerTest extends TestCase
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }
 
-        $this->app->config->set('chunky.disks.chunks.disk', 's3_disk');
-        $this->app->config->set('chunky.disks.merge.disk', 's3_disk');
-
         Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello');
         Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'Hello');
         Storage::disk('s3_disk')->put('chunks/foo/2_foo.txt', 'Hello');
@@ -399,6 +367,10 @@ class ChunksManagerTest extends TestCase
         $manager = new ChunksManager(new ChunkySettings(
             $this->config
         ));
+
+        $manager->chunksFilesystem()->disk('s3_disk');
+        $this->app->make(MergeManager::class)->mergeFilesystem()->disk('s3_disk');
+
         $chunk_size_0 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/0_foo.txt');
         $chunk_size_1 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/1_foo.txt');
         $chunk_size_2 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/2_foo.txt');

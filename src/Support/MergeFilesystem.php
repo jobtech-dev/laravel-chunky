@@ -13,7 +13,7 @@ class MergeFilesystem extends FileSystem
             $this->disk = $disk;
         }
 
-        return  $this->disk;
+        return $this->disk;
     }
 
     /** {@inheritdoc} */
