@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Strategies;
 
-use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 

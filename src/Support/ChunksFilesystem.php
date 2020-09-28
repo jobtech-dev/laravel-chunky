@@ -12,7 +12,6 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class ChunksFilesystem extends FileSystem
 {
-
     /** {@inheritdoc} */
     public function disk($disk = null): ?string
     {
@@ -215,8 +214,6 @@ class ChunksFilesystem extends FileSystem
         return $this->filesystem()->disk($this->disk)->readStream($path);
     }
 
-
-
     /**
      * Concatenate all chunks into final merge.
      *
@@ -224,7 +221,8 @@ class ChunksFilesystem extends FileSystem
      * @param array $chunks
      * @return bool
      */
-    public function concatenate(string $chunk, array $chunks): bool {
+    public function concatenate(string $chunk, array $chunks): bool
+    {
         $this->filesystem()->disk($this->disk)->addPlugin(new Concatenate);
 
         return $this->filesystem()->disk($this->disk)->concatenate($chunk, ...$chunks);

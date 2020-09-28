@@ -5,7 +5,6 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Jobs;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Contracts\ChunksManager;
-use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
