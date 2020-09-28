@@ -383,7 +383,8 @@ class ChunksManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_handle_merge_with_remote_filesystem() {
+    public function manager_handle_merge_with_remote_filesystem()
+    {
         if (! $this->canTestS3()) {
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }

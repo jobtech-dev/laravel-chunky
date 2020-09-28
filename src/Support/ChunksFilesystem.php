@@ -67,7 +67,7 @@ class ChunksFilesystem extends FileSystem
 
         if (Str::startsWith($folder, $this->folder)) {
             return $folder.$suffix;
-        } else if(!Str::endsWith($this->folder, $folder.$suffix)) {
+        } elseif (! Str::endsWith($this->folder, $folder.$suffix)) {
             return $this->folder.$folder.$suffix;
         }
 
@@ -277,7 +277,7 @@ class ChunksFilesystem extends FileSystem
         $stream = new AppendStream;
 
         foreach ($chunks as $chunk) {
-            if(!$this->isLocal()) {
+            if (! $this->isLocal()) {
                 $temp = fopen($chunk, 'rb');
                 $stream->append($temp);
             } else {
@@ -285,8 +285,9 @@ class ChunksFilesystem extends FileSystem
             }
         }
 
-        if(!$this->isLocal()) {
+        if (! $this->isLocal()) {
             file_put_contents($first, $stream->getResource());
+
             return $this->filesystem()->disk($this->disk)->put($destination, fopen($first, 'rb'));
         }
 
