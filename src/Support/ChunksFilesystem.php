@@ -115,13 +115,13 @@ class ChunksFilesystem extends FileSystem
 
         $file = fopen($chunk->getPath(), 'r');
         $destination = $this->fullPath($folder).$chunk->getSlug();
-        $path = $this->filesystem()->disk($this->disk)->put(
+        $this->filesystem()->disk($this->disk)->put(
             $destination, $file
         );
 
         fclose($file);
 
-        $chunk->setPath($path);
+        $chunk->setPath($destination);
 
         event(new ChunkAdded($chunk));
 
