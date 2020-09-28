@@ -89,11 +89,6 @@ class ChunksManagerTest extends TestCase
         Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello ');
         Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'World!');
 
-        $chunks = collect([
-            new Chunk(0, 'chunks/foo/0_foo.txt', '', false),
-            new Chunk(1, 'chunks/foo/1_foo.txt', '', true),
-        ]);
-
         $settings = $this->mock(ChunkySettings::class, function ($mock) {
             $mock->shouldReceive('chunksDisk')
                 ->once()
@@ -111,7 +106,7 @@ class ChunksManagerTest extends TestCase
             $this->assertTrue(Str::startsWith($file, sys_get_temp_dir().'/foo'));
         }
 
-        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt']);
+        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo']);
     }
 
     /** @test */
@@ -165,10 +160,10 @@ class ChunksManagerTest extends TestCase
             $this->config
         ));
 
-        $chunk = $manager->addChunk($file, 3, 'foo');
+        $chunk = $manager->addChunk($file, 0, 'test');
 
         $this->assertInstanceOf(Chunk::class, $chunk);
-        Storage::disk('local')->exists('foo/foo-file.mp4');
+        Storage::disk('local')->exists('test/0_fake-file.mp4');
 
         Event::assertDispatched(ChunkAdded::class);
     }
@@ -385,5 +380,39 @@ class ChunksManagerTest extends TestCase
         $this->assertTrue($manager->checkChunkIntegrity('unexisting', 12));
         $this->assertTrue($manager->checkChunkIntegrity('foo', 15));
         $this->assertFalse($manager->checkChunkIntegrity('wrong_index', 15));
+    }
+
+    /** @test */
+    public function manager_handle_merge_with_remote_filesystem() {
+        if (! $this->canTestS3()) {
+            $this->markTestSkipped('Skipping S3 tests: missing .env values');
+        }
+
+        $this->app->config->set('chunky.disks.chunks.disk', 's3_disk');
+        $this->app->config->set('chunky.disks.merge.disk', 's3_disk');
+
+        Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('chunks/foo/2_foo.txt', 'Hello');
+
+        $manager = new ChunksManager(new ChunkySettings(
+            $this->config
+        ));
+        $chunk_size_0 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/0_foo.txt');
+        $chunk_size_1 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/1_foo.txt');
+        $chunk_size_2 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/2_foo.txt');
+        $total_size = $chunk_size_0 + $chunk_size_1 + $chunk_size_2;
+
+        $manager->handleMerge(
+            'foo',
+            'merge.txt',
+            $chunk_size_0,
+            $total_size
+        );
+
+        $this->assertTrue(Storage::disk('s3_disk')->exists('merge.txt'));
+        $this->assertEquals($total_size, Storage::disk('s3_disk')->size('merge.txt'));
+
+        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo/2_foo.txt', 'chunks/foo', 'merge.txt']);
     }
 }

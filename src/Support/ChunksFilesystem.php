@@ -2,12 +2,14 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
+use Keven\AppendStream\AppendStream;
 use Keven\Flysystem\Concatenate\Concatenate;
 use Neutron\TemporaryFilesystem\Manager;
 use Symfony\Component\HttpFoundation\File\File;
@@ -61,11 +63,15 @@ class ChunksFilesystem extends FileSystem
      */
     public function fullPath(string $folder): string
     {
+        $suffix = Str::endsWith($folder, DIRECTORY_SEPARATOR) ? '' : DIRECTORY_SEPARATOR;
+
         if (Str::startsWith($folder, $this->folder)) {
-            return $folder;
+            return $folder.$suffix;
+        } else if(!Str::endsWith($this->folder, $folder.$suffix)) {
+            return $this->folder.$folder.$suffix;
         }
 
-        return $this->folder.$folder;
+        return $this->folder;
     }
 
     /**
@@ -107,12 +113,14 @@ class ChunksFilesystem extends FileSystem
             throw new ChunkyException('Path must be a file');
         }
 
-        $path = $this->filesystem()->putFileAs(
-            $this->fullPath($folder),
-            $chunk->getPath(),
-            $chunk->getSlug(),
-            $options
+        $file = fopen($chunk->getPath(), 'r');
+        $destination = $this->fullPath($folder).$chunk->getSlug();
+        $path = $this->filesystem()->disk($this->disk)->put(
+            $destination, $file
         );
+
+        fclose($file);
+
         $chunk->setPath($path);
 
         event(new ChunkAdded($chunk));
@@ -183,7 +191,7 @@ class ChunksFilesystem extends FileSystem
 
         return collect($files)
             ->map(function ($path, $key) use ($folder, $files) {
-                $filename = str_replace($folder.DIRECTORY_SEPARATOR, '', $path);
+                $filename = str_replace($folder, '', $path);
                 $exploded_name = explode('_', $filename);
                 $index = array_shift($exploded_name);
                 $last = count($files) - 1 == $key;
@@ -263,10 +271,25 @@ class ChunksFilesystem extends FileSystem
      * @param array $chunks
      * @return bool
      */
-    public function concatenate(string $chunk, array $chunks): bool
+    public function concatenate(string $destination, array $chunks): bool
     {
-        $this->filesystem()->disk($this->disk)->addPlugin(new Concatenate);
+        $first = Arr::first($chunks);
+        $stream = new AppendStream;
 
-        return $this->filesystem()->disk($this->disk)->concatenate($chunk, ...$chunks);
+        foreach ($chunks as $chunk) {
+            if(!$this->isLocal()) {
+                $temp = fopen($chunk, 'rb');
+                $stream->append($temp);
+            } else {
+                $stream->append($this->filesystem()->disk($this->disk)->readStream($chunk));
+            }
+        }
+
+        if(!$this->isLocal()) {
+            file_put_contents($first, $stream->getResource());
+            return $this->filesystem()->disk($this->disk)->put($destination, fopen($first, 'rb'));
+        }
+
+        return $this->filesystem()->disk($this->disk)->put($destination, $stream->getResource());
     }
 }

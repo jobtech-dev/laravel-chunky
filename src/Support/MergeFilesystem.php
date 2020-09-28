@@ -52,7 +52,7 @@ class MergeFilesystem extends FileSystem
      */
     public function store(string $destination, $origin, $options = []): string
     {
-        if ($this->filesystem()->disk($this->disk)->writeStream($destination, $origin, $options)) {
+        if ($this->filesystem()->disk($this->disk)->put($destination, $origin, $options)) {
             return $destination;
         }
 
@@ -62,5 +62,14 @@ class MergeFilesystem extends FileSystem
     public function createTemporaryChunk($origin)
     {
         $this->filesystem()->disk();
+    }
+
+    /**
+     * @param string $path
+     * @return bool
+     */
+    public function exists(string $path): bool
+    {
+        return $this->filesystem()->disk($this->disk)->exists($path);
     }
 }

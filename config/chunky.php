@@ -15,11 +15,11 @@ return [
 
     'disks' => [
         'chunks' => [
-            'disk'   => env('CHUNKY_CHUNK_DISK'),
+            'disk'   => env('CHUNKY_CHUNK_DISK', 'local'),
             'folder' => 'chunks',
         ],
         'merge' => [
-            'disk'   => env('CHUNKY_MERGE_DISK'),
+            'disk'   => env('CHUNKY_MERGE_DISK', 'local'),
             'folder' => null,
         ],
     ],

@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Strategies;
 
-use Illuminate\Support\Arr;
 use Jobtech\LaravelChunky\Exceptions\StrategyException;
 
 class FlysystemStrategy extends MergeStrategy
@@ -10,9 +9,9 @@ class FlysystemStrategy extends MergeStrategy
     /**
      * {@inheritdoc}
      */
-    protected function mergeChunks(string $chunk, array $chunks): bool
+    protected function mergeChunks(string $destination, array $chunks): bool
     {
-        if (! $this->chunksManager->chunksFilesystem()->concatenate($chunk, $chunks)) {
+        if (! $this->chunksManager->chunksFilesystem()->concatenate($destination, $chunks)) {
             throw new StrategyException('Unable to concatenate chunks');
         }
 
@@ -28,10 +27,12 @@ class FlysystemStrategy extends MergeStrategy
         $chunks = $this->chunksManager->temporaryFiles(
             $this->chunksFolder()
         )->values();
-        $chunk = Arr::first($chunks);
+        $chunk = $this->chunksManager->chunks(
+            $this->chunksFolder()
+        )->first();
 
         // Merge chunks
-        $this->mergeChunks($chunk, $chunks->toArray());
+        $this->mergeChunks($chunk->getPath(), $chunks->toArray());
 
         // Move chunks to destination
         $origin = $this->chunksManager->chunk($chunk);
