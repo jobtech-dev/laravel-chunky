@@ -20,12 +20,13 @@ class ChunksFilesystemTest extends TestCase
         parent::setUp();
 
         $this->filesystem = ChunksFilesystem::instance([
-            'folder' => 'chunks'
+            'folder' => 'chunks',
         ]);
     }
 
     /** @test */
-    public function filesystem_lists_chunks_in_folder() {
+    public function filesystem_lists_chunks_in_folder()
+    {
         $result = $this->filesystem->listChunks('foo');
 
         $result->each(function (Chunk $item, int $index) {
@@ -37,32 +38,37 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_folders() {
+    public function filesystem_lists_folders()
+    {
         $result = $this->filesystem->chunkFolders();
 
         $this->assertEquals([
             'chunks/foo',
-            'chunks/wrong_index'
+            'chunks/wrong_index',
         ], $result);
     }
 
     /** @test */
-    public function filesystem_counts_chunks_in_folder() {
+    public function filesystem_counts_chunks_in_folder()
+    {
         $this->assertEquals(3, $this->filesystem->chunksCount('foo'));
     }
 
     /** @test */
-    public function filesystem_returns_chunk_size() {
+    public function filesystem_returns_chunk_size()
+    {
         $this->assertEquals(5, $this->filesystem->chunkSize('foo/0_chunk.txt'));
     }
 
     /** @test */
-    public function filesystem_reads_chunk() {
+    public function filesystem_reads_chunk()
+    {
         $this->assertIsResource($this->filesystem->readChunk('foo/0_chunk.txt'));
     }
 
     /** @test */
-    public function filesystem_throws_exception_with_invalid_chunk() {
+    public function filesystem_throws_exception_with_invalid_chunk()
+    {
         $chunk = new Chunk(0, '');
 
         $this->expectException(ChunkyException::class);
@@ -71,7 +77,8 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_stores_chunks() {
+    public function filesystem_stores_chunks()
+    {
         $chunk = new Chunk(0, UploadedFile::fake()->create('test.txt'));
 
         $this->filesystem->store($chunk, '');
@@ -80,12 +87,14 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function unexisting_chunk_returns_true_on_delete() {
+    public function unexisting_chunk_returns_true_on_delete()
+    {
         $this->assertTrue($this->filesystem->deleteChunk(new Chunk(999, 'chunks/foo/999_chunk.txt')));
     }
 
     /** @test */
-    public function filesystem_deletes_chunk() {
+    public function filesystem_deletes_chunk()
+    {
         Event::fake();
         $this->filesystem->deleteChunk(new Chunk(0, 'chunks/foo/0_chunk.txt'));
 
@@ -94,12 +103,14 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function unexisting_chunks_folder_returns_true_on_delete() {
+    public function unexisting_chunks_folder_returns_true_on_delete()
+    {
         $this->assertTrue($this->filesystem->delete('foo/bar/baz'));
     }
 
     /** @test */
-    public function filesystem_deletes_chunks_folder() {
+    public function filesystem_deletes_chunks_folder()
+    {
         Event::fake();
         $this->filesystem->delete('foo');
 
@@ -111,7 +122,8 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_concatenate_chunks() {
+    public function filesystem_concatenate_chunks()
+    {
         $this->filesystem->concatenate('chunks/foo/concatenated.txt', [
             'chunks/foo/0_chunk.txt',
             'chunks/foo/1_chunk.txt',

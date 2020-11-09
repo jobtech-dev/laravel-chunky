@@ -16,12 +16,9 @@ use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
-use Jobtech\LaravelChunky\Contracts\MergeManager;
-use Jobtech\LaravelChunky\Strategies\FlysystemStrategy;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use Mockery;
 
 class ChunkyManagerTest extends TestCase
 {
@@ -52,7 +49,8 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieve_settings() {
+    public function manager_retrieve_settings()
+    {
         $settings = new ChunkySettings(
             $this->config
         );
@@ -62,7 +60,8 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_set_chunks_filesystem() {
+    public function manager_set_chunks_filesystem()
+    {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
@@ -74,7 +73,8 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_set_merge_filesystem() {
+    public function manager_set_merge_filesystem()
+    {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
@@ -428,8 +428,8 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_merges_chunks_from_folder() {
-
+    public function manager_merges_chunks_from_folder()
+    {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));

@@ -17,12 +17,13 @@ class MergeFilesystemTest extends TestCase
         parent::setUp();
 
         $this->filesystem = MergeFilesystem::instance([
-            'folder' => 'foo'
+            'folder' => 'foo',
         ]);
     }
 
     /** @test */
-    public function filesystem_stores_file() {
+    public function filesystem_stores_file()
+    {
         Event::fake();
         $this->filesystem->store('text.txt', $this->filesystem->read('chunks/foo/0_chunk.txt'));
 

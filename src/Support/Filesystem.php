@@ -108,6 +108,7 @@ abstract class Filesystem
             ->disk($this->disk())
             ->exists($this->path($path));
     }
+
     /**
      * Retrieve every chunks' folder.
      *
@@ -161,7 +162,7 @@ abstract class Filesystem
 
     public function __call($method, $parameters)
     {
-        if(!method_exists($this, $method)) {
+        if (! method_exists($this, $method)) {
             return $this->forwardCallTo($this->filesystem(), $method, $parameters);
         }
 

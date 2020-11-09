@@ -40,7 +40,8 @@ class ChunksFilesystem extends Filesystem
     /**
      * @return array
      */
-    public function chunkFolders() : array {
+    public function chunkFolders(): array
+    {
         return $this->filesystem()->disk(
             $this->disk()
         )->directories(
@@ -158,7 +159,8 @@ class ChunksFilesystem extends Filesystem
      * @param array $chunks
      * @return bool
      */
-    public function concatenate(string $chunk, array $chunks): bool {
+    public function concatenate(string $chunk, array $chunks): bool
+    {
         $this->filesystem()->disk($this->disk())->addPlugin(new Concatenate);
 
         return $this->filesystem()->disk($this->disk())->concatenate($chunk, ...$chunks);

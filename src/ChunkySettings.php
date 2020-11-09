@@ -144,10 +144,10 @@ class ChunkySettings
      */
     public function mergeHandler(): MergeHandler
     {
-        if($this->handler === null) {
+        if ($this->handler === null) {
             $handler = Arr::get($this->config, 'merge.handler');
 
-            if(!class_exists($handler)) {
+            if (! class_exists($handler)) {
                 throw new ChunkyException("Undefined handler $handler");
             }
 
