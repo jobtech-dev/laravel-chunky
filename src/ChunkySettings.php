@@ -5,6 +5,8 @@ namespace Jobtech\LaravelChunky;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Jobtech\LaravelChunky\Contracts\MergeHandler;
+use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 
 class ChunkySettings
 {
@@ -14,9 +16,9 @@ class ChunkySettings
     /** @var int */
     const INDEX_ONE = 1;
 
-    /**
-     * @var array
-     */
+    private ?MergeHandler $handler = null;
+
+    /** @var array */
     private $config;
 
     public function __construct(Repository $config)
@@ -55,7 +57,9 @@ class ChunkySettings
 
         if ($folder === null) {
             return '';
-        } elseif (! Str::endsWith($folder, '/')) {
+        }
+
+        if (! Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 
@@ -83,7 +87,9 @@ class ChunkySettings
 
         if ($folder === null) {
             return '';
-        } elseif (! Str::endsWith($folder, '/')) {
+        }
+
+        if (! Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 
@@ -132,13 +138,23 @@ class ChunkySettings
     }
 
     /**
-     * Retrieve the default merge strategy.
+     * Retrieve the default merge handler.
      *
-     * @return string
+     * @return MergeHandler
      */
-    public function defaultMergeStrategy(): string
+    public function mergeHandler(): MergeHandler
     {
-        return Arr::get($this->config, 'strategies.default');
+        if($this->handler === null) {
+            $handler = Arr::get($this->config, 'merge.handler');
+
+            if(!class_exists($handler)) {
+                throw new ChunkyException("Undefined handler $handler");
+            }
+
+            $this->handler = $handler::instance();
+        }
+
+        return $this->handler;
     }
 
     /**
@@ -148,7 +164,7 @@ class ChunkySettings
      */
     public function connection()
     {
-        return Arr::get($this->config, 'strategies.connection');
+        return Arr::get($this->config, 'merge.connection');
     }
 
     /**
@@ -158,6 +174,6 @@ class ChunkySettings
      */
     public function queue()
     {
-        return Arr::get($this->config, 'strategies.queue');
+        return Arr::get($this->config, 'merge.queue');
     }
 }

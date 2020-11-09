@@ -2,8 +2,8 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
@@ -134,38 +134,16 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_transformed_into_a_response()
-    {
-        $mock = $this->mock(Request::class, function ($mock) {
-            $mock->shouldReceive('wantsJson')
-               ->once()
-               ->andReturn(false);
-        });
-        $chunk = new Chunk(0, $this->upload);
-
-        /** @var Response $result */
-        $result = $chunk->toResponse($mock);
-
-        $this->assertInstanceOf(Response::class, $result);
-        $this->assertEquals($chunk->toJson(), $result->getContent());
-    }
-
-    /** @test */
     public function chunk_is_transformed_into_a_json_resource()
     {
-        $mock = $this->mock(Request::class, function ($mock) {
-            $mock->shouldReceive('wantsJson')
-                ->once()
-                ->andReturn(true);
-        });
+        $mock = $this->mock(Request::class);
         $chunk = new Chunk(0, $this->upload);
 
-        /** @var ChunkResource $result */
         $result = $chunk->toResponse($mock);
 
-        $this->assertInstanceOf(ChunkResource::class, $result);
+        $this->assertInstanceOf(JsonResponse::class, $result);
         $this->assertEquals(json_encode([
             'data' => $chunk->toArray(),
-        ]), $result->toResponse($mock)->getContent());
+        ]), $result->getContent());
     }
 }

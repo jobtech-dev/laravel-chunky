@@ -9,10 +9,7 @@ class ChunkAdded
 {
     use SerializesModels;
 
-    /**
-     * @var \Jobtech\LaravelChunky\Chunk
-     */
-    private $chunk;
+    private Chunk $chunk;
 
     public function __construct(Chunk $chunk)
     {

@@ -6,6 +6,9 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
 
+/**
+ * @deprecated
+ */
 interface MergeManager
 {
     /**

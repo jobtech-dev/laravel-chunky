@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Chunk;
-use Jobtech\LaravelChunky\ChunksManager;
+use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
@@ -17,10 +17,13 @@ use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Jobtech\LaravelChunky\Contracts\MergeManager;
+use Jobtech\LaravelChunky\Strategies\FlysystemStrategy;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
+use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Jobtech\LaravelChunky\Tests\TestCase;
+use Mockery;
 
-class ChunksManagerTest extends TestCase
+class ChunkyManagerTest extends TestCase
 {
     /**
      * @var \Illuminate\Config\Repository
@@ -35,40 +38,97 @@ class ChunksManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_chunks_filesystem()
+    public function manager_is_created_with_filesystems()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
         $this->assertInstanceOf(ChunksFilesystem::class, $manager->chunksFilesystem());
         $this->assertInstanceOf(Factory::class, $manager->chunksFilesystem()->filesystem());
+
+        $this->assertInstanceOf(MergeFilesystem::class, $manager->mergeFilesystem());
+        $this->assertInstanceOf(Factory::class, $manager->mergeFilesystem()->filesystem());
+    }
+
+    /** @test */
+    public function manager_retrieve_settings() {
+        $settings = new ChunkySettings(
+            $this->config
+        );
+        $manager = new ChunkyManager($settings);
+
+        $this->assertEquals($settings, $manager->settings());
+    }
+
+    /** @test */
+    public function manager_set_chunks_filesystem() {
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $manager->setChunksFilesystem('foo', 'bar');
+
+        $this->assertEquals('foo', $manager->chunksFilesystem()->disk());
+        $this->assertEquals('bar/', $manager->chunksFilesystem()->folder());
+    }
+
+    /** @test */
+    public function manager_set_merge_filesystem() {
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $manager->setMergeFilesystem('foo', 'bar');
+
+        $this->assertEquals('foo', $manager->mergeFilesystem()->disk());
+        $this->assertEquals('bar/', $manager->mergeFilesystem()->folder());
     }
 
     /** @test */
     public function manager_retrieves_chunks_disk()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
-        $this->assertEquals($this->config->get('chunky.disks.chunks.disk'), $manager->getChunksDisk());
+        $this->assertEquals($this->config->get('chunky.disks.chunks.disk'), $manager->chunksDisk());
+    }
+
+    /** @test */
+    public function manager_retrieves_merge_disk()
+    {
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertEquals($this->config->get('chunky.disks.merge.disk'), $manager->mergeDisk());
     }
 
     /** @test */
     public function manager_retrieves_chunks_folder()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
-        $this->assertEquals($this->config->get('chunky.disks.chunks.folder').'/', $manager->getChunksFolder());
+        $this->assertEquals($this->config->get('chunky.disks.chunks.folder').'/', $manager->chunksFolder());
+    }
+
+    /** @test */
+    public function manager_retrieves_merge_folder()
+    {
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertEquals($this->config->get('chunky.disks.merge.folder'), $manager->mergeFolder());
     }
 
     /** @test */
     public function manager_retrieves_chunks_options()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
@@ -76,17 +136,29 @@ class ChunksManagerTest extends TestCase
             'disk' => $this->config->get('chunky.disks.chunks.disk'),
         ], $this->config->get('chunky.options.chunks'));
 
-        $this->assertEquals($options, $manager->getChunksOptions());
+        $this->assertEquals($options, $manager->chunksOptions());
+    }
+
+    /** @test */
+    public function manager_retrieves_merge_options()
+    {
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $options = $this->config->get('chunky.options.merge');
+
+        $this->assertEquals($options, $manager->mergeOptions());
     }
 
     /** @test */
     public function manager_retrieves_chunks_from_folder()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
-        $result = $manager->chunks('foo');
+        $result = $manager->listChunks('foo');
         $this->assertInstanceOf(Collection::class, $result);
         $result->each(function ($item) {
             $this->assertInstanceOf(Chunk::class, $item);
@@ -100,22 +172,22 @@ class ChunksManagerTest extends TestCase
     /** @test */
     public function manager_reads_chunk_from_object()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
-        $result = $manager->chunk(new Chunk(0, 'chunks/foo/0_chunk.txt', 'chunks'));
+        $result = $manager->readChunk(new Chunk(0, 'chunks/foo/0_chunk.txt', 'chunks'));
         $this->assertTrue(is_resource($result));
     }
 
     /** @test */
     public function manager_reads_chunk_from_path()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
-        $result = $manager->chunk('chunks/foo/0_chunk.txt');
+        $result = $manager->readChunk('chunks/foo/0_chunk.txt');
         $this->assertTrue(is_resource($result));
     }
 
@@ -126,7 +198,7 @@ class ChunksManagerTest extends TestCase
 
         $file = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
@@ -143,7 +215,7 @@ class ChunksManagerTest extends TestCase
     {
         $file = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
@@ -159,7 +231,7 @@ class ChunksManagerTest extends TestCase
 
         $file = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
@@ -174,27 +246,11 @@ class ChunksManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_checks_if_chunks_folder_exists()
-    {
-        $manager = new ChunksManager(new ChunkySettings(
-            $this->config
-        ));
-
-        $this->assertFalse($manager->validFolder('unexisting'));
-        $this->assertFalse($manager->validFolder('chunks/unexisting'));
-
-        $manager->chunksFilesystem()->makeDirectory('test');
-
-        $this->assertTrue($manager->validFolder('test'));
-        $this->assertTrue($manager->validFolder('chunks/test'));
-    }
-
-    /** @test */
     public function manager_deletes_chunks()
     {
         Event::fake();
 
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
@@ -207,7 +263,7 @@ class ChunksManagerTest extends TestCase
         Storage::assertExists('chunks/test/0_fake-file.txt');
         Storage::assertExists('chunks/test/1_fake-file.txt');
 
-        $manager->deleteChunkFolder('chunks/test');
+        $manager->deleteChunks('chunks/test');
 
         Storage::assertMissing('chunks/test/0_fake-file.txt');
         Storage::assertMissing('chunks/test/1_fake-file.txt');
@@ -219,43 +275,51 @@ class ChunksManagerTest extends TestCase
     /** @test */
     public function manager_delete_chunks_returns_true_on_unexisting_folder()
     {
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
-        $this->assertTrue($manager->deleteChunkFolder('unexisting'));
+        $this->assertTrue($manager->deleteChunks('unexisting'));
     }
 
     /** @test */
-    public function manager_deletes_all_chunks()
+    public function manager_checks_if_chunks_folder_exists()
     {
-        Event::fake();
-
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
-        $fake = $this->createFakeUpload();
+        $this->assertFalse($manager->isValidChunksFolder('unexisting'));
+        $this->assertFalse($manager->isValidChunksFolder('chunks/unexisting'));
 
-        $manager->addChunk($fake, 0, 'test_1');
-        $manager->addChunk($fake, 1, 'test_1');
-        $manager->addChunk($fake, 0, 'test_2');
-        $manager->addChunk($fake, 1, 'test_2');
+        $manager->chunksFilesystem()->makeDirectory('test');
 
-        Storage::assertExists('chunks/test_1/0_fake-file.txt');
-        Storage::assertExists('chunks/test_1/1_fake-file.txt');
-        Storage::assertExists('chunks/test_2/0_fake-file.txt');
-        Storage::assertExists('chunks/test_2/1_fake-file.txt');
+        $this->assertTrue($manager->isValidChunksFolder('test'));
+        $this->assertTrue($manager->isValidChunksFolder('chunks/test'));
+    }
 
-        $manager->deleteAllChunks();
+    /** @test */
+    public function manager_checks_integrity_with_not_existing_folder()
+    {
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
 
-        Storage::assertMissing('test_1/0_fake-file.txt');
-        Storage::assertMissing('test_1/1_fake-file.txt');
-        Storage::assertMissing('test_2/0_fake-file.txt');
-        Storage::assertMissing('test_2/1_fake-file.txt');
-        Storage::assertMissing('test_1');
-        Storage::assertMissing('test_2');
-        Event::assertDispatched(ChunkDeleted::class);
+        $this->assertTrue($manager->checkChunks('foo', 3));
+        $this->assertFalse($manager->checkChunks('wrong_index', 3));
+    }
+
+    /** @test */
+    public function manager_checks_integrity_with_not_existing_folder_and_different_default_index()
+    {
+        $this->config->set('chunky.index', 12);
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $this->assertTrue($manager->checkChunks('unexisting', 12));
+        $this->assertTrue($manager->checkChunks('foo', 15));
+        $this->assertFalse($manager->checkChunks('wrong_index', 15));
     }
 
     /** @test */
@@ -264,7 +328,7 @@ class ChunksManagerTest extends TestCase
         Queue::fake();
         Event::fake();
 
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
@@ -300,7 +364,7 @@ class ChunksManagerTest extends TestCase
         Queue::fake();
         Event::fake();
 
-        $manager = $this->app->make(ChunksManager::class);
+        $manager = $this->app->make(ChunkyManager::class);
 
         $mock = $this->mock(AddChunkRequest::class, function ($mock) {
             $upload = UploadedFile::fake()->create('foo.mp4', 5000);
@@ -330,30 +394,6 @@ class ChunksManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_checks_integrity_with_not_existing_folder()
-    {
-        $manager = new ChunksManager(new ChunkySettings(
-            $this->config
-        ));
-
-        $this->assertTrue($manager->checkChunkIntegrity('foo', 3));
-        $this->assertFalse($manager->checkChunkIntegrity('wrong_index', 3));
-    }
-
-    /** @test */
-    public function manager_checks_integrity_with_not_existing_folder_and_different_default_index()
-    {
-        $this->config->set('chunky.index', 12);
-        $manager = new ChunksManager(new ChunkySettings(
-            $this->config
-        ));
-
-        $this->assertTrue($manager->checkChunkIntegrity('unexisting', 12));
-        $this->assertTrue($manager->checkChunkIntegrity('foo', 15));
-        $this->assertFalse($manager->checkChunkIntegrity('wrong_index', 15));
-    }
-
-    /** @test */
     public function manager_handle_merge_with_remote_filesystem()
     {
         if (! $this->canTestS3()) {
@@ -364,28 +404,45 @@ class ChunksManagerTest extends TestCase
         Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'Hello');
         Storage::disk('s3_disk')->put('chunks/foo/2_foo.txt', 'Hello');
 
-        $manager = new ChunksManager(new ChunkySettings(
+        $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
         $manager->chunksFilesystem()->disk('s3_disk');
-        $this->app->make(MergeManager::class)->mergeFilesystem()->disk('s3_disk');
+        $manager->mergeFilesystem()->disk('s3_disk');
 
         $chunk_size_0 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/0_foo.txt');
         $chunk_size_1 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/1_foo.txt');
         $chunk_size_2 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/2_foo.txt');
         $total_size = $chunk_size_0 + $chunk_size_1 + $chunk_size_2;
 
-        $manager->handleMerge(
+        $manager->merge(
             'foo',
-            'merge.txt',
-            $chunk_size_0,
-            $total_size
+            'merge.txt'
         );
 
         $this->assertTrue(Storage::disk('s3_disk')->exists('merge.txt'));
         $this->assertEquals($total_size, Storage::disk('s3_disk')->size('merge.txt'));
 
         Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo/2_foo.txt', 'chunks/foo', 'merge.txt']);
+    }
+
+    /** @test */
+    public function manager_merges_chunks_from_folder() {
+
+        $manager = new ChunkyManager(new ChunkySettings(
+            $this->config
+        ));
+
+        $manager->chunksFilesystem()->filesystem()->write('chunks/test/0_foo.txt', 'Hello');
+        $manager->chunksFilesystem()->filesystem()->write('chunks/test/1_foo.txt', ' World');
+
+        $manager->merge('chunks/test', 'bar/bar.txt');
+
+        Storage::assertExists('bar/bar.txt');
+        $this->assertEquals('Hello World', $manager->chunksFilesystem()->filesystem()->get('bar/bar.txt'));
+        Storage::assertMissing('test/0_foo.txt');
+        Storage::assertMissing('test/1_foo.txt');
+        Storage::assertMissing('test');
     }
 }

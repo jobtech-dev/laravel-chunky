@@ -12,8 +12,7 @@ use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 
 /**
- * @mixin ManagerHelpers
- * @mixin ChunkyRequestHelpers
+ * @deprecated
  */
 interface ChunksManager
 {
