@@ -40,8 +40,9 @@ class MergeHandler implements MergeHandlerContract
      * @return \Jobtech\LaravelChunky\Contracts\ChunkyManager
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function manager(): ChunkyManager {
-        if($this->manager === null) {
+    public function manager(): ChunkyManager
+    {
+        if ($this->manager === null) {
             $this->manager = Container::getInstance()->make('chunky');
         }
 
@@ -56,7 +57,7 @@ class MergeHandler implements MergeHandlerContract
      *
      * @return string
      */
-    private function concatenate(string $folder, string $target) : string
+    private function concatenate(string $folder, string $target): string
     {
         // Merge
         $chunks = $this->listChunks(
@@ -65,7 +66,7 @@ class MergeHandler implements MergeHandlerContract
             return $item->getPath();
         });
 
-        if(!$this->chunksFilesystem()->isLocal()) {
+        if (! $this->chunksFilesystem()->isLocal()) {
             return $this->temporaryConcatenate($target, $chunks->toArray());
         }
 
@@ -73,6 +74,7 @@ class MergeHandler implements MergeHandlerContract
         if (! $this->chunksFilesystem()->concatenate($merge, $chunks->toArray())) {
             throw new ChunkyException('Unable to concatenate chunks');
         }
+
         return $this->mergeFilesystem()
             ->store(
                 $target,
@@ -93,7 +95,7 @@ class MergeHandler implements MergeHandlerContract
         $stream = new AppendStream;
         $tmp_streams = [];
 
-        foreach($chunks as $chunk) {
+        foreach ($chunks as $chunk) {
             $chunk_stream = $this->chunksFilesystem()->readChunk($chunk);
             $chunk_contents = stream_get_contents($chunk_stream);
             fclose($chunk_stream);
@@ -108,7 +110,7 @@ class MergeHandler implements MergeHandlerContract
         $path = $this->mergeFilesystem()->store($target, $resource = $stream->getResource(), $this->mergeOptions());
 
         foreach ($tmp_streams as $stream) {
-            if(is_resource($stream)) {
+            if (is_resource($stream)) {
                 fclose($stream);
             }
         }
@@ -145,9 +147,10 @@ class MergeHandler implements MergeHandlerContract
     /**
      * {@inheritdoc}
      */
-    public function merge(string $chunks_folder, string $merge_path): string {
+    public function merge(string $chunks_folder, string $merge_path): string
+    {
         // Check chunks folder
-        if(!$this->isValidChunksFolder($chunks_folder)) {
+        if (! $this->isValidChunksFolder($chunks_folder)) {
             throw new ChunkyException("Invalid chunks folder {$chunks_folder}");
         }
 
@@ -176,7 +179,7 @@ class MergeHandler implements MergeHandlerContract
 
     public function __call($method, $parameters)
     {
-        if(!method_exists($this, $method)) {
+        if (! method_exists($this, $method)) {
             return $this->forwardCallTo($this->manager(), $method, $parameters);
         }
 

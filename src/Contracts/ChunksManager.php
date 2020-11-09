@@ -6,8 +6,6 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Jobtech\LaravelChunky\Chunk;
-use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
-use Jobtech\LaravelChunky\Concerns\ManagerHelpers;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 

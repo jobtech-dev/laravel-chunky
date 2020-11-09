@@ -9,5 +9,4 @@ use Jobtech\LaravelChunky\Support\Filesystem;
  */
 class TestFilesystem extends Filesystem
 {
-
 }

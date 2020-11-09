@@ -5,11 +5,11 @@ namespace Jobtech\LaravelChunky;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
+use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
 use Jobtech\LaravelChunky\Contracts\MergeHandler;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
-use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
 
 /**
@@ -43,7 +43,8 @@ class ChunkyManager implements ChunkyManagerContract
     /**
      * {@inheritdoc}
      */
-    public function settings(): ChunkySettings {
+    public function settings(): ChunkySettings
+    {
         return $this->settings;
     }
 

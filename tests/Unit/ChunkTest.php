@@ -6,7 +6,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Jobtech\LaravelChunky\Chunk;
-use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
 class ChunkTest extends TestCase

@@ -296,8 +296,8 @@ class ChunkySettingsTest extends TestCase
                 ->once()
                 ->andReturn([
                     'merge' => [
-                        'handler' => 'Foo\Bar\Baz'
-                    ]
+                        'handler' => 'Foo\Bar\Baz',
+                    ],
                 ]);
         });
 
@@ -316,8 +316,8 @@ class ChunkySettingsTest extends TestCase
                 ->once()
                 ->andReturn([
                     'merge' => [
-                        'handler' => MergeHandler::class
-                    ]
+                        'handler' => MergeHandler::class,
+                    ],
                 ]);
         });
 

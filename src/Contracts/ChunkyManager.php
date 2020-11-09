@@ -2,7 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Contracts;
 
-use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Jobtech\LaravelChunky\Chunk;

@@ -70,7 +70,7 @@ class ClearChunks extends Command
 
         $bar->start();
 
-        foreach($folders as $folder) {
+        foreach ($folders as $folder) {
             $this->deleteFolder($folder);
         }
 

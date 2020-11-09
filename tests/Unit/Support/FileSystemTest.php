@@ -34,7 +34,8 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_checks_if_path_exists() {
+    public function filesystem_checks_if_path_exists()
+    {
         $this->filesystem->folder('chunks');
 
         $this->assertTrue($this->filesystem->exists('foo'));
@@ -42,7 +43,8 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_folders() {
+    public function filesystem_lists_folders()
+    {
         $this->filesystem->folder('chunks');
 
         $this->assertEquals([
@@ -52,7 +54,8 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_files_in_folder() {
+    public function filesystem_lists_files_in_folder()
+    {
         $this->filesystem->folder('chunks');
 
         $this->assertEquals([
@@ -63,7 +66,8 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_makes_directory() {
+    public function filesystem_makes_directory()
+    {
         $this->filesystem->folder('chunks');
 
         $this->filesystem->makeDirectory('bar');
@@ -72,10 +76,11 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_returns_instance_of_itself() {
+    public function filesystem_returns_instance_of_itself()
+    {
         $filesystem = TestFilesystem::instance([
             'disk' => 'foo',
-            'folder' => 'bar'
+            'folder' => 'bar',
         ]);
 
         $this->assertInstanceOf(TestFilesystem::class, $filesystem);
@@ -83,7 +88,8 @@ class FileSystemTest extends TestCase
         $this->assertEquals('bar/', $filesystem->folder());
     }
 
-    public function filesystem_forward_calls_to_factory() {
+    public function filesystem_forward_calls_to_factory()
+    {
         $mock = Mockery::mock(Factory::class);
         $mock->shouldReceive('foo')
             ->once()

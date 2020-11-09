@@ -4,7 +4,6 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Concerns;
 
 use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Tests\TestCase;
 

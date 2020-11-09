@@ -3,7 +3,6 @@
 namespace Jobtech\LaravelChunky\Concerns;
 
 use Illuminate\Support\Str;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 
 trait ChunkyRequestHelpers

@@ -17,14 +17,16 @@ use Mockery;
 
 class MergeHandlerTest extends TestCase
 {
-    public function handler_is_created_with_manager() {
+    public function handler_is_created_with_manager()
+    {
         $manager = new ChunkyManager(new ChunkySettings($this->app->make('config')));
         $handler = new MergeHandler($manager);
 
         $this->assertEquals($manager, $handler->manager());
     }
 
-    public function invalid_chunks_integrity_throws_exception() {
+    public function invalid_chunks_integrity_throws_exception()
+    {
         $request_mock = Mockery::mock(ChunkyManager::class);
         $request_mock->shouldReceive('fileInput')
             ->once()
@@ -58,7 +60,8 @@ class MergeHandlerTest extends TestCase
         $handler->dispatchMerge($request_mock, 'foo');
     }
 
-    public function handler_dispatch_merge() {
+    public function handler_dispatch_merge()
+    {
         Queue::fake();
         $request_mock = Mockery::mock(ChunkyManager::class);
         $request_mock->shouldReceive('fileInput')
@@ -96,7 +99,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_throws_exception_with_invalid_chunk_folder() {
+    public function handler_throws_exception_with_invalid_chunk_folder()
+    {
         $mock = Mockery::mock(ChunkyManager::class);
         $mock->shouldReceive('isValidChunksFolder')
             ->once()
@@ -110,7 +114,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_merge_chunks_to_target() {
+    public function handler_merge_chunks_to_target()
+    {
         Event::fake();
         $handler = new MergeHandler();
         $handler->chunksFilesystem()->folder('chunks');
@@ -124,7 +129,8 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_merge_chunks_with_temporary_files() {
+    public function handler_merge_chunks_with_temporary_files()
+    {
         if (! $this->canTestS3()) {
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }
