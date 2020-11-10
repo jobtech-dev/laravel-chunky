@@ -81,9 +81,9 @@ class MergeHandlerTest extends TestCase
                 'chunky' => [
                     'merge' => [
                         'connection' => 'default',
-                        'queue' => 'foo'
-                    ]
-                ]
+                        'queue' => 'foo',
+                    ],
+                ],
             ])));
 
         $handler = new MergeHandler($manager_mock);
