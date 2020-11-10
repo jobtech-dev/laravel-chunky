@@ -6,6 +6,19 @@ use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 
 interface MergeHandler
 {
+
+    /**
+     * @param \Jobtech\LaravelChunky\Contracts\ChunkyManager $manager
+     * @return \Jobtech\LaravelChunky\Handlers\MergeHandler
+     */
+    public function setManager(ChunkyManager $manager): MergeHandler;
+
+    /**
+     * @return \Jobtech\LaravelChunky\Contracts\ChunkyManager
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function manager(): ChunkyManager;
+
     /**
      * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
      * @param string $folder

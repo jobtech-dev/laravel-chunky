@@ -2,6 +2,8 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Handlers;
 
+use Illuminate\Config\Repository;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -11,12 +13,14 @@ use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Jobtech\LaravelChunky\Tests\TestCase;
 use Mockery;
 
 class MergeHandlerTest extends TestCase
 {
+    /** @test */
     public function handler_is_created_with_manager()
     {
         $manager = new ChunkyManager(new ChunkySettings($this->app->make('config')));
@@ -25,15 +29,13 @@ class MergeHandlerTest extends TestCase
         $this->assertEquals($manager, $handler->manager());
     }
 
+    /** @test */
     public function invalid_chunks_integrity_throws_exception()
     {
-        $request_mock = Mockery::mock(ChunkyManager::class);
+        $request_mock = Mockery::mock(AddChunkRequest::class);
         $request_mock->shouldReceive('fileInput')
             ->once()
-            ->andReturnSelf();
-        $request_mock->shouldReceive('getClientOriginalName')
-            ->once()
-            ->andReturn('test.txt');
+            ->andReturn(UploadedFile::fake()->create('test.txt'));
         $request_mock->shouldReceive('chunkSizeInput')
             ->once()
             ->andReturn(10);
@@ -44,10 +46,7 @@ class MergeHandlerTest extends TestCase
         $manager_mock = Mockery::mock(ChunkyManager::class);
         $manager_mock->shouldReceive('settings')
             ->once()
-            ->andReturnSelf();
-        $manager_mock->shouldReceive('connection')
-            ->once()
-            ->andReturn('default');
+            ->andReturn(new ChunkySettings(new Repository()));
         $manager_mock->shouldReceive('checkChunksIntegrity')
             ->once()
             ->with('foo', 10, 100)
@@ -60,16 +59,14 @@ class MergeHandlerTest extends TestCase
         $handler->dispatchMerge($request_mock, 'foo');
     }
 
+    /** @test */
     public function handler_dispatch_merge()
     {
         Queue::fake();
-        $request_mock = Mockery::mock(ChunkyManager::class);
+        $request_mock = Mockery::mock(AddChunkRequest::class);
         $request_mock->shouldReceive('fileInput')
             ->once()
-            ->andReturnSelf();
-        $request_mock->shouldReceive('getClientOriginalName')
-            ->once()
-            ->andReturn('test.txt');
+            ->andReturn(UploadedFile::fake()->create('test.txt'));
         $request_mock->shouldReceive('chunkSizeInput')
             ->once()
             ->andReturn(10);
@@ -80,17 +77,14 @@ class MergeHandlerTest extends TestCase
         $manager_mock = Mockery::mock(ChunkyManager::class);
         $manager_mock->shouldReceive('settings')
             ->times(2)
-            ->andReturnSelf();
-        $manager_mock->shouldReceive('connection')
-            ->once()
-            ->andReturn('default');
-        $manager_mock->shouldReceive('queue')
-            ->once()
-            ->andReturn('foo');
-        $manager_mock->shouldReceive('checkChunksIntegrity')
-            ->once()
-            ->with('foo', 10, 100)
-            ->andReturn(true);
+            ->andReturn(new ChunkySettings(new Repository([
+                'chunky' => [
+                    'merge' => [
+                        'connection' => 'default',
+                        'queue' => 'foo'
+                    ]
+                ]
+            ])));
 
         $handler = new MergeHandler($manager_mock);
 
@@ -135,21 +129,24 @@ class MergeHandlerTest extends TestCase
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }
 
-        Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello');
-        Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'Hello');
-        Storage::disk('s3_disk')->put('chunks/foo/2_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('test/foo/0_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('test/foo/1_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('test/foo/2_foo.txt', 'Hello');
 
         $handler = new MergeHandler();
 
         $handler->chunksFilesystem()->disk('s3_disk');
+        $handler->chunksFilesystem()->folder('test');
         $handler->mergeFilesystem()->disk('s3_disk');
+        $handler->mergeFilesystem()->folder('test');
 
         $handler->merge(
             'foo',
             'merge.txt'
         );
 
-        $this->assertTrue(Storage::disk('s3_disk')->exists('merge.txt'));
-        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo/2_foo.txt', 'chunks/foo', 'merge.txt']);
+        $this->assertTrue(Storage::disk('s3_disk')->exists('test/merge.txt'));
+
+        Storage::disk('s3_disk')->delete(['test/foo/0_foo.txt', 'test/foo/1_foo.txt', 'test/foo/2_foo.txt', 'test/foo', 'test/merge.txt']);
     }
 }

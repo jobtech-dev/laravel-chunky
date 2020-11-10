@@ -95,7 +95,7 @@ class ChunkyManager implements ChunkyManagerContract
      */
     public function mergeHandler(): MergeHandler
     {
-        return $this->settings->mergeHandler();
+        return $this->settings->mergeHandler()->setManager($this);
     }
 
     /**
@@ -286,6 +286,6 @@ class ChunkyManager implements ChunkyManagerContract
      */
     public function merge(string $chunks_folder, string $merge_path): string
     {
-        return $this->settings->mergeHandler()->merge($chunks_folder, $merge_path);
+        return $this->mergeHandler()->merge($chunks_folder, $merge_path);
     }
 }

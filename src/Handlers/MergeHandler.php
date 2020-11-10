@@ -29,24 +29,11 @@ class MergeHandler implements MergeHandlerContract
 {
     use ForwardsCalls;
 
-    private ?ChunkyManager $manager = null;
+    private ?ChunkyManager $manager;
 
     public function __construct(?ChunkyManager $manager = null)
     {
         $this->manager = $manager;
-    }
-
-    /**
-     * @return \Jobtech\LaravelChunky\Contracts\ChunkyManager
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function manager(): ChunkyManager
-    {
-        if ($this->manager === null) {
-            $this->manager = Container::getInstance()->make('chunky');
-        }
-
-        return $this->manager;
     }
 
     /**
@@ -107,7 +94,7 @@ class MergeHandler implements MergeHandlerContract
             $tmp_streams[] = $tmp_stream;
         }
 
-        $path = $this->mergeFilesystem()->store($target, $resource = $stream->getResource(), $this->mergeOptions());
+        $path = $this->mergeFilesystem()->store($target, $stream->getResource(), $this->mergeOptions());
 
         foreach ($tmp_streams as $stream) {
             if (is_resource($stream)) {
@@ -116,6 +103,32 @@ class MergeHandler implements MergeHandlerContract
         }
 
         return $path;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
+     */
+    public function setManager(ChunkyManager $manager): MergeHandler
+    {
+        $this->manager = $manager;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
+     */
+    public function manager(): ChunkyManager
+    {
+        if ($this->manager === null) {
+            $this->manager = Container::getInstance()->make('chunky');
+        }
+
+        return $this->manager;
     }
 
     /**

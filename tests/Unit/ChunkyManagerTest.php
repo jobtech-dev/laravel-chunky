@@ -400,20 +400,22 @@ class ChunkyManagerTest extends TestCase
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }
 
-        Storage::disk('s3_disk')->put('chunks/foo/0_foo.txt', 'Hello');
-        Storage::disk('s3_disk')->put('chunks/foo/1_foo.txt', 'Hello');
-        Storage::disk('s3_disk')->put('chunks/foo/2_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('test/foo/0_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('test/foo/1_foo.txt', 'Hello');
+        Storage::disk('s3_disk')->put('test/foo/2_foo.txt', 'Hello');
 
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
         ));
 
         $manager->chunksFilesystem()->disk('s3_disk');
+        $manager->chunksFilesystem()->folder('test');
         $manager->mergeFilesystem()->disk('s3_disk');
+        $manager->mergeFilesystem()->folder('test');
 
-        $chunk_size_0 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/0_foo.txt');
-        $chunk_size_1 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/1_foo.txt');
-        $chunk_size_2 = $manager->chunksFilesystem()->filesystem()->disk('s3_disk')->size('chunks/foo/2_foo.txt');
+        $chunk_size_0 = Storage::disk('s3_disk')->size('test/foo/0_foo.txt');
+        $chunk_size_1 = Storage::disk('s3_disk')->size('test/foo/1_foo.txt');
+        $chunk_size_2 = Storage::disk('s3_disk')->size('test/foo/2_foo.txt');
         $total_size = $chunk_size_0 + $chunk_size_1 + $chunk_size_2;
 
         $manager->merge(
@@ -421,10 +423,10 @@ class ChunkyManagerTest extends TestCase
             'merge.txt'
         );
 
-        $this->assertTrue(Storage::disk('s3_disk')->exists('merge.txt'));
-        $this->assertEquals($total_size, Storage::disk('s3_disk')->size('merge.txt'));
+        $this->assertTrue(Storage::disk('s3_disk')->exists('test/merge.txt'));
+        $this->assertEquals($total_size, Storage::disk('s3_disk')->size('test/merge.txt'));
 
-        Storage::disk('s3_disk')->delete(['chunks/foo/0_foo.txt', 'chunks/foo/1_foo.txt', 'chunks/foo/2_foo.txt', 'chunks/foo', 'merge.txt']);
+        Storage::disk('s3_disk')->delete(['test/foo/0_foo.txt', 'test/foo/1_foo.txt', 'test/foo/2_foo.txt', 'test/foo', 'test/merge.txt']);
     }
 
     /** @test */
