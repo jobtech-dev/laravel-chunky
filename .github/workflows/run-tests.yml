@@ -6,7 +6,7 @@ on:
       - 'feature/*'
   pull_request:
     branches:
-      - main
+      - master
       - develop
 jobs:
   run-tests:
