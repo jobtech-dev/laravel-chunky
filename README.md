@@ -28,11 +28,10 @@
 
 * [Getting Started](#getting-started)
   * [Main features](#main-features)
-  * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
   * [Chunks](#chunks)
-  * [Merge strategies](#merge-strategies)
+  * [Merge handler](#merge-handler)
 * [Testing](#testing)
 * [Roadmap](#roadmap)
 * [Changelog](#changelog)
@@ -43,25 +42,14 @@
 
 ## Getting Started
 
-Laravel chunky has been written to easily handle chunk upload for large files in Laravel 6.x and 7.x. It will automatically handle the upload request (see the [usage](#usage) section below) and save all the chunks into the desired disk.
+Laravel chunky has been written to easily handle chunk upload for large files in Laravel 6.x, 7.x. and 8.x It will automatically handle the upload request (see the [usage](#usage) section below) and save all the chunks into the desired disk.
 
 Once the upload completes, the package will dispatch a job in order to merge all the files into a single one and save in the same chunks disks or in another one.
 
 ### Main features
 * Handle chunks upload with custom save disks and folders.
 * Handle file merge with custom save disks and folders.
-* Different merge strategies based on the file mime type.
 * Once the merge is done, the chunks folder is automatically cleared.
-
-### Prerequisites
-
-This packages uses the [Laravel FFMpeg](https://github.com/protonemedia/laravel-ffmpeg) library, a wrapper around [php-ffmpeg](https://github.com/PHP-FFMpeg/PHP-FFMpeg) to merge video and audio files but it requires the ffmpeg library installed. 
-
-From the [php-ffmpeg docs](https://github.com/PHP-FFMpeg/PHP-FFMpeg#how-this-library-works):
-
-> This library requires a working FFMpeg install. You will need both FFMpeg and FFProbe binaries to use it. Be sure that these binaries can be located with system PATH to get the benefit of the binary detection, otherwise you should have to explicitly give the binaries path on load.
->
->  For Windows users: Please find the binaries at http://ffmpeg.zeranoe.com/builds/.
 
 ### Installation
 
@@ -92,7 +80,7 @@ You can also register an alias for the `Chunky` facade:
   // [...]
   'aliases' => [
       // [...]
-      'Chunky' => Jobtech\LaravelChunky\ChunkyServiceProviderChunky::class,
+      'Chunky' => Jobtech\LaravelChunky\Facades\Chunky::class,
   ]
 ];
 ```
@@ -113,7 +101,7 @@ This package can also work with Lumen, just register the service provider in `bo
 $app->register(Jobtech\LaravelChunky\ChunkyServiceProvider::class);
 ```
 
-In order to configure the package, since lumen doesn't include the `vendor:publis` command, copy the configuration file to your config folder and enable it:
+In order to configure the package, since lumen doesn't include the `vendor:publish` command, copy the configuration file to your config folder and enable it:
 
 ```php
 $app->configure('chunky');
@@ -121,13 +109,13 @@ $app->configure('chunky');
 
 ## Usage
 
-This package has been designed to leave you the full control of the chunks upload and simple use the helper methods to handle the merge strategy as well as an _all-in-one_ solution for a fast scaffolding of the controllers delegated to handle large files upload.
+This package has been designed to leave you the full control of the chunks upload and simple use the helper methods to handle the files merge as well as an _all-in-one_ solution for a fast scaffolding of the controllers delegated to handle large files upload.
 
 At the moment, this package doesn't include any wrapper for the frontend forms for the file uploads but, in the `config/chunky.php` configuration file, you can find two ways of integrate the package with [Dropzone](https://www.dropzonejs.com/) and [ResumableJs](http://resumablejs.com/).
 
 ### Chunks
 
-Laravel Chunky handles the chunks as an _ordered list_ of files. This is a **must** and if a wrong file index has been uploaded, an exception will be thrown in order to guarantee the integrity of the final merged file. Once all the chunks have been uploaded, and the merge strategy is executing, another integrity check will be made to all the chunks. If the sum of each file size is lower than the original file size, another exception will be thrown. For this reason a chunk request must include both the chunk and these attributes:
+Laravel Chunky handles the chunks as an _ordered list_ of files. This is a **must** and if a wrong file index has been uploaded, an exception will be thrown in order to guarantee the integrity of the final merged file. Once all the chunks have been uploaded, and the merge process is executing, another integrity check will be made to all the chunks. If the sum of each file size is lower than the original file size, another exception will be thrown. For this reason a chunk request must include both the chunk and these attributes:
 
 * An `index`: indicates the current chunk that is uploading. The first index can be set in the configuration file.
 * A `file size`: the original file size. Will be used for the integrity check.
@@ -230,6 +218,8 @@ return $chunk->showFileInfo()->toResponse();
 // }
 ```
 
+Everytime a chunk is added, a `Jobtech\LaravelChunky\Events\ChunkDeleted` event is fired.
+
 > If you're trying to add a chunk that violates the integrity of the chunks folder an exception will be thrown.
 > for example:
 > 
@@ -244,21 +234,23 @@ return $chunk->showFileInfo()->toResponse();
 >```
 > This will throw a `Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException`
 
-
 If you're using, for example, Dropzone you can block the upload action, in that case you will delete the currently uploaded chunks:
 
-Everytime a chunk is deleted a `Jobtech\LaravelChunky\Events\ChunkDeleted` event is fired.
 
 ```php
-Chunky::deleteChunk('chunks-folder');
+Chunky::deleteChunks('chunks-folder');
 ``` 
+Everytime a chunk is deleted, a `Jobtech\LaravelChunky\Events\ChunkDeleted` event is fired.
+
+---
 
 The package include a method that, given the chunks folder, will return a sorted collection. Each item contains the relative chunk's path and index.
 
 ```php
-$chunks = Chunky::chunks('chunks-folder-name');
+$chunks = Chunky::listChunks('chunks-folder-name');
 
 foreach($chunks as $chunk) {
+  /** @var \Jobtech\LaravelChunky\Chunk $chunk */
   print_r($chunk->toArray());
 }
 
@@ -307,11 +299,23 @@ class UploadController extends Controller {
 }
 ```
 
-### Merge strategies
+### Merge handler
 
-If you need to merge chunks into a single file, you can use the strategies to merge the uploaded chunks into a single file. If the `auto_merge` config key is `true`, the package will automatically decide which merge strategy should be used depending on the file mime type. If no strategy has been declared, the default one will be used.
+If you need to merge chunks into a single file, you can call the `merge` function that will use the configured merge handler to concatenate all the uploaded chunks into a single file. 
 
-Once the last chunk has been uploaded, a `Jobtech\LaravelChunky\Jobs\MergeChunks` job will be dispatched on the given connection and queue.
+```
+public function chunkUpload(AddChunkRequest $request) {
+   $chunk = Chunky::handle($request, 'folder-is-optional');
+
+   if($chunk->isLast()) {
+       Chunky::merge('upload-folder', 'your/merge/file.ext');
+   }
+
+   return $chunk->toResponse();
+}
+```
+
+Once the last chunk has been uploaded and the `auto_merge` config key has `true` value, the package will automatically merge the chunks. A `Jobtech\LaravelChunky\Jobs\MergeChunks` job will be dispatched on the given connection and queue if these options have been set.
 
 ```php
 // config/chunky.php
@@ -319,30 +323,26 @@ Once the last chunk has been uploaded, a `Jobtech\LaravelChunky\Jobs\MergeChunks
    // [...]
 
    /*
-    |--------------------------------------------------------------------------
-    | Merge strategies
-    |--------------------------------------------------------------------------
-    |
-    | This option defines the strategy that should be used for a given file
-    | mime type. If left empty, the default strategy will be used.
-    |
-    | `connection` and `queue` keys define which queue and which connection
-    | should be used for the merge job. If connection is null, a synchronous
-    | job will be dispatched
-    */
-
-    'strategies' => [
-        'default' => \Jobtech\LaravelChunky\Strategies\FlysystemStrategy::class,
-
-        'mime_types' => [
-            'video/*' => \Jobtech\LaravelChunky\Strategies\VideoStrategy::class,
-            'audio/*' => \Jobtech\LaravelChunky\Strategies\AudioStrategy::class,
-        ],
-
-        'connection' => env('CHUNKY_MERGE_CONNECTION', 'default'),
-
-        'queue' => env('CHUNKY_MERGE_QUEUE'),
-    ],
+   |--------------------------------------------------------------------------
+   | Merge settings
+   |--------------------------------------------------------------------------
+   |
+   | This option defines the merge handler that should be used to perform the
+   | chunks merge once the upload is completed (automagically depending on
+   | `auto_merge` config value.
+   |
+   | `connection` and `queue` keys define which queue and which connection
+   | should be used for the merge job. If connection is null, a synchronous
+   | job will be dispatched
+   */
+   
+   'merge' => [
+       'handler' => \Jobtech\LaravelChunky\Handlers\MergeHandler::class,
+   
+       'connection' => env('CHUNKY_MERGE_CONNECTION', 'sync'),
+   
+       'queue' => env('CHUNKY_MERGE_QUEUE'),
+   ],
 ];
 ```
 
@@ -372,88 +372,68 @@ class UploadController extends Controller {
 }
 ```
 
-Once the job is completed a `Jobtech\LaravelChunky\Events\ChunksMerged` event is fired.
+Once the job is completed, a `Jobtech\LaravelChunky\Events\ChunksMerged` event is fired as well as once the merge file is moved to destination a `Jobtech\LaravelChunky\Events\MergeAdded` event is fired.
 
-#### Custom strategies
+#### Custom handler
 
-If you prefer to do everything on your own, without dispatching jobs but simply using the strategy:
-
-```php
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
-use Jobtech\LaravelChunky\Handlers\MergeHandler;
-
-class UploadController extends Controller {
-    // [...]
-
-    public function chunkUpload(AddChunkRequest $request) {
-       $chunk = Chunky::handle($request, 'folder-is-optional');
-
-       if($chunk->isLast()) {
-            $strategy = MergeHandler::strategyBy($request->file('chunk')->getMimeType());
-
-            $strategy->chunksFolder('chunks-folder');
-            $strategy->destination('destination/path/to/merge.ext');
-
-            $strategy->merge();
-       }
-
-       return $chunk->toResponse();
-    }
-}       
-```
-
-Finally, you can implement your own strategy by extending the `Jobtech\LaravelChunky\Strategies\MergeStrategy` abstract class. This class implements the `Illuminate\Support\Traits\ForwardsCalls` trait, so you can call all the helpers methods of the `Jobtech\LaravelChunky\ChunksManager` class.
-
-> At the moment only the `Jobtech\LaravelChunky\Strategies\FlysystemStrategy` and the `Jobtech\LaravelChunky\Strategies\VideoStrategy` have been implemented. If you want to add more strategy, please follow the [contributing](#contributing) section.
-
-This is a scaffolding of a custom strategy:
+If you want to integrate your own handler, remember to implement the `Jobtech\LaravelChunky\Contracts\MergeHandler` contract (or at least implement the same methods) in your class, and update the related `handler` configuration option:
 
 ```php
-<?php
+use Jobtech\LaravelChunky\Contracts\MergeHandler;
 
-namespace App\MergeStrategies;
-
-use Jobtech\LaravelChunky\Strategies\MergeStrategy;
-use Jobtech\LaravelChunky\Strategies\Concerns\ChecksIntegrity;
-use Jobtech\LaravelChunky\Strategies\Contracts\MergeStrategy as MergeStrategyContract;
-
-class PDFStrategy extends MergeStrategy
-{
-    use ChecksIntegrity;
+class MyHandler implements MergeHandler {
+    private ChunkyManager $manager;
 
     /**
-     * @inheritDoc
+     * @param \Jobtech\LaravelChunky\Contracts\ChunkyManager $manager
+     * @return \Jobtech\LaravelChunky\Handlers\MergeHandler
      */
-    public function merge() : MergeStrategyContract
+    public function setManager(ChunkyManager $manager): MergeHandler 
     {
-        // Implement here your logic to merge pdf chunks
+        $this->manager = $manager;
 
         return $this;
     }
-}
-```
-
-Once completed, add your strategy into the configuration file, so you can automatically resolve your strategy with the `Jobtech\LaravelChunky\Handlers\MergeHandler::strategyBy` method:
-
-
-```php
-// config/chunky.php
-[
-    // [...]
-
-    'strategies' => [
-        'default' => \Jobtech\LaravelChunky\Strategies\FlysystemStrategy::class,
-
-        'mime_types' => [
-            'video/*' => \Jobtech\LaravelChunky\Strategies\VideoStrategy::class,
-            'audio/*' => \Jobtech\LaravelChunky\Strategies\AudioStrategy::class,
-            // Add here
-            'application/pdf' => \App\MergeStrategies\PDFStrategy::class,
-        ],
-    ],
-
-    // [...]
-];
+    
+    /**
+     * @return \Jobtech\LaravelChunky\Contracts\ChunkyManager
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
+    public function manager(): ChunkyManager
+    {
+        return $this->manager;
+    }
+    
+    /**
+     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
+     * @param string $folder
+     *
+     * @return \Illuminate\Foundation\Bus\PendingDispatch|string
+     */
+    public function dispatchMerge(AddChunkRequest $request, string $folder)
+    {
+        // Your logic here
+    }
+    
+    /**
+     * @param string $chunks_folder
+     * @param string $merge_destination
+     *
+     * @return string
+     */
+    public function merge(string $chunks_folder, string $merge_destination): string
+    {
+        // Your logic here
+    }
+    
+    /**
+     * @return \Jobtech\LaravelChunky\Contracts\MergeHandler
+     */
+    public static function instance(): MergeHandler
+    {
+        return new static();
+    }
+}       
 ```
 
 ## Testing
@@ -480,11 +460,10 @@ See the [open issues](https://github.com/jobtech-dev/laravel-chunky/issues) for 
 
 We're working on:
 
-* Implement more merge strategies for specific mime types
-  * Video and audio should have dedicated strategy for each codec.
-* Integrate frontend chunk upload (Not sure if necessary... there are so many packages that does it)
-* Better tests
-* Laravel 5.5+ compatibility
+* Integrate frontend chunk upload (Not sure if necessary... there are so many packages that does it).
+* Custom concatenation, at the moment we're using a third party package.
+* Better tests.
+* Laravel 5.5+ compatibility.
 
 ## Changelog
 
@@ -511,10 +490,9 @@ Thanks to:
 * Filippo Galante ([ilGala](https://github.com/ilgala)) 
 * [All contributors](https://github.com/jobtech-dev/laravel-chunky/graphs/contributors)
 
-We've used these packages for the merge strategies:
+We've used these packages for the chunks concatenation:
 
 * Keven Godet - [Flysystem concatenate](https://github.com/kevengodet/flysystem-concatenate)
-* Protone Media - [Laravel FFMpeg](https://github.com/protonemedia/laravel-ffmpeg)
 
 And this repository for the readme boilerplate:
 
