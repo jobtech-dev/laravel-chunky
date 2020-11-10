@@ -20,7 +20,7 @@ class MergeFilesystem extends Filesystem
     public function store(string $destination, $origin, $options = []): string
     {
         $destination = $this->path($destination);
-        if(is_resource($origin)) {
+        if (is_resource($origin)) {
             $origin = stream_get_contents($origin);
         }
 
