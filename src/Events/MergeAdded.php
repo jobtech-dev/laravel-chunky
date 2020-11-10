@@ -4,7 +4,7 @@ namespace Jobtech\LaravelChunky\Events;
 
 use Illuminate\Queue\SerializesModels;
 
-class ChunksMerged
+class MergeAdded
 {
     use SerializesModels;
 

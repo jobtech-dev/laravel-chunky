@@ -4,7 +4,7 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Jobs;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Jobtech\LaravelChunky\Contracts\ChunksManager;
+use Jobtech\LaravelChunky\Contracts\ChunkyManager;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -14,7 +14,7 @@ use Jobtech\LaravelChunky\Tests\TestCase;
 class MergeChunksTest extends TestCase
 {
     /**
-     * @var \Jobtech\LaravelChunky\ChunksManager
+     * @var \Jobtech\LaravelChunky\ChunkyManager
      */
     private $manager;
 
@@ -22,7 +22,7 @@ class MergeChunksTest extends TestCase
     {
         parent::setUp();
 
-        $this->manager = $this->app->make(ChunksManager::class);
+        $this->manager = $this->app->make(ChunkyManager::class);
     }
 
     /** @test */

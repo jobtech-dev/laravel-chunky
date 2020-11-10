@@ -2,43 +2,10 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
-use Illuminate\Support\Str;
+use Jobtech\LaravelChunky\Events\MergeAdded;
 
-class MergeFilesystem extends FileSystem
+class MergeFilesystem extends Filesystem
 {
-    /** {@inheritdoc} */
-    public function disk($disk = null): ?string
-    {
-        if (! empty($disk) && is_string($disk)) {
-            $this->disk = $disk;
-        }
-
-        return $this->disk;
-    }
-
-    /** {@inheritdoc} */
-    public function folder($folder = null): ?string
-    {
-        if (! empty($folder) && is_string($folder)) {
-            $this->folder = $folder;
-        }
-
-        return $this->folder;
-    }
-
-    /**
-     * @param string $path
-     * @return string
-     */
-    public function destinationPath(string $path): string
-    {
-        if (Str::startsWith($path, $this->folder())) {
-            return $path;
-        }
-
-        return $this->folder.$path;
-    }
-
     /**
      * Write the origin stream into destination.
      *
@@ -52,24 +19,17 @@ class MergeFilesystem extends FileSystem
      */
     public function store(string $destination, $origin, $options = []): string
     {
+        $destination = $this->path($destination);
+        if (is_resource($origin)) {
+            $origin = stream_get_contents($origin);
+        }
+
         if ($this->filesystem()->disk($this->disk)->put($destination, $origin, $options)) {
+            event(new MergeAdded($destination));
+
             return $destination;
         }
 
         return false;
-    }
-
-    public function createTemporaryChunk($origin)
-    {
-        $this->filesystem()->disk();
-    }
-
-    /**
-     * @param string $path
-     * @return bool
-     */
-    public function exists(string $path): bool
-    {
-        return $this->filesystem()->disk($this->disk)->exists($path);
     }
 }

@@ -2,16 +2,15 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Concerns;
 
-use Jobtech\LaravelChunky\ChunksManager;
+use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
 class ChunkyRequestHelpersTest extends TestCase
 {
     /**
-     * @var \Jobtech\LaravelChunky\ChunksManager
+     * @var \Jobtech\LaravelChunky\ChunkyManager
      */
     private $manager;
 
@@ -19,7 +18,7 @@ class ChunkyRequestHelpersTest extends TestCase
     {
         parent::setUp();
 
-        $this->manager = new ChunksManager(new ChunkySettings(
+        $this->manager = new ChunkyManager(new ChunkySettings(
             $this->app->make('config')
         ));
     }
@@ -45,7 +44,7 @@ class ChunkyRequestHelpersTest extends TestCase
     }
 
     /** @test */
-    public function manager_throws_exception_on_total_size_lower_than_chunk_size()
+    public function manager_returns_1_on_total_size_lower_than_chunk_size()
     {
         $request = $this->mock(AddChunkRequest::class, function ($mock) {
             $mock->shouldReceive('totalSizeInput')
@@ -56,9 +55,7 @@ class ChunkyRequestHelpersTest extends TestCase
                 ->andReturn(2);
         });
 
-        $this->expectException(ChunksIntegrityException::class);
-
-        $this->manager->lastIndexFrom($request);
+        $this->assertEquals(1, $this->manager->lastIndexFrom($request));
     }
 
     /**

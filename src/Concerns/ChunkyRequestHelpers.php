@@ -3,7 +3,6 @@
 namespace Jobtech\LaravelChunky\Concerns;
 
 use Illuminate\Support\Str;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 
 trait ChunkyRequestHelpers
@@ -48,7 +47,8 @@ trait ChunkyRequestHelpers
         $chunk_size = $request->chunkSizeInput();
 
         if ($total_size < $chunk_size) {
-            throw new ChunksIntegrityException('Total file size is lower than single chunk size');
+            // In this case usually it means that there's only a chunk
+            return 1;
         }
 
         return ceil($total_size / $chunk_size);
@@ -66,8 +66,6 @@ trait ChunkyRequestHelpers
         $last_index = $this->lastIndexFrom($request)
             + ($this->settings->defaultIndex() - 1);
 
-        $result = $request->indexInput() == $last_index;
-
-        return $result;
+        return $request->indexInput() == $last_index;
     }
 }

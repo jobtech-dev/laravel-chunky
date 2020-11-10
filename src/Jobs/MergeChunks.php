@@ -7,7 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Jobtech\LaravelChunky\ChunksManager;
+use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
+use Jobtech\LaravelChunky\Facades\Chunky;
 
 class MergeChunks implements ShouldQueue
 {
@@ -16,38 +17,26 @@ class MergeChunks implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * @var string
-     */
-    private string $folder;
+    private string $chunks_folder;
 
-    /**
-     * @var string
-     */
-    private string $destination;
+    private string $merge_path;
 
-    /**
-     * @var int
-     */
     private int $chunk_size;
 
-    /**
-     * @var int
-     */
-    private $total_size;
+    private int $total_size;
 
     /**
      * Create a new job instance.
      *
-     * @param string $folder
-     * @param string $destination
+     * @param string $chunks_folder
+     * @param string $merge_path
      * @param int $chunk_size
      * @param int $total_size
      */
-    public function __construct(string $folder, string $destination, int $chunk_size, int $total_size)
+    public function __construct(string $chunks_folder, string $merge_path, int $chunk_size, int $total_size)
     {
-        $this->folder = $folder;
-        $this->destination = $destination;
+        $this->chunks_folder = $chunks_folder;
+        $this->merge_path = $merge_path;
         $this->chunk_size = $chunk_size;
         $this->total_size = $total_size;
     }
@@ -55,19 +44,14 @@ class MergeChunks implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     *
      * @return void
      */
     public function handle()
     {
-        $manager = ChunksManager::getInstance();
+        if (! Chunky::checkChunksIntegrity($this->chunks_folder, $this->chunk_size, $this->total_size)) {
+            throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
+        }
 
-        $manager->handleMerge(
-            $this->folder,
-            $this->destination,
-            $this->chunk_size,
-            $this->total_size
-        );
+        Chunky::merge($this->chunks_folder, $this->merge_path);
     }
 }

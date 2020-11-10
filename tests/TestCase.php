@@ -5,8 +5,6 @@ namespace Jobtech\LaravelChunky\Tests;
 use Dotenv\Dotenv;
 use File;
 use Illuminate\Http\UploadedFile;
-use Jobtech\LaravelChunky\Contracts\ChunksManager;
-use Jobtech\LaravelChunky\Contracts\MergeManager;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -30,12 +28,15 @@ abstract class TestCase extends Orchestra
         $this->loadEnvironmentVariables();
 
         parent::setUp();
+    }
 
-        $this->app->make(ChunksManager::class)->chunksFilesystem()
-            ->disk($this->app['config']->get('chunky.disks.chunks.disk'));
+    protected function tearDown(): void
+    {
+        parent::tearDown();
 
-        $this->app->make(MergeManager::class)->mergeFilesystem()
-            ->disk($this->app['config']->get('chunky.disks.chunks.disk'));
+        if (File::isDirectory(__DIR__.'/tmp')) {
+            File::deleteDirectory(__DIR__.'/tmp');
+        }
     }
 
     /**

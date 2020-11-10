@@ -5,7 +5,7 @@ namespace Jobtech\LaravelChunky;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\Response;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -84,7 +84,9 @@ class Chunk implements Arrayable, Jsonable, Responsable
     {
         if ($this->path instanceof UploadedFile) {
             return basename($this->path->getClientOriginalName(), $suffix);
-        } elseif ($this->path instanceof File) {
+        }
+
+        if ($this->path instanceof File) {
             return $this->path->getBasename($suffix);
         }
 
@@ -215,20 +217,14 @@ class Chunk implements Arrayable, Jsonable, Responsable
      */
     public function toResponse($request)
     {
-        if ($request->wantsJson()) {
-            return $this->toResource();
-        }
-
-        return new Response(
-            $this->toJson(),
-            Response::HTTP_CREATED
-        );
+        return $this->toResource()
+            ->toResponse($request);
     }
 
     /**
      * Transforms the current model into a json resource.
      */
-    public function toResource()
+    public function toResource(): JsonResource
     {
         /** @var \Illuminate\Http\Resources\Json\JsonResource $resource */
         $resource = config('chunky.resource', ChunkResource::class);

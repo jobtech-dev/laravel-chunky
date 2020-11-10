@@ -2,6 +2,8 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
@@ -10,70 +12,69 @@ use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Keven\Flysystem\Concatenate\Concatenate;
 use Symfony\Component\HttpFoundation\File\File;
 
-class ChunksFilesystem extends FileSystem
+class ChunksFilesystem extends Filesystem
 {
-    /** {@inheritdoc} */
-    public function disk($disk = null): ?string
+    /**
+     * @param string $folder
+     * @return \Illuminate\Support\Collection
+     */
+    public function listChunks(string $folder): Collection
     {
-        if (! empty($disk) && is_string($disk)) {
-            $this->disk = $disk;
-        }
+        $folder = $this->path($folder);
+        $files = $this->list($folder);
 
-        return $this->disk;
+        return collect($files)
+            ->map(function ($path, $key) use ($folder, $files) {
+                $filename = str_replace($folder.DIRECTORY_SEPARATOR, '', $path);
+                $exploded_name = explode('_', $filename);
+
+                $index = array_shift($exploded_name);
+                $last = count($files) - 1 == $key;
+
+                return new Chunk(intval($index), $path, $this->disk(), $last);
+            })->sortBy(function (Chunk $chunk) {
+                return $chunk->getIndex();
+            });
     }
 
-    /** {@inheritdoc} */
-    public function folder($folder = null): ?string
+    /**
+     * @return array
+     */
+    public function chunkFolders(): array
     {
-        if (! empty($folder) && is_string($folder)) {
-            $this->folder = $folder;
-        }
-
-        return $this->folder;
+        return $this->filesystem()->disk(
+            $this->disk()
+        )->directories(
+            $this->folder()
+        );
     }
 
     /**
      * @param string $folder
-     *
-     * @return string
+     * @return int
      */
-    public function fullPath(string $folder): string
+    public function chunksCount(string $folder): int
     {
-        $suffix = Str::endsWith($folder, DIRECTORY_SEPARATOR) ? '' : DIRECTORY_SEPARATOR;
-
-        if (Str::startsWith($folder, $this->folder)) {
-            return $folder.$suffix;
-        } elseif (! Str::endsWith($this->folder, $folder.$suffix)) {
-            return $this->folder.$folder.$suffix;
-        }
-
-        return $this->folder;
+        return count($this->list($this->path($folder)));
     }
 
     /**
-     * Retrieve every chunks' folder.
-     *
-     * @return array
+     * @param string $path
+     * @return int
      */
-    public function folders(): array
+    public function chunkSize(string $path): int
     {
-        return $this->filesystem()
-            ->disk($this->disk)
-            ->directories($this->folder);
+        return $this->filesystem()->disk($this->disk())->size($this->path($path));
     }
 
     /**
-     * @param string|null $folder
-     *
-     * @return array
+     * @param string $path
+     * @return resource|null
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function list($folder = null): array
+    public function readChunk(string $path)
     {
-        $folder = $this->fullPath($folder);
-
-        return $this->filesystem()
-            ->disk($this->disk)
-            ->files($folder);
+        return $this->filesystem()->disk($this->disk())->readStream($this->path($path));
     }
 
     /**
@@ -89,19 +90,43 @@ class ChunksFilesystem extends FileSystem
             throw new ChunkyException('Path must be a file');
         }
 
-        $file = fopen($chunk->getPath(), 'r');
-        $destination = $this->fullPath($folder).$chunk->getSlug();
-        $this->filesystem()->disk($this->disk)->put(
-            $destination, $file
-        );
+        // Build destination
+        $suffix = Str::endsWith($folder, DIRECTORY_SEPARATOR) ? '' : DIRECTORY_SEPARATOR;
+        $destination = $this->path($folder.$suffix.$chunk->getSlug());
 
+        // Copy file
+        $file = fopen($chunk->getPath(), 'r');
+
+        Arr::pull($options, 'disk');
+        $this->filesystem()->disk($this->disk())->put($destination, $file, $options);
         fclose($file);
 
+        // Return chunk
         $chunk->setPath($destination);
-
         event(new ChunkAdded($chunk));
 
         return $chunk;
+    }
+
+    /**
+     * Delete all chunks and, once empty, delete the folder.
+     *
+     * @param \Jobtech\LaravelChunky\Chunk $chunk
+     * @return bool
+     */
+    public function deleteChunk(Chunk $chunk): bool
+    {
+        if (! $this->filesystem()->disk($this->disk())->exists($chunk->getPath())) {
+            return true;
+        }
+
+        $deleted = $this->filesystem()->disk($this->disk())->delete($chunk->getPath());
+
+        if ($deleted) {
+            event(new ChunkDeleted($chunk));
+        }
+
+        return $deleted;
     }
 
     /**
@@ -113,9 +138,9 @@ class ChunksFilesystem extends FileSystem
      */
     public function delete(string $folder): bool
     {
-        $folder = $this->fullPath($folder);
+        $folder = $this->path($folder);
 
-        if (! $this->filesystem()->disk($this->disk)->exists($folder)) {
+        if (! $this->filesystem()->disk($this->disk())->exists($folder)) {
             return true;
         }
 
@@ -123,95 +148,8 @@ class ChunksFilesystem extends FileSystem
             $this->deleteChunk($chunk);
         }
 
-        $result = $this->filesystem()->disk($this->disk)
+        return $this->filesystem()->disk($this->disk())
             ->deleteDirectory($folder);
-
-        return $result;
-    }
-
-    /**
-     * Delete all chunks and, once empty, delete the folder.
-     *
-     * @param string $folder
-     *
-     * @return bool
-     */
-    public function deleteChunk(Chunk $chunk): bool
-    {
-        if (! $this->filesystem()->disk($this->disk)->exists($chunk->getPath())) {
-            return true;
-        }
-
-        $deleted = $this->filesystem()
-            ->disk($this->disk)
-            ->delete($chunk->getPath());
-
-        if ($deleted) {
-            event(new ChunkDeleted($chunk));
-        }
-
-        return $deleted;
-    }
-
-    /**
-     * @param string $folder
-     * @return \Illuminate\Support\Collection
-     */
-    public function listChunks(string $folder)
-    {
-        $folder = $this->fullPath($folder);
-        $files = $this->list($folder);
-
-        return collect($files)
-            ->map(function ($path, $key) use ($folder, $files) {
-                $filename = str_replace($folder, '', $path);
-                $exploded_name = explode('_', $filename);
-                $index = array_shift($exploded_name);
-                $last = count($files) - 1 == $key;
-
-                return new Chunk(intval($index), $path, $this->disk, $last);
-            })->sortBy(function (Chunk $chunk) {
-                return $chunk->getIndex();
-            });
-    }
-
-    /**
-     * @param string $path
-     * @return bool
-     */
-    public function exists(string $path): bool
-    {
-        return $this->filesystem()->disk($this->disk)->exists($path);
-    }
-
-    /**
-     * @param string $folder
-     * @return int
-     */
-    public function chunksCount(string $folder): int
-    {
-        $folder = $this->fullPath($folder);
-
-        return count($this->list($folder));
-    }
-
-    /**
-     * @param string $path
-     * @return int
-     */
-    public function chunkSize(string $path): int
-    {
-        return $this->filesystem()->disk($this->disk)->size($path);
-    }
-
-    /**
-     * @param $path
-     * @return resource|null
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     */
-    public function readChunk($path)
-    {
-        return $this->filesystem()->disk($this->disk)->readStream($path);
     }
 
     /**
@@ -223,8 +161,8 @@ class ChunksFilesystem extends FileSystem
      */
     public function concatenate(string $chunk, array $chunks): bool
     {
-        $this->filesystem()->disk($this->disk)->addPlugin(new Concatenate);
+        $this->filesystem()->disk($this->disk())->addPlugin(new Concatenate);
 
-        return $this->filesystem()->disk($this->disk)->concatenate($chunk, ...$chunks);
+        return $this->filesystem()->disk($this->disk())->concatenate($chunk, ...$chunks);
     }
 }

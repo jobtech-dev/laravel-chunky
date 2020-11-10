@@ -6,10 +6,7 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\ServiceProvider;
 use Jobtech\LaravelChunky\Commands\ClearChunks;
-use Jobtech\LaravelChunky\Contracts\ChunksManager as ChunksManagerContract;
-use Jobtech\LaravelChunky\Contracts\MergeManager as MergeManagerContract;
-use Jobtech\LaravelChunky\Strategies\Contracts\StrategyFactory as StrategyFactoryContract;
-use Jobtech\LaravelChunky\Strategies\StrategyFactory;
+use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Laravel\Lumen\Application as LumenApplication;
@@ -36,7 +33,7 @@ class ChunkyServiceProvider extends ServiceProvider
         $this->registerBindings();
         $this->registerCommands();
 
-        $this->app->alias(ChunksManagerContract::class, 'chunky');
+        $this->app->alias(ChunkyManagerContract::class, 'chunky');
     }
 
     protected function setupConfig()
@@ -68,21 +65,12 @@ class ChunkyServiceProvider extends ServiceProvider
         $this->app->bind(ChunksFilesystem::class, ChunksFilesystem::class);
         $this->app->bind(MergeFilesystem::class, MergeFilesystem::class);
 
-        $this->app->singleton(ChunksManagerContract::class, function (Container $app) {
-            return new ChunksManager(new ChunkySettings(
-                $app->make('config')
-            ));
-        });
-        $this->app->singleton(MergeManagerContract::class, function (Container $app) {
-            return new MergeManager(new ChunkySettings(
-                $app->make('config')
-            ));
+        $this->app->singleton(ChunkySettings::class, function (Container $app) {
+            return new ChunkySettings($app->make('config'));
         });
 
-        $this->app->singleton(StrategyFactoryContract::class, function (Container $app) {
-            return new StrategyFactory(new ChunkySettings(
-                $app->make('config')
-            ));
+        $this->app->singleton(ChunkyManagerContract::class, function (Container $app) {
+            return new ChunkyManager($app->make(ChunkySettings::class));
         });
     }
 }

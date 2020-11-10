@@ -41,18 +41,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Automatically merge chunks
-    |--------------------------------------------------------------------------
-    |
-    | This option defines if chunky should automatically dispatch a merge job
-    | once the last chunk has been upload.
-    |
-    */
-
-    'auto_merge' => env('CHUNKY_AUTO_MERGE', true),
-
-    /*
-    |--------------------------------------------------------------------------
     | Additional options
     |--------------------------------------------------------------------------
     |
@@ -168,23 +156,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Merge strategies
+    | Automatically merge chunks
     |--------------------------------------------------------------------------
     |
-    | This option defines the strategy that should be used for a given file
-    | mime type. If left empty, the default strategy will be used.
+    | This option defines if chunky should automatically dispatch a merge job
+    | once the last chunk has been upload.
+    |
+    */
+
+    'auto_merge' => env('CHUNKY_AUTO_MERGE', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Merge settings
+    |--------------------------------------------------------------------------
+    |
+    | This option defines the merge handler that should be used to perform the
+    | chunks merge once the upload is completed (automagically depending on
+    | `auto_merge` config value.
     |
     | `connection` and `queue` keys define which queue and which connection
     | should be used for the merge job. If connection is null, a synchronous
     | job will be dispatched
     */
 
-    'strategies' => [
-        'default' => \Jobtech\LaravelChunky\Strategies\FlysystemStrategy::class,
-
-        'mime_types' => [
-            'video/*' => \Jobtech\LaravelChunky\Strategies\VideoStrategy::class,
-        ],
+    'merge' => [
+        'handler' => \Jobtech\LaravelChunky\Handlers\MergeHandler::class,
 
         'connection' => env('CHUNKY_MERGE_CONNECTION', 'sync'),
 

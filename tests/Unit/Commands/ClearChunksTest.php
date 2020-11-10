@@ -3,7 +3,7 @@
 namespace Jobtech\LaravelChunky\Tests\Unit\Commands;
 
 use Illuminate\Support\Facades\Storage;
-use Jobtech\LaravelChunky\ChunksManager;
+use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
@@ -18,7 +18,7 @@ class ClearChunksTest extends TestCase
     {
         parent::setUp();
 
-        $this->manager = new ChunksManager(
+        $this->manager = new ChunkyManager(
             new ChunkySettings($this->app->make('config'))
         );
     }
@@ -36,7 +36,7 @@ class ClearChunksTest extends TestCase
         Storage::assertExists('chunks/test/1_fake-file.txt');
 
         $this->artisan('chunky:clear', ['folder' => 'test'])
-            ->expectsOutput('folder chunks/test cleared!')
+            ->expectsOutput('folder chunks/test has been deleted!')
             ->assertExitCode(0);
 
         Storage::assertMissing('test/0_fake-file.txt');
@@ -60,7 +60,7 @@ class ClearChunksTest extends TestCase
         Storage::assertExists('chunks/test_2/1_fake-file.txt');
 
         $this->artisan('chunky:clear')
-            ->expectsOutput('Chunks folder cleared!')
+            ->expectsOutput('Chunks folders have been deleted!')
             ->assertExitCode(0);
 
         Storage::assertMissing('test_1/0_fake-file.txt');

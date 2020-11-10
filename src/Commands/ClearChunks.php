@@ -4,7 +4,7 @@ namespace Jobtech\LaravelChunky\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
-use Jobtech\LaravelChunky\Contracts\ChunksManager;
+use Jobtech\LaravelChunky\Contracts\ChunkyManager;
 
 class ClearChunks extends Command
 {
@@ -24,8 +24,9 @@ class ClearChunks extends Command
      * @var string
      */
     protected $description = 'Delete all chunks and relative folder.';
+
     /**
-     * @var \Jobtech\LaravelChunky\Contracts\ChunksManager
+     * @var \Jobtech\LaravelChunky\Contracts\ChunkyManager
      */
     private $manager;
 
@@ -42,11 +43,11 @@ class ClearChunks extends Command
     /**
      * Execute the console command.
      *
-     * @param \Jobtech\LaravelChunky\Contracts\ChunksManager $manager
+     * @param \Jobtech\LaravelChunky\Contracts\ChunkyManager $manager
      *
      * @return mixed
      */
-    public function handle(ChunksManager $manager)
+    public function handle(ChunkyManager $manager)
     {
         $this->manager = $manager;
 
@@ -54,27 +55,40 @@ class ClearChunks extends Command
             return;
         }
 
-        $root = $this->manager->getChunksFolder();
+        $root = $this->manager->chunksFolder();
         $folder = $this->argument('folder');
 
         if (! empty($folder)) {
             $root .= $folder;
+            $this->deleteFolder($root);
 
-            if (! $this->manager->chunksFilesystem()->delete($root)) {
-                $this->error("An error occurred while deleting folder {$root}");
-
-                return;
-            }
-
-            $this->info("folder {$root} cleared!");
-        } else {
-            if (! $this->manager->deleteAllChunks($this->output)) {
-                $this->error("An error occurred while deleting folder {$folder}");
-
-                return;
-            }
-
-            $this->info('Chunks folder cleared!');
+            return;
         }
+
+        $folders = $this->manager->chunksFilesystem()->chunkFolders();
+        $bar = $this->output->createProgressBar(count($folders));
+
+        $bar->start();
+
+        foreach ($folders as $folder) {
+            $this->deleteFolder($folder);
+        }
+
+        $bar->finish();
+        $this->info('Chunks folders have been deleted!');
+    }
+
+    /**
+     * @param string $folder
+     */
+    private function deleteFolder(string $folder)
+    {
+        if (! $this->manager->deleteChunks($folder)) {
+            $this->error("An error occurred while deleting folder {$folder}");
+
+            return;
+        }
+
+        $this->info("folder {$folder} has been deleted!");
     }
 }
