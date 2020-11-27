@@ -1,7 +1,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/jobtech-dev/laravel-chunky">
-    <img src="https://jobtech.it/img/logo@2x.png" alt="Logo">
+    <img src="https://user-images.githubusercontent.com/1577699/100443019-3c0ca500-30a9-11eb-9e36-72193abc90fc.png" alt="Logo">
   </a>
 
   <h3 align="center">Laravel Chunky</h3>

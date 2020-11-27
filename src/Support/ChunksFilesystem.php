@@ -11,12 +11,13 @@ use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Keven\Flysystem\Concatenate\Concatenate;
 use Symfony\Component\HttpFoundation\File\File;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class ChunksFilesystem extends Filesystem
 {
     /**
      * @param string $folder
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function listChunks(string $folder): Collection
     {
@@ -70,7 +71,7 @@ class ChunksFilesystem extends Filesystem
     /**
      * @param string $path
      * @return resource|null
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws FileNotFoundException
      */
     public function readChunk(string $path)
     {
@@ -78,7 +79,7 @@ class ChunksFilesystem extends Filesystem
     }
 
     /**
-     * @param \Jobtech\LaravelChunky\Chunk $chunk
+     * @param Chunk $chunk
      * @param string $folder
      * @param array $options
      *
@@ -111,7 +112,7 @@ class ChunksFilesystem extends Filesystem
     /**
      * Delete all chunks and, once empty, delete the folder.
      *
-     * @param \Jobtech\LaravelChunky\Chunk $chunk
+     * @param Chunk $chunk
      * @return bool
      */
     public function deleteChunk(Chunk $chunk): bool

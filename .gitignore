@@ -4,3 +4,4 @@ vendor
 .phpunit.result.cache
 .idea
 .env
+!phpunit.xml.dist

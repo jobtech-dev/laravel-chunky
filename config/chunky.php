@@ -22,6 +22,10 @@ return [
             'disk'   => env('CHUNKY_MERGE_DISK', 'local'),
             'folder' => null,
         ],
+        'tmp' => [
+            'disk'   => env('CHUNKY_TMP_DISK', 'local'),
+            'tmp' => null,
+        ],
     ],
 
     /*
