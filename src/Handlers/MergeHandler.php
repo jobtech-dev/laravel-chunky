@@ -82,7 +82,7 @@ class MergeHandler implements MergeHandlerContract
     private function temporaryConcatenate(string $target, Collection $chunks)
     {
         $stream = new AppendStream;
-        $chunks->each(function (Chunk $chunk) use($stream) {
+        $chunks->each(function (Chunk $chunk) use ($stream) {
             $path = $this->temp_filesystem->store('tmp-'.$chunk->getFilename(), $this->chunksFilesystem()->readChunk($chunk->getPath()));
             $stream->append($this->temp_filesystem->readFile($path));
         });

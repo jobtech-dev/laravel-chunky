@@ -17,7 +17,7 @@ class MergeFilesystemTest extends TestCase
         parent::setUp();
 
         $this->filesystem = MergeFilesystem::instance([
-            'folder' => 'foo'
+            'folder' => 'foo',
         ]);
     }
 
