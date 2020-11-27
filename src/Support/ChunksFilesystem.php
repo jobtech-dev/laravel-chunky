@@ -2,6 +2,7 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -11,7 +12,6 @@ use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Keven\Flysystem\Concatenate\Concatenate;
 use Symfony\Component\HttpFoundation\File\File;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class ChunksFilesystem extends Filesystem
 {

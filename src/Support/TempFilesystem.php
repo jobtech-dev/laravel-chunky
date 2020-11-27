@@ -2,8 +2,6 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
-use Illuminate\Support\Facades\Log;
-
 class TempFilesystem extends Filesystem
 {
     private array $temp_files = [];
@@ -37,7 +35,7 @@ class TempFilesystem extends Filesystem
 
     public function clean()
     {
-        foreach($this->temp_files as $file) {
+        foreach ($this->temp_files as $file) {
             $this->filesystem()->disk($this->disk())->delete($file);
         }
     }

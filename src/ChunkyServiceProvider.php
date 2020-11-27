@@ -64,7 +64,7 @@ class ChunkyServiceProvider extends ServiceProvider
 
     private function registerBindings()
     {
-        $this->app->singleton(TempFilesystem::class, function() {
+        $this->app->singleton(TempFilesystem::class, function () {
             $config = $this->app->make('config');
             $filesystem = new TempFilesystem(app()->make(Factory::class));
 

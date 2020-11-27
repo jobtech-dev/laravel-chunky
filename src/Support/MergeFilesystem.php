@@ -23,6 +23,7 @@ class MergeFilesystem extends Filesystem
 
         if ($this->filesystem()->disk($this->disk)->writeStream($destination, $origin, $options)) {
             event(new MergeAdded($destination));
+
             return $destination;
         }
 
