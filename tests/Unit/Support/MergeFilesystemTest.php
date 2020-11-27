@@ -17,7 +17,7 @@ class MergeFilesystemTest extends TestCase
         parent::setUp();
 
         $this->filesystem = MergeFilesystem::instance([
-            'folder' => 'foo',
+            'folder' => 'foo'
         ]);
     }
 
@@ -25,7 +25,7 @@ class MergeFilesystemTest extends TestCase
     public function filesystem_stores_file()
     {
         Event::fake();
-        $this->filesystem->store('text.txt', $this->filesystem->read('chunks/foo/0_chunk.txt'));
+        $this->filesystem->store('text.txt', $this->filesystem->readStream('chunks/foo/0_chunk.txt'));
 
         Storage::assertExists('foo/text.txt');
         Event::assertDispatched(MergeAdded::class);

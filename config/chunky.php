@@ -24,7 +24,7 @@ return [
         ],
         'tmp' => [
             'disk'   => env('CHUNKY_TMP_DISK', 'local'),
-            'tmp' => null,
+            'folder' => null,
         ],
     ],
 
