@@ -2,6 +2,28 @@
 
 Every major / minor version release will be documented in the changelog.
 
+## v1.3.0 - 2020-11-2020
+Major updates:
+
+* Removed the merge strategy logic. It was completely useless since the package doesn't aim anymore to convert the files after merge.
+* Code refactor.
+* Temporary files support when merging from remote chunks disks.
+
+Minor fixes:
+
+* Improved tests.
+* Updated documentation.
+* Fixed Github actions
+
+## v1.2.2 - 2020-09-28
+Major features:
+
+* Removed all the logic regarding the mime-type strategy. It was out of context.
+* Splitted ChunksManager in two classes ChunksManager and MergeManager
+* Code cleanup
+* Better handling of remote chunks merge
+
+
 ## v1.1.5 - 2020-09-02
 * Little fixes on `Chunk` model. 
 * `MergeChunks` job refactor to avoid request serialization. 

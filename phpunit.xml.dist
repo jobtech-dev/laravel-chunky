@@ -20,6 +20,10 @@
         </whitelist>
     </filter>
     <php>
-        <env name="APP_NAME" value="mysite"/>
+        <env name="CHUNKY_CHUNK_DISK" value="local"/>
+        <env name="CHUNKY_MERGE_DISK" value="local"/>
+        <env name="CHUNKY_AUTO_MERGE" value="true"/>
+        <env name="CHUNKY_MERGE_CONNECTION" value="default"/>
+        <env name="CHUNKY_MERGE_QUEUE" value="null"/>
     </php>
 </phpunit>

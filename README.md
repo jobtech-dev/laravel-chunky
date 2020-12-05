@@ -1,11 +1,9 @@
 <br />
 <p align="center">
   <a href="https://github.com/jobtech-dev/laravel-chunky">
-    <img src="https://jobtech.it/img/logo@2x.png" alt="Logo">
+    <img src="https://user-images.githubusercontent.com/1577699/100456224-4ab28680-30c0-11eb-8452-e6a674f3dcdb.png" alt="Logo">
   </a>
-
-  <h3 align="center">Laravel Chunky</h3>
-
+  
   <p align="center">
     This package handles chunked files upload requests in order to safely save chunked files and, once the upload has been completed, merge all the chunks into a single file.
     <br />
@@ -42,7 +40,7 @@
 
 ## Getting Started
 
-Laravel chunky has been written to easily handle chunk upload for large files in Laravel 6.x, 7.x. and 8.x It will automatically handle the upload request (see the [usage](#usage) section below) and save all the chunks into the desired disk.
+Laravel chunky is a package that can handle chunk upload for large files in Laravel 6.x, 7.x. and 8.x. Its main goal is automatically handle the upload request (see the [usage](#usage) section below) and save all the chunks into the desired disk.
 
 Once the upload completes, the package will dispatch a job in order to merge all the files into a single one and save in the same chunks disks or in another one.
 

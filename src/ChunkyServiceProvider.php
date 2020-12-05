@@ -3,12 +3,14 @@
 namespace Jobtech\LaravelChunky;
 
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\ServiceProvider;
 use Jobtech\LaravelChunky\Commands\ClearChunks;
 use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
 use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
+use Jobtech\LaravelChunky\Support\TempFilesystem;
 use Laravel\Lumen\Application as LumenApplication;
 
 class ChunkyServiceProvider extends ServiceProvider
@@ -62,6 +64,16 @@ class ChunkyServiceProvider extends ServiceProvider
 
     private function registerBindings()
     {
+        $this->app->singleton(TempFilesystem::class, function () {
+            $config = $this->app->make('config');
+            $filesystem = new TempFilesystem(app()->make(Factory::class));
+
+            $filesystem->disk($config->get('chunky.disks.tmp.disk', $config->get('filesystems.default')));
+            $filesystem->folder($config->get('chunky.disks.tmp.folder'));
+
+            return $filesystem;
+        });
+
         $this->app->bind(ChunksFilesystem::class, ChunksFilesystem::class);
         $this->app->bind(MergeFilesystem::class, MergeFilesystem::class);
 

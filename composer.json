@@ -1,11 +1,13 @@
 {
     "name": "jobtech/laravel-chunky",
     "description": "A laravel manager to handle chunked files upload",
+    "keywords": ["upload", "chunk", "laravel", "jobtech", "chunky"],
     "license": "MIT",
     "authors": [
         {
             "name": "ilGala",
-            "email": "filippo.galante@jobtech.it"
+            "email": "filippo.galante@jobtech.it",
+            "homepage": "https://jobtech.it"
         }
     ],
     "homepage": "https://github.com/jobtech-dev/laravel-chunky",
