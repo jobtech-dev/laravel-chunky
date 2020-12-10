@@ -40,7 +40,7 @@ class ChunksFilesystemTest extends TestCase
     /** @test */
     public function filesystem_lists_chunks_in_folder_with_more_than_10_chunks()
     {
-        for($i = 0; $i < 11; $i++) {
+        for ($i = 0; $i < 11; $i++) {
             $file = UploadedFile::fake()->create('test_chunk.txt');
             $chunk = Chunk::create($file, $i);
 
@@ -50,7 +50,7 @@ class ChunksFilesystemTest extends TestCase
         $result = $this->filesystem->listChunks('manyChunks');
 
         $result->each(function (Chunk $item, int $index) {
-            if($index == 10) {
+            if ($index == 10) {
                 $this->assertTrue($item->isLast());
             } else {
                 $this->assertFalse($item->isLast());
