@@ -2,6 +2,9 @@
 
 Every major / minor version release will be documented in the changelog.
 
+## v1.4.1 - 2020-12-10
+Bug fix for the chunks listing. This error was due to the alphabetical order of files when listed from the chunk's folder.
+
 ## v1.4.0 - 2020-12-05
 Major updates:
 
@@ -9,7 +12,7 @@ After a few tests, there was a RAM memory usage pick (10x the file dimension) wh
 
 In detail, if the ChunkFilesystem has a remote adapter (S3 adapter tested) in order to generate the merge file, local temporary files are generated from remote chunks and, once appended to the final file, a stream is opened and putted as resource object into S3. This very last operation, mesured with `memory_get_peak_usage` function, was about ten times the dimension of the remote chunks sum.
 
-To avoid this behaviour, TemporaryFilesystem has been introduced and the memory pick has been optimized.
+To avoid this behaviour TemporaryFilesystem has been introduced and the memory pick has been optimized.
 
 ## v1.3.0 - 2020-11-10
 Major updates:

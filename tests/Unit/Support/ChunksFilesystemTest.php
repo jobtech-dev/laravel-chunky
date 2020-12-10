@@ -29,11 +29,32 @@ class ChunksFilesystemTest extends TestCase
     {
         $result = $this->filesystem->listChunks('foo');
 
-        $result->each(function (Chunk $item, int $index) {
+        $result->each(function ($item, $index) {
             $this->assertInstanceOf(Chunk::class, $item);
 
             $this->assertEquals($index, $item->getIndex());
             $this->assertEquals("chunks/foo/{$index}_chunk.txt", $item->getPath());
+        });
+    }
+
+    /** @test */
+    public function filesystem_lists_chunks_in_folder_with_more_than_10_chunks()
+    {
+        for($i = 0; $i < 11; $i++) {
+            $file = UploadedFile::fake()->create('test_chunk.txt');
+            $chunk = Chunk::create($file, $i);
+
+            $this->filesystem->store($chunk, 'manyChunks');
+        }
+
+        $result = $this->filesystem->listChunks('manyChunks');
+
+        $result->each(function (Chunk $item, int $index) {
+            if($index == 10) {
+                $this->assertTrue($item->isLast());
+            } else {
+                $this->assertFalse($item->isLast());
+            }
         });
     }
 

@@ -25,17 +25,17 @@ class ChunksFilesystem extends Filesystem
         $files = $this->list($folder);
 
         return collect($files)
-            ->map(function ($path, $key) use ($folder, $files) {
+            ->map(function ($path) use ($folder, $files) {
                 $filename = str_replace($folder.DIRECTORY_SEPARATOR, '', $path);
                 $exploded_name = explode('_', $filename);
 
                 $index = array_shift($exploded_name);
-                $last = count($files) - 1 == $key;
+                $last = count($files) - 1 == $index;
 
                 return new Chunk(intval($index), $path, $this->disk(), $last);
             })->sortBy(function (Chunk $chunk) {
                 return $chunk->getIndex();
-            });
+            })->values();
     }
 
     /**
