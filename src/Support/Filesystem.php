@@ -7,7 +7,8 @@ use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
-use League\Flysystem\Adapter\Local;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\StorageAttributes;
 
 abstract class Filesystem
 {
@@ -92,10 +93,9 @@ abstract class Filesystem
     {
         $adapter = $this->filesystem()
             ->disk($this->disk)
-            ->getDriver()
             ->getAdapter();
 
-        return $adapter instanceof Local;
+        return $adapter instanceof LocalFilesystemAdapter;
     }
 
     /**
@@ -116,9 +116,11 @@ abstract class Filesystem
      */
     public function folders(): array
     {
-        return $this->filesystem()
-            ->disk($this->disk())
-            ->directories($this->folder());
+        return $this->filesystem()->disk($this->disk())->listContents($this->folder(), false)
+            ->filter(fn (StorageAttributes $attributes) => $attributes->isDir())
+            ->sortByPath()
+            ->map(fn (StorageAttributes $attributes) => $attributes->path())
+            ->toArray();
     }
 
     /**
