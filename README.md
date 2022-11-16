@@ -38,6 +38,15 @@
 * [Contact](#contact)
 * [Credits](#credits)
 
+## Laravel compatibility
+
+ Laravel      | laravel-chunky
+:-------------|:----------
+ 9.x          | 2.0.0
+ 8.x          | 1.4.1
+ 7.x          | 1.4.1
+ 6.x          | 1.4.1
+
 ## Getting Started
 
 Laravel chunky is a package that can handle chunk upload for large files in Laravel 6.x, 7.x. and 8.x. Its main goal is automatically handle the upload request (see the [usage](#usage) section below) and save all the chunks into the desired disk.

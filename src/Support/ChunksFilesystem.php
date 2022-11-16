@@ -10,8 +10,12 @@ use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
+use Keven\AppendStream\AppendStream;
 use Keven\Flysystem\Concatenate\Concatenate;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\StorageAttributes;
 use Symfony\Component\HttpFoundation\File\File;
+use League\Flysystem\Filesystem as LeagueFilesystem;
 
 class ChunksFilesystem extends Filesystem
 {
@@ -32,7 +36,7 @@ class ChunksFilesystem extends Filesystem
                 $index = array_shift($exploded_name);
                 $last = count($files) - 1 == $index;
 
-                return new Chunk(intval($index), $path, $this->disk(), $last);
+                return new Chunk((int)$index, $path, $this->disk(), $last);
             })->sortBy(function (Chunk $chunk) {
                 return $chunk->getIndex();
             })->values();
@@ -40,14 +44,16 @@ class ChunksFilesystem extends Filesystem
 
     /**
      * @return array
+     *
+     * @throws FilesystemException
      */
     public function chunkFolders(): array
     {
-        return $this->filesystem()->disk(
-            $this->disk()
-        )->directories(
-            $this->folder()
-        );
+        return $this->filesystem()->disk($this->disk())->listContents($this->folder(), false)
+            ->filter(fn (StorageAttributes $attributes) => $attributes->isDir())
+            ->sortByPath()
+            ->map(fn (StorageAttributes $attributes) => $attributes->path())
+            ->toArray();
     }
 
     /**
@@ -71,7 +77,6 @@ class ChunksFilesystem extends Filesystem
     /**
      * @param string $path
      * @return resource|null
-     * @throws FileNotFoundException
      */
     public function readChunk(string $path)
     {
@@ -159,11 +164,34 @@ class ChunksFilesystem extends Filesystem
      * @param string $chunk
      * @param array $chunks
      * @return bool
+     *
+     * @throws FileNotFoundException|FilesystemException
      */
     public function concatenate(string $chunk, array $chunks): bool
     {
-        $this->filesystem()->disk($this->disk())->addPlugin(new Concatenate);
+        foreach ($chunks as $path) {
+            if (!$this->filesystem()->disk($this->disk())->has($path)) {
+                throw new FileNotFoundException($path);
+            }
+        }
 
-        return $this->filesystem()->disk($this->disk())->concatenate($chunk, ...$chunks);
+        $overwrite = in_array($chunk, $chunks, true);
+        if ($overwrite) {
+            $this->filesystem()->disk($this->disk())->move($chunk, $chunkBackupPath = $chunk.'.backup');
+            $key = array_search($chunk, $chunks, true);
+            $chunks[$key] = $chunkBackupPath;
+        }
+
+        $stream = new AppendStream;
+        foreach ($chunks as $fragment) {
+            $stream->append($this->filesystem()->disk($this->disk())->readStream($fragment));
+        }
+        $this->filesystem()->disk($this->disk())->writeStream($chunk, $resource = $stream->getResource());
+
+        if ($overwrite) {
+            $this->filesystem()->disk($this->disk())->delete($chunkBackupPath);
+        }
+
+        return true;
     }
 }
