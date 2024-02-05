@@ -2,14 +2,19 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
+use Illuminate\Contracts\Filesystem\FileExistsException;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+
 class TempFilesystem extends Filesystem
 {
     private array $temp_files = [];
 
     /**
      * @param string $path
+     *
      * @return resource|null
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     *
+     * @throws FileNotFoundException
      */
     public function readFile(string $path)
     {
@@ -17,12 +22,13 @@ class TempFilesystem extends Filesystem
     }
 
     /**
-     * @param string $path
-     * @param string|resource $resource
-     * @param array  $options
+     * @param string          $path
+     * @param resource|string $resource
+     * @param array           $options
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileExistsException
      * @return string
+     *
+     * @throws FileExistsException
      */
     public function store(string $path, $resource = '', $options = []): string
     {

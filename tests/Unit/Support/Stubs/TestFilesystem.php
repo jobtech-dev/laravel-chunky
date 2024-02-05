@@ -7,6 +7,4 @@ use Jobtech\LaravelChunky\Support\Filesystem;
 /**
  * @method bool foo(string $arg)
  */
-class TestFilesystem extends Filesystem
-{
-}
+class TestFilesystem extends Filesystem {}

@@ -2,12 +2,14 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Support;
 
-use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\Tests\TestCase;
+use Illuminate\Contracts\Filesystem\Factory;
 use Jobtech\LaravelChunky\Tests\Unit\Support\Stubs\TestFilesystem;
-use Mockery;
 
+/**
+ * @internal
+ */
 class FileSystemTest extends TestCase
 {
     private TestFilesystem $filesystem;
@@ -20,21 +22,21 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_set_disk()
+    public function filesystemSetDisk()
     {
         $this->assertNull($this->filesystem->disk());
         $this->assertEquals('foo', $this->filesystem->disk('foo'));
     }
 
     /** @test */
-    public function filesystem_set_folder()
+    public function filesystemSetFolder()
     {
         $this->assertNull($this->filesystem->folder());
         $this->assertEquals('foo/', $this->filesystem->folder('foo'));
     }
 
     /** @test */
-    public function filesystem_checks_if_path_exists()
+    public function filesystemChecksIfPathExists()
     {
         $this->filesystem->folder('chunks');
 
@@ -43,7 +45,7 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_folders()
+    public function filesystemListsFolders()
     {
         $this->filesystem->folder('chunks');
 
@@ -54,7 +56,7 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_files_in_folder()
+    public function filesystemListsFilesInFolder()
     {
         $this->filesystem->folder('chunks');
 
@@ -66,7 +68,7 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_makes_directory()
+    public function filesystemMakesDirectory()
     {
         $this->filesystem->folder('chunks');
 
@@ -76,7 +78,7 @@ class FileSystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_returns_instance_of_itself()
+    public function filesystemReturnsInstanceOfItself()
     {
         $filesystem = TestFilesystem::instance([
             'disk' => 'foo',
@@ -90,7 +92,7 @@ class FileSystemTest extends TestCase
 
     public function filesystem_forward_calls_to_factory()
     {
-        $mock = Mockery::mock(Factory::class);
+        $mock = \Mockery::mock(Factory::class);
         $mock->shouldReceive('foo')
             ->once()
             ->with('bar')

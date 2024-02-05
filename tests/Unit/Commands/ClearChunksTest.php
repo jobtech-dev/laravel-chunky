@@ -7,6 +7,9 @@ use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class ClearChunksTest extends TestCase
 {
     /**
@@ -24,7 +27,7 @@ class ClearChunksTest extends TestCase
     }
 
     /** @test */
-    public function command_clears_chunks()
+    public function commandClearsChunks()
     {
         $fake_0 = $this->createFakeUpload();
         $fake_1 = $this->createFakeUpload();
@@ -45,7 +48,7 @@ class ClearChunksTest extends TestCase
     }
 
     /** @test */
-    public function command_clears_all_chunks()
+    public function commandClearsAllChunks()
     {
         $fake = $this->createFakeUpload();
 

@@ -2,15 +2,18 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit\Support;
 
+use Jobtech\LaravelChunky\Chunk;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Jobtech\LaravelChunky\Chunk;
-use Jobtech\LaravelChunky\Events\ChunkDeleted;
-use Jobtech\LaravelChunky\Exceptions\ChunkyException;
-use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Tests\TestCase;
+use Jobtech\LaravelChunky\Events\ChunkDeleted;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
+use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 
+/**
+ * @internal
+ */
 class ChunksFilesystemTest extends TestCase
 {
     private ChunksFilesystem $filesystem;
@@ -25,7 +28,7 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_chunks_in_folder()
+    public function filesystemListsChunksInFolder()
     {
         $result = $this->filesystem->listChunks('foo');
 
@@ -38,7 +41,7 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_chunks_in_folder_with_more_than_10_chunks()
+    public function filesystemListsChunksInFolderWithMoreThan10Chunks()
     {
         for ($i = 0; $i < 11; $i++) {
             $file = UploadedFile::fake()->create('test_chunk.txt');
@@ -59,7 +62,7 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_lists_folders()
+    public function filesystemListsFolders()
     {
         $result = $this->filesystem->chunkFolders();
 
@@ -70,25 +73,25 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_counts_chunks_in_folder()
+    public function filesystemCountsChunksInFolder()
     {
         $this->assertEquals(3, $this->filesystem->chunksCount('foo'));
     }
 
     /** @test */
-    public function filesystem_returns_chunk_size()
+    public function filesystemReturnsChunkSize()
     {
         $this->assertEquals(5, $this->filesystem->chunkSize('foo/0_chunk.txt'));
     }
 
     /** @test */
-    public function filesystem_reads_chunk()
+    public function filesystemReadsChunk()
     {
         $this->assertIsResource($this->filesystem->readChunk('foo/0_chunk.txt'));
     }
 
     /** @test */
-    public function filesystem_throws_exception_with_invalid_chunk()
+    public function filesystemThrowsExceptionWithInvalidChunk()
     {
         $chunk = new Chunk(0, '');
 
@@ -98,7 +101,7 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_stores_chunks()
+    public function filesystemStoresChunks()
     {
         $chunk = new Chunk(0, UploadedFile::fake()->create('test.txt'));
 
@@ -108,13 +111,13 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function unexisting_chunk_returns_true_on_delete()
+    public function unexistingChunkReturnsTrueOnDelete()
     {
         $this->assertTrue($this->filesystem->deleteChunk(new Chunk(999, 'chunks/foo/999_chunk.txt')));
     }
 
     /** @test */
-    public function filesystem_deletes_chunk()
+    public function filesystemDeletesChunk()
     {
         Event::fake();
         $this->filesystem->deleteChunk(new Chunk(0, 'chunks/foo/0_chunk.txt'));
@@ -124,13 +127,13 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function unexisting_chunks_folder_returns_true_on_delete()
+    public function unexistingChunksFolderReturnsTrueOnDelete()
     {
         $this->assertTrue($this->filesystem->delete('foo/bar/baz'));
     }
 
     /** @test */
-    public function filesystem_deletes_chunks_folder()
+    public function filesystemDeletesChunksFolder()
     {
         Event::fake();
         $this->filesystem->delete('foo');
@@ -143,7 +146,7 @@ class ChunksFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_concatenate_chunks()
+    public function filesystemConcatenateChunks()
     {
         $this->filesystem->concatenate('chunks/foo/concatenated.txt', [
             'chunks/foo/0_chunk.txt',

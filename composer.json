@@ -25,7 +25,8 @@
         "mockery/mockery": "^1.4",
         "aws/aws-sdk-php": "^3.155",
         "league/flysystem-aws-s3-v3": "^3.0",
-        "orchestra/testbench": "^8.21"
+        "orchestra/testbench": "^8.21",
+        "friendsofphp/php-cs-fixer": "^3.49"
     },
     "suggest": {
         "league/flysystem-aws-s3-v3": "Required to use AWS S3 file storage"
@@ -48,7 +49,8 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit"
+        "test": "vendor/bin/phpunit",
+        "lint": "vendor/bin/php-cs-fixer fix"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

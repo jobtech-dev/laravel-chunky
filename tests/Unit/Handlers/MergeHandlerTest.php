@@ -9,19 +9,21 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
-use Jobtech\LaravelChunky\Events\ChunksMerged;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Exceptions\ChunkyException;
-use Jobtech\LaravelChunky\Handlers\MergeHandler;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
-use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Jobtech\LaravelChunky\Tests\TestCase;
-use Mockery;
+use Jobtech\LaravelChunky\Jobs\MergeChunks;
+use Jobtech\LaravelChunky\Events\ChunksMerged;
+use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Exceptions\ChunkyException;
+use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
+use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 
+/**
+ * @internal
+ */
 class MergeHandlerTest extends TestCase
 {
     /** @test */
-    public function handler_is_created_with_manager()
+    public function handlerIsCreatedWithManager()
     {
         $manager = new ChunkyManager(new ChunkySettings($this->app->make('config')));
         $handler = new MergeHandler($manager);
@@ -30,9 +32,9 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function invalid_chunks_integrity_throws_exception()
+    public function invalidChunksIntegrityThrowsException()
     {
-        $request_mock = Mockery::mock(AddChunkRequest::class);
+        $request_mock = \Mockery::mock(AddChunkRequest::class);
         $request_mock->shouldReceive('fileInput')
             ->once()
             ->andReturn(UploadedFile::fake()->create('test.txt'));
@@ -43,7 +45,7 @@ class MergeHandlerTest extends TestCase
             ->once()
             ->andReturn(100);
 
-        $manager_mock = Mockery::mock(ChunkyManager::class);
+        $manager_mock = \Mockery::mock(ChunkyManager::class);
         $manager_mock->shouldReceive('settings')
             ->once()
             ->andReturn(new ChunkySettings(new Repository()));
@@ -60,10 +62,10 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_dispatch_merge()
+    public function handlerDispatchMerge()
     {
         Queue::fake();
-        $request_mock = Mockery::mock(AddChunkRequest::class);
+        $request_mock = \Mockery::mock(AddChunkRequest::class);
         $request_mock->shouldReceive('fileInput')
             ->once()
             ->andReturn(UploadedFile::fake()->create('test.txt'));
@@ -74,7 +76,7 @@ class MergeHandlerTest extends TestCase
             ->once()
             ->andReturn(100);
 
-        $manager_mock = Mockery::mock(ChunkyManager::class);
+        $manager_mock = \Mockery::mock(ChunkyManager::class);
         $manager_mock->shouldReceive('settings')
             ->times(2)
             ->andReturn(new ChunkySettings(new Repository([
@@ -93,9 +95,9 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_throws_exception_with_invalid_chunk_folder()
+    public function handlerThrowsExceptionWithInvalidChunkFolder()
     {
-        $mock = Mockery::mock(ChunkyManager::class);
+        $mock = \Mockery::mock(ChunkyManager::class);
         $mock->shouldReceive('isValidChunksFolder')
             ->once()
             ->with('foo')
@@ -108,7 +110,7 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_merge_chunks_to_target()
+    public function handlerMergeChunksToTarget()
     {
         Event::fake();
         $handler = new MergeHandler();
@@ -123,9 +125,9 @@ class MergeHandlerTest extends TestCase
     }
 
     /** @test */
-    public function handler_merge_chunks_with_temporary_files()
+    public function handlerMergeChunksWithTemporaryFiles()
     {
-        if (! $this->canTestS3()) {
+        if (!$this->canTestS3()) {
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }
 

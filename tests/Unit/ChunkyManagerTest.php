@@ -2,28 +2,32 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit;
 
-use Illuminate\Contracts\Filesystem\Factory;
+use Jobtech\LaravelChunky\Chunk;
+use Illuminate\Config\Repository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
-use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
+use Jobtech\LaravelChunky\Tests\TestCase;
+use Jobtech\LaravelChunky\Jobs\MergeChunks;
+use Illuminate\Contracts\Filesystem\Factory;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
-use Jobtech\LaravelChunky\Jobs\MergeChunks;
-use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
-use Jobtech\LaravelChunky\Tests\TestCase;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
+use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
+use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
 
+/**
+ * @internal
+ */
 class ChunkyManagerTest extends TestCase
 {
     /**
-     * @var \Illuminate\Config\Repository
+     * @var Repository
      */
     private $config;
 
@@ -35,7 +39,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_is_created_with_filesystems()
+    public function managerIsCreatedWithFilesystems()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -49,7 +53,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieve_settings()
+    public function managerRetrieveSettings()
     {
         $settings = new ChunkySettings(
             $this->config
@@ -60,7 +64,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_set_chunks_filesystem()
+    public function managerSetChunksFilesystem()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -73,7 +77,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_set_merge_filesystem()
+    public function managerSetMergeFilesystem()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -86,7 +90,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_chunks_disk()
+    public function managerRetrievesChunksDisk()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -96,7 +100,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_merge_disk()
+    public function managerRetrievesMergeDisk()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -106,7 +110,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_chunks_folder()
+    public function managerRetrievesChunksFolder()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -116,7 +120,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_merge_folder()
+    public function managerRetrievesMergeFolder()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -126,7 +130,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_chunks_options()
+    public function managerRetrievesChunksOptions()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -140,7 +144,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_merge_options()
+    public function managerRetrievesMergeOptions()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -152,7 +156,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_retrieves_chunks_from_folder()
+    public function managerRetrievesChunksFromFolder()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -170,7 +174,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_reads_chunk_from_object()
+    public function managerReadsChunkFromObject()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -181,7 +185,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_reads_chunk_from_path()
+    public function managerReadsChunkFromPath()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -192,7 +196,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_adds_chunk()
+    public function managerAddsChunk()
     {
         Event::fake();
 
@@ -211,7 +215,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_throws_exception_if_chunk_index_is_wrong()
+    public function managerThrowsExceptionIfChunkIndexIsWrong()
     {
         $file = new UploadedFile(__DIR__.'/../tmp/upload/fake_file.txt', 'fake_file.txt');
 
@@ -225,7 +229,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_adds_chunks()
+    public function managerAddsChunks()
     {
         Event::fake();
 
@@ -246,7 +250,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_deletes_chunks()
+    public function managerDeletesChunks()
     {
         Event::fake();
 
@@ -273,7 +277,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_delete_chunks_returns_true_on_unexisting_folder()
+    public function managerDeleteChunksReturnsTrueOnUnexistingFolder()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -283,7 +287,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_checks_if_chunks_folder_exists()
+    public function managerChecksIfChunksFolderExists()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -299,7 +303,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_checks_integrity_with_not_existing_folder()
+    public function managerChecksIntegrityWithNotExistingFolder()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config
@@ -310,7 +314,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_checks_integrity_with_not_existing_folder_and_different_default_index()
+    public function managerChecksIntegrityWithNotExistingFolderAndDifferentDefaultIndex()
     {
         $this->config->set('chunky.index', 12);
         $manager = new ChunkyManager(new ChunkySettings(
@@ -323,7 +327,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_handle_chunk_request()
+    public function managerHandleChunkRequest()
     {
         Queue::fake();
         Event::fake();
@@ -359,7 +363,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_handle_last_chunk_request()
+    public function managerHandleLastChunkRequest()
     {
         Queue::fake();
         Event::fake();
@@ -394,9 +398,9 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_handle_merge_with_remote_filesystem()
+    public function managerHandleMergeWithRemoteFilesystem()
     {
-        if (! $this->canTestS3()) {
+        if (!$this->canTestS3()) {
             $this->markTestSkipped('Skipping S3 tests: missing .env values');
         }
 
@@ -430,7 +434,7 @@ class ChunkyManagerTest extends TestCase
     }
 
     /** @test */
-    public function manager_merges_chunks_from_folder()
+    public function managerMergesChunksFromFolder()
     {
         $manager = new ChunkyManager(new ChunkySettings(
             $this->config

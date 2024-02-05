@@ -2,14 +2,14 @@
 
 namespace Jobtech\LaravelChunky\Events;
 
-use Illuminate\Queue\SerializesModels;
 use Jobtech\LaravelChunky\Chunk;
+use Illuminate\Queue\SerializesModels;
 
 class ChunkDeleted
 {
     use SerializesModels;
 
-    private Chunk$chunk;
+    private Chunk $chunk;
 
     public function __construct(Chunk $chunk)
     {

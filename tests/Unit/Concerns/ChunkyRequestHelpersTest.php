@@ -4,13 +4,16 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Concerns;
 
 use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Tests\TestCase;
+use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 
+/**
+ * @internal
+ */
 class ChunkyRequestHelpersTest extends TestCase
 {
     /**
-     * @var \Jobtech\LaravelChunky\ChunkyManager
+     * @var ChunkyManager
      */
     private $manager;
 
@@ -44,12 +47,12 @@ class ChunkyRequestHelpersTest extends TestCase
     }
 
     /** @test */
-    public function manager_returns_1_on_total_size_lower_than_chunk_size()
+    public function managerReturns1OnTotalSizeLowerThanChunkSize()
     {
         $request = $this->mock(AddChunkRequest::class, function ($mock) {
             $mock->shouldReceive('totalSizeInput')
-               ->once()
-               ->andReturn(1);
+                ->once()
+                ->andReturn(1);
             $mock->shouldReceive('chunkSizeInput')
                 ->once()
                 ->andReturn(2);
@@ -63,10 +66,11 @@ class ChunkyRequestHelpersTest extends TestCase
      *
      * @dataProvider indexProvider
      *
-     * @param $chunk_size
-     * @param $total_size
+     * @param       $chunk_size
+     * @param       $total_size
+     * @param mixed $result
      */
-    public function manager_retrieve_last_index_from_request($chunk_size, $total_size, $result)
+    public function managerRetrieveLastIndexFromRequest($chunk_size, $total_size, $result)
     {
         $request = $this->mock(AddChunkRequest::class, function ($mock) use ($chunk_size, $total_size) {
             $mock->shouldReceive('totalSizeInput')
@@ -90,7 +94,7 @@ class ChunkyRequestHelpersTest extends TestCase
      * @param $index
      * @param $result
      */
-    public function manager_check_if_request_index_is_the_last_one($index, $chunk_size, $total_size, $result)
+    public function managerCheckIfRequestIndexIsTheLastOne($index, $chunk_size, $total_size, $result)
     {
         $request = $this->mock(AddChunkRequest::class, function ($mock) use ($index, $chunk_size, $total_size) {
             $mock->shouldReceive('totalSizeInput')

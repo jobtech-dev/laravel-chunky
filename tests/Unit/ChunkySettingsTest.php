@@ -2,12 +2,15 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit;
 
-use Illuminate\Contracts\Config\Repository;
 use Jobtech\LaravelChunky\ChunkySettings;
-use Jobtech\LaravelChunky\Exceptions\ChunkyException;
-use Jobtech\LaravelChunky\Handlers\MergeHandler;
 use Jobtech\LaravelChunky\Tests\TestCase;
+use Illuminate\Contracts\Config\Repository;
+use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 
+/**
+ * @internal
+ */
 class ChunkySettingsTest extends TestCase
 {
     protected function setUp(): void
@@ -28,7 +31,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_have_config()
+    public function settingsHaveConfig()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -45,7 +48,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_disk()
+    public function settingsRetrieveDefaultDisk()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -61,7 +64,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_folder()
+    public function settingsRetrieveDefaultFolder()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -77,7 +80,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_chunks_disk()
+    public function settingsRetrieveDefaultChunksDisk()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -98,7 +101,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_chunks_folder()
+    public function settingsRetrieveChunksFolder()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -119,7 +122,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_merge_disk()
+    public function settingsRetrieveDefaultMergeDisk()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -140,7 +143,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_merge_folder()
+    public function settingsRetrieveMergeFolder()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -162,12 +165,13 @@ class ChunkySettingsTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider indexProvider
      *
      * @param $index
      * @param $expected
      */
-    public function settings_retrieve_default_index($index, $expected)
+    public function settingsRetrieveDefaultIndex($index, $expected)
     {
         $repository = $this->mock(Repository::class, function ($mock) use ($index) {
             $mock->shouldReceive('get')
@@ -184,7 +188,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_additional_chunks_options()
+    public function settingsRetrieveDefaultAdditionalChunksOptions()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -199,7 +203,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_additional_chunks_options()
+    public function settingsRetrieveAdditionalChunksOptions()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -220,7 +224,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_additional_merge_options()
+    public function settingsRetrieveDefaultAdditionalMergeOptions()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -235,7 +239,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_additional_merge_options()
+    public function settingsRetrieveAdditionalMergeOptions()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -256,7 +260,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_auto_merge_option()
+    public function settingsRetrieveDefaultAutoMergeOption()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -271,7 +275,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_auto_merge_option()
+    public function settingsRetrieveAutoMergeOption()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -288,7 +292,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_throws_exception_with_undefined_merge_handler_class()
+    public function settingsThrowsExceptionWithUndefinedMergeHandlerClass()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -308,7 +312,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_merge_handler_instance()
+    public function settingsRetrieveMergeHandlerInstance()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -327,7 +331,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_connection()
+    public function settingsRetrieveDefaultConnection()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -342,7 +346,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_connection()
+    public function settingsRetrieveConnection()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -361,7 +365,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_default_queue()
+    public function settingsRetrieveDefaultQueue()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -376,7 +380,7 @@ class ChunkySettingsTest extends TestCase
     }
 
     /** @test */
-    public function settings_retrieve_queue()
+    public function settingsRetrieveQueue()
     {
         $repository = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
