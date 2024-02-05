@@ -23,7 +23,7 @@ class ChunkyRequestHelpersTest extends TestCase
         ));
     }
 
-    public function indexProvider(): array
+    public static function indexProvider(): array
     {
         return [
             [2000, 2000, 1],
@@ -33,7 +33,7 @@ class ChunkyRequestHelpersTest extends TestCase
         ];
     }
 
-    public function lastIndexProvider(): array
+    public static function lastIndexProvider(): array
     {
         return [
             [ChunkySettings::INDEX_ZERO, 2000, 2000, true],

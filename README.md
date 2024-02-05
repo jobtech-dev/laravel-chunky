@@ -42,6 +42,7 @@
 
  Laravel      | laravel-chunky
 :-------------|:----------
+10.x          | 3.0.0
  9.x          | 2.0.0
  8.x          | 1.4.1
  7.x          | 1.4.1
@@ -477,6 +478,7 @@ We're working on:
 Please see [CHANGELOG.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CHANGELOG.md) for more information what has changed recently.
 
 ## Contributing
+This package comes with a docker container based on php 8.1 and composer 2.2. To start it simply run `make start`. To enter the container shell you can use `make shell`.
 
 Please see [CONTRIBUTING.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CONTRIBUTING.md) for more details.
 

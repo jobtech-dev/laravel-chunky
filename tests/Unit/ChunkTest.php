@@ -22,7 +22,7 @@ class ChunkTest extends TestCase
         $this->upload = UploadedFile::fake()->image('foo.png');
     }
 
-    public function indexProvider()
+    public static function indexProvider()
     {
         return [
             [1],
