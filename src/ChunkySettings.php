@@ -2,19 +2,19 @@
 
 namespace Jobtech\LaravelChunky;
 
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Contracts\Config\Repository;
 use Jobtech\LaravelChunky\Contracts\MergeHandler;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 
 class ChunkySettings
 {
     /** @var int */
-    const INDEX_ZERO = 0;
+    public const INDEX_ZERO = 0;
 
     /** @var int */
-    const INDEX_ONE = 1;
+    public const INDEX_ONE = 1;
 
     private ?MergeHandler $handler = null;
 
@@ -59,7 +59,7 @@ class ChunkySettings
             return '';
         }
 
-        if (! Str::endsWith($folder, '/')) {
+        if (!Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 
@@ -89,7 +89,7 @@ class ChunkySettings
             return '';
         }
 
-        if (! Str::endsWith($folder, '/')) {
+        if (!Str::endsWith($folder, '/')) {
             $folder .= DIRECTORY_SEPARATOR;
         }
 
@@ -147,8 +147,8 @@ class ChunkySettings
         if ($this->handler === null) {
             $handler = Arr::get($this->config, 'merge.handler');
 
-            if (! class_exists($handler)) {
-                throw new ChunkyException("Undefined handler $handler");
+            if (!class_exists($handler)) {
+                throw new ChunkyException("Undefined handler {$handler}");
             }
 
             $this->handler = $handler::instance();

@@ -4,14 +4,17 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Http\Requests;
 
 use Illuminate\Config\Repository;
 use Illuminate\Http\UploadedFile;
+use Jobtech\LaravelChunky\Tests\TestCase;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
-use Jobtech\LaravelChunky\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class AddChunkRequestTest extends TestCase
 {
     /** @test */
-    public function request_throw_exception_on_missing_index_rules()
+    public function requestThrowExceptionOnMissingIndexRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -35,7 +38,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_default_index_rules()
+    public function requestRetrievesDefaultIndexRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -60,7 +63,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_index_rules()
+    public function requestRetrievesIndexRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -86,7 +89,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_throw_exception_on_missing_file_rules()
+    public function requestThrowExceptionOnMissingFileRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -110,7 +113,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_default_file_rules()
+    public function requestRetrievesDefaultFileRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -135,7 +138,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_file_rules()
+    public function requestRetrievesFileRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -161,7 +164,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_throw_exception_on_missing_chunk_size_rules()
+    public function requestThrowExceptionOnMissingChunkSizeRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -185,7 +188,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_default_chunk_size_rules()
+    public function requestRetrievesDefaultChunkSizeRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -210,7 +213,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_chunk_size_rules()
+    public function requestRetrievesChunkSizeRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -259,7 +262,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_default_total_size_rules()
+    public function requestRetrievesDefaultTotalSizeRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -284,7 +287,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_total_size_rules()
+    public function requestRetrievesTotalSizeRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -310,7 +313,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_default_additional_rules()
+    public function requestRetrievesDefaultAdditionalRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -329,17 +332,17 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_additional_file_rules()
+    public function requestRetrievesAdditionalFileRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
                 ->once()
                 ->with('chunky.validation', null)
                 ->andReturn([
-                    'index'  => [],
-                    'file'   => [],
+                    'index' => [],
+                    'file' => [],
                     'folder' => [
-                        'key'   => 'folder',
+                        'key' => 'folder',
                         'rules' => ['filled', 'string'],
                     ],
                 ]);
@@ -356,7 +359,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_returns_rules()
+    public function requestReturnsRules()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -400,7 +403,7 @@ class AddChunkRequestTest extends TestCase
                 ->with('chunky.validation', null)
                 ->andReturn([
                     'folder' => [
-                        'key'   => 'folder',
+                        'key' => 'folder',
                         'rules' => ['foo', 'bar'],
                     ],
                 ]);
@@ -425,7 +428,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_throws_exception_on_missing_index_config_key()
+    public function requestThrowsExceptionOnMissingIndexConfigKey()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -445,7 +448,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_index_input()
+    public function requestRetrievesIndexInput()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -464,7 +467,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_throws_exception_on_missing_file_config_key()
+    public function requestThrowsExceptionOnMissingFileConfigKey()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -484,7 +487,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_file_input()
+    public function requestRetrievesFileInput()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -505,7 +508,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_throws_exception_on_missing_chunk_size_config_key()
+    public function requestThrowsExceptionOnMissingChunkSizeConfigKey()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -525,7 +528,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_chunk_size_input()
+    public function requestRetrievesChunkSizeInput()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -544,7 +547,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_throws_exception_on_missing_total_size_config_key()
+    public function requestThrowsExceptionOnMissingTotalSizeConfigKey()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')
@@ -564,7 +567,7 @@ class AddChunkRequestTest extends TestCase
     }
 
     /** @test */
-    public function request_retrieves_total_size_input()
+    public function requestRetrievesTotalSizeInput()
     {
         $mock = $this->mock(Repository::class, function ($mock) {
             $mock->shouldReceive('get')

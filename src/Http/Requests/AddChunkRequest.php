@@ -2,9 +2,9 @@
 
 namespace Jobtech\LaravelChunky\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Foundation\Http\FormRequest;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 
 class AddChunkRequest extends FormRequest
@@ -107,7 +107,7 @@ class AddChunkRequest extends FormRequest
 
         foreach (config('chunky.validation') as $input => $config) {
             if (
-                ! in_array($input, ['index', 'file', 'chunkSize', 'totalSize'])
+                !in_array($input, ['index', 'file', 'chunkSize', 'totalSize'])
                 && Arr::has($config, 'key')
                 && Arr::has($config, 'rules')
             ) {
@@ -137,7 +137,7 @@ class AddChunkRequest extends FormRequest
     /**
      * Retrieve file input.
      *
-     * @return \Illuminate\Http\UploadedFile
+     * @return UploadedFile
      */
     public function fileInput(): UploadedFile
     {

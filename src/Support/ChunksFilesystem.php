@@ -2,25 +2,25 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Chunk;
-use Jobtech\LaravelChunky\Events\ChunkAdded;
-use Jobtech\LaravelChunky\Events\ChunkDeleted;
-use Jobtech\LaravelChunky\Exceptions\ChunkyException;
+use Illuminate\Support\Collection;
 use Keven\AppendStream\AppendStream;
-use Keven\Flysystem\Concatenate\Concatenate;
-use League\Flysystem\FilesystemException;
 use League\Flysystem\StorageAttributes;
+use League\Flysystem\FilesystemException;
+use Jobtech\LaravelChunky\Events\ChunkAdded;
+use Keven\Flysystem\Concatenate\Concatenate;
+use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Symfony\Component\HttpFoundation\File\File;
-use League\Flysystem\Filesystem as LeagueFilesystem;
+use Jobtech\LaravelChunky\Exceptions\ChunkyException;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class ChunksFilesystem extends Filesystem
 {
     /**
      * @param string $folder
+     *
      * @return Collection
      */
     public function listChunks(string $folder): Collection
@@ -36,7 +36,7 @@ class ChunksFilesystem extends Filesystem
                 $index = array_shift($exploded_name);
                 $last = count($files) - 1 == $index;
 
-                return new Chunk((int)$index, $path, $this->disk(), $last);
+                return new Chunk((int) $index, $path, $this->disk(), $last);
             })->sortBy(function (Chunk $chunk) {
                 return $chunk->getIndex();
             })->values();
@@ -58,6 +58,7 @@ class ChunksFilesystem extends Filesystem
 
     /**
      * @param string $folder
+     *
      * @return int
      */
     public function chunksCount(string $folder): int
@@ -67,6 +68,7 @@ class ChunksFilesystem extends Filesystem
 
     /**
      * @param string $path
+     *
      * @return int
      */
     public function chunkSize(string $path): int
@@ -76,6 +78,7 @@ class ChunksFilesystem extends Filesystem
 
     /**
      * @param string $path
+     *
      * @return resource|null
      */
     public function readChunk(string $path)
@@ -84,15 +87,15 @@ class ChunksFilesystem extends Filesystem
     }
 
     /**
-     * @param Chunk $chunk
+     * @param Chunk  $chunk
      * @param string $folder
-     * @param array $options
+     * @param array  $options
      *
      * @return Chunk
      */
     public function store(Chunk $chunk, string $folder, $options = []): Chunk
     {
-        if (! $chunk->getOriginalPath() instanceof File) {
+        if (!$chunk->getOriginalPath() instanceof File) {
             throw new ChunkyException('Path must be a file');
         }
 
@@ -118,11 +121,12 @@ class ChunksFilesystem extends Filesystem
      * Delete all chunks and, once empty, delete the folder.
      *
      * @param Chunk $chunk
+     *
      * @return bool
      */
     public function deleteChunk(Chunk $chunk): bool
     {
-        if (! $this->filesystem()->disk($this->disk())->exists($chunk->getPath())) {
+        if (!$this->filesystem()->disk($this->disk())->exists($chunk->getPath())) {
             return true;
         }
 
@@ -146,7 +150,7 @@ class ChunksFilesystem extends Filesystem
     {
         $folder = $this->path($folder);
 
-        if (! $this->filesystem()->disk($this->disk())->exists($folder)) {
+        if (!$this->filesystem()->disk($this->disk())->exists($folder)) {
             return true;
         }
 
@@ -162,7 +166,8 @@ class ChunksFilesystem extends Filesystem
      * Concatenate all chunks into final merge.
      *
      * @param string $chunk
-     * @param array $chunks
+     * @param array  $chunks
+     *
      * @return bool
      *
      * @throws FileNotFoundException|FilesystemException
@@ -182,7 +187,7 @@ class ChunksFilesystem extends Filesystem
             $chunks[$key] = $chunkBackupPath;
         }
 
-        $stream = new AppendStream;
+        $stream = new AppendStream();
         foreach ($chunks as $fragment) {
             $stream->append($this->filesystem()->disk($this->disk())->readStream($fragment));
         }

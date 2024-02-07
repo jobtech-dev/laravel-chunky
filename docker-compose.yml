@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  laravel-chunky:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-chunky
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html

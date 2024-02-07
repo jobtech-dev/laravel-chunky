@@ -2,20 +2,18 @@
 
 namespace Jobtech\LaravelChunky\Support;
 
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Container\Container;
+use League\Flysystem\StorageAttributes;
+use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Support\Traits\ForwardsCalls;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use League\Flysystem\StorageAttributes;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 abstract class Filesystem
 {
     use ForwardsCalls;
-
-    /** @var \Illuminate\Contracts\Filesystem\Factory */
-    private Factory $filesystem;
 
     /** @var string|null */
     protected ?string $disk = null;
@@ -23,27 +21,25 @@ abstract class Filesystem
     /** @var string|null */
     protected ?string $folder = null;
 
+    /** @var Factory */
+    private Factory $filesystem;
+
     public function __construct(Factory $filesystem)
     {
         $this->filesystem = $filesystem;
     }
 
-    /**
-     * @param string $path
-     *
-     * @return string
-     */
-    protected function path(string $path): string
+    public function __call($method, $parameters)
     {
-        if (! Str::startsWith($path, $this->folder)) {
-            return $this->folder().$path;
+        if (!method_exists($this, $method)) {
+            return $this->forwardCallTo($this->filesystem(), $method, $parameters);
         }
 
-        return $path;
+        return $this->{$method}($parameters);
     }
 
     /**
-     * @return \Illuminate\Contracts\Filesystem\Factory
+     * @return Factory
      *
      * @codeCoverageIgnore
      */
@@ -56,11 +52,12 @@ abstract class Filesystem
      * Disk getter and setter.
      *
      * @param string|null $disk
+     *
      * @return string|null
      */
     public function disk($disk = null): ?string
     {
-        if (! empty($disk) && is_string($disk)) {
+        if (!empty($disk) && is_string($disk)) {
             $this->disk = $disk;
         }
 
@@ -71,11 +68,12 @@ abstract class Filesystem
      * Folder getter and setter.
      *
      * @param string|null $folder
+     *
      * @return string|null
      */
     public function folder($folder = null): ?string
     {
-        if (! empty($folder) && is_string($folder)) {
+        if (!empty($folder) && is_string($folder)) {
             $suffix = Str::endsWith($folder, DIRECTORY_SEPARATOR) ? '' : DIRECTORY_SEPARATOR;
 
             $this->folder = $folder.$suffix;
@@ -100,6 +98,7 @@ abstract class Filesystem
 
     /**
      * @param string $path
+     *
      * @return bool
      */
     public function exists(string $path): bool
@@ -139,6 +138,7 @@ abstract class Filesystem
 
     /**
      * @param string $folder
+     *
      * @return bool
      */
     public function makeDirectory(string $folder): bool
@@ -149,8 +149,10 @@ abstract class Filesystem
 
     /**
      * @param array $config
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
      * @return mixed
+     *
+     * @throws BindingResolutionException
      */
     public static function instance(array $config)
     {
@@ -162,12 +164,17 @@ abstract class Filesystem
         return $filesystem;
     }
 
-    public function __call($method, $parameters)
+    /**
+     * @param string $path
+     *
+     * @return string
+     */
+    protected function path(string $path): string
     {
-        if (! method_exists($this, $method)) {
-            return $this->forwardCallTo($this->filesystem(), $method, $parameters);
+        if (!Str::startsWith($path, $this->folder)) {
+            return $this->folder().$path;
         }
 
-        return $this->{$method}($parameters);
+        return $path;
     }
 }

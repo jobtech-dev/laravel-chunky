@@ -1,7 +1,10 @@
 <?php
 
-return [
+use Jobtech\LaravelChunky\ChunkySettings;
+use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
 
+return [
     /*
     |--------------------------------------------------------------------------
     | Default disks
@@ -15,15 +18,15 @@ return [
 
     'disks' => [
         'chunks' => [
-            'disk'   => env('CHUNKY_CHUNK_DISK', 'local'),
+            'disk' => env('CHUNKY_CHUNK_DISK', 'local'),
             'folder' => 'chunks',
         ],
         'merge' => [
-            'disk'   => env('CHUNKY_MERGE_DISK', 'local'),
+            'disk' => env('CHUNKY_MERGE_DISK', 'local'),
             'folder' => null,
         ],
         'tmp' => [
-            'disk'   => env('CHUNKY_TMP_DISK', 'local'),
+            'disk' => env('CHUNKY_TMP_DISK', 'local'),
             'folder' => null,
         ],
     ],
@@ -41,7 +44,7 @@ return [
     |
     */
 
-    'index' => \Jobtech\LaravelChunky\ChunkySettings::INDEX_ZERO,
+    'index' => ChunkySettings::INDEX_ZERO,
 
     /*
     |--------------------------------------------------------------------------
@@ -76,24 +79,24 @@ return [
     'validation' => [
         // Mandatory
         'index' => [
-            'key'   => 'index',
+            'key' => 'index',
             'rules' => ['required', 'integer', 'min:0'],
         ],
         'file' => [
-            'key'   => 'file',
+            'key' => 'file',
             'rules' => ['required', 'file'],
         ],
         'chunkSize' => [
-            'key'   => 'chunkSize',
+            'key' => 'chunkSize',
             'rules' => ['required', 'integer', 'min:1'],
         ],
         'totalSize' => [
-            'key'   => 'totalSize',
+            'key' => 'totalSize',
             'rules' => ['required', 'integer', 'min:1'],
         ],
         // Optional
         'folder' => [
-            'key'   => 'folder',
+            'key' => 'folder',
             'rules' => ['filled', 'string'],
         ],
         // --------------------------------------------------------------------------
@@ -156,7 +159,7 @@ return [
     |
     */
 
-    'resource' => \Jobtech\LaravelChunky\Http\Resources\ChunkResource::class,
+    'resource' => ChunkResource::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -185,7 +188,7 @@ return [
     */
 
     'merge' => [
-        'handler' => \Jobtech\LaravelChunky\Handlers\MergeHandler::class,
+        'handler' => MergeHandler::class,
 
         'connection' => env('CHUNKY_MERGE_CONNECTION', 'sync'),
 

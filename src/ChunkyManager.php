@@ -4,32 +4,32 @@ namespace Jobtech\LaravelChunky;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
-use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
-use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
 use Jobtech\LaravelChunky\Contracts\MergeHandler;
-use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
-use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
+use Jobtech\LaravelChunky\Concerns\ChunkyRequestHelpers;
+use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
+use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
+use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
 
 /**
- * @method int lastIndexFrom(AddChunkRequest $request)
+ * @method int  lastIndexFrom(AddChunkRequest $request)
  * @method bool isLastIndex(AddChunkRequest $request)
  */
 class ChunkyManager implements ChunkyManagerContract
 {
     use ChunkyRequestHelpers;
 
-    /** @var \Jobtech\LaravelChunky\ChunkySettings */
-    private ChunkySettings $settings;
-
-    /** @var \Jobtech\LaravelChunky\Support\ChunksFilesystem */
+    /** @var ChunksFilesystem */
     protected ChunksFilesystem $chunksFilesystem;
 
-    /** @var \Jobtech\LaravelChunky\Support\MergeFilesystem */
+    /** @var ChunkySettings */
+    private ChunkySettings $settings;
+
+    /** @var MergeFilesystem */
     private MergeFilesystem $mergeFilesystem;
 
-    /** @var \Jobtech\LaravelChunky\Contracts\MergeHandler */
+    /** @var MergeHandler */
     private MergeHandler $mergeHandler;
 
     public function __construct(ChunkySettings $settings)
@@ -179,7 +179,7 @@ class ChunkyManager implements ChunkyManagerContract
     public function addChunk(UploadedFile $file, int $index, string $folder): Chunk
     {
         // Check integrity
-        if (! $this->checkChunks($folder, $index)) {
+        if (!$this->checkChunks($folder, $index)) {
             throw new ChunksIntegrityException("Uploaded chunk with index {$index} violates the integrity");
         }
 
@@ -200,6 +200,7 @@ class ChunkyManager implements ChunkyManagerContract
 
     /**
      * @param string $folder
+     *
      * @return bool
      */
     public function isValidChunksFolder(string $folder): bool
@@ -214,12 +215,12 @@ class ChunkyManager implements ChunkyManagerContract
     {
         $default = $this->settings->defaultIndex();
 
-        if (! $this->chunksFilesystem()->exists($folder) && $index != $default) {
+        if (!$this->chunksFilesystem()->exists($folder) && $index != $default) {
             return false;
         }
 
         if ($this->chunksFilesystem()->exists($folder)) {
-            if (ChunkySettings::INDEX_ZERO != $default) {
+            if ($default != ChunkySettings::INDEX_ZERO) {
                 $index -= $default;
             }
 
@@ -227,8 +228,8 @@ class ChunkyManager implements ChunkyManagerContract
         }
 
         if ($index == $default) {
-            if (! $this->chunksFilesystem()->makeDirectory($folder)) {
-                throw new ChunksIntegrityException("Cannot create chunks folder $folder");
+            if (!$this->chunksFilesystem()->makeDirectory($folder)) {
+                throw new ChunksIntegrityException("Cannot create chunks folder {$folder}");
             }
         }
 
@@ -246,7 +247,7 @@ class ChunkyManager implements ChunkyManagerContract
         foreach ($chunks as $chunk) {
             $size = $this->chunksFilesystem()->chunkSize($chunk->getPath());
 
-            if ($size < $chunk_size && ! $chunk->isLast()) {
+            if ($size < $chunk_size && !$chunk->isLast()) {
                 return false;
             }
 

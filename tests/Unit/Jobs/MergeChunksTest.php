@@ -4,13 +4,16 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Jobs;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Jobtech\LaravelChunky\Contracts\ChunkyManager;
+use Jobtech\LaravelChunky\Tests\TestCase;
+use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
+use Jobtech\LaravelChunky\Contracts\ChunkyManager;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Jobs\MergeChunks;
-use Jobtech\LaravelChunky\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class MergeChunksTest extends TestCase
 {
     /**
@@ -26,7 +29,7 @@ class MergeChunksTest extends TestCase
     }
 
     /** @test */
-    public function job_throws_exception_if_integrity_doesnt_match()
+    public function jobThrowsExceptionIfIntegrityDoesntMatch()
     {
         $this->manager->chunksFilesystem()->makeDirectory('chunks/foo');
 
@@ -43,7 +46,7 @@ class MergeChunksTest extends TestCase
     }
 
     /** @test */
-    public function job_handles_merge()
+    public function jobHandlesMerge()
     {
         Event::fake();
 

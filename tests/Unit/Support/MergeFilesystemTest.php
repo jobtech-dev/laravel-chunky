@@ -4,10 +4,13 @@ namespace Jobtech\LaravelChunky\Tests\Unit\Support;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Jobtech\LaravelChunky\Tests\TestCase;
 use Jobtech\LaravelChunky\Events\MergeAdded;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
-use Jobtech\LaravelChunky\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class MergeFilesystemTest extends TestCase
 {
     private MergeFilesystem $filesystem;
@@ -22,7 +25,7 @@ class MergeFilesystemTest extends TestCase
     }
 
     /** @test */
-    public function filesystem_stores_file()
+    public function filesystemStoresFile()
     {
         Event::fake();
         $this->filesystem->store('text.txt', $this->filesystem->readStream('chunks/foo/0_chunk.txt'));

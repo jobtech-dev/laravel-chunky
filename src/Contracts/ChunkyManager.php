@@ -2,36 +2,39 @@
 
 namespace Jobtech\LaravelChunky\Contracts;
 
+use Jobtech\LaravelChunky\Chunk;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
-use Jobtech\LaravelChunky\Chunk;
 use Jobtech\LaravelChunky\ChunkySettings;
-use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
-use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Support\MergeFilesystem;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
+use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
- * @method int lastIndexFrom(AddChunkRequest $request)
+ * @method int  lastIndexFrom(AddChunkRequest $request)
  * @method bool isLastIndex(AddChunkRequest $request)
  */
 interface ChunkyManager
 {
     /**
-     * @return \Jobtech\LaravelChunky\ChunkySettings
+     * @return ChunkySettings
      */
     public function settings(): ChunkySettings;
 
     /**
      * @param string $disk
      * @param string $folder
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      *
      * @return \Jobtech\LaravelChunky\ChunkyManager
+     *
+     * @throws BindingResolutionException
      */
     public function setChunksFilesystem(string $disk, string $folder): ChunkyManager;
 
     /**
-     * @return \Jobtech\LaravelChunky\Support\ChunksFilesystem
+     * @return ChunksFilesystem
      */
     public function chunksFilesystem(): ChunksFilesystem;
 
@@ -39,19 +42,19 @@ interface ChunkyManager
      * @param string $disk
      * @param string $folder
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     *
      * @return \Jobtech\LaravelChunky\ChunkyManager
+     *
+     * @throws BindingResolutionException
      */
     public function setMergeFilesystem(string $disk, string $folder): ChunkyManager;
 
     /**
-     * @return \Jobtech\LaravelChunky\Support\MergeFilesystem
+     * @return MergeFilesystem
      */
     public function mergeFilesystem(): MergeFilesystem;
 
     /**
-     * @return \Jobtech\LaravelChunky\Contracts\MergeHandler
+     * @return MergeHandler
      */
     public function mergeHandler(): MergeHandler;
 
@@ -87,25 +90,27 @@ interface ChunkyManager
 
     /**
      * @param string|null $folder
-     * @param bool $temporary
-     * @return \Illuminate\Support\Collection
+     * @param bool        $temporary
+     *
+     * @return Collection
      */
     public function listChunks(?string $folder = null): Collection;
 
     /**
      * @param Chunk|string $chunk
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      *
      * @return resource|null
+     *
+     * @throws FileNotFoundException
      */
     public function readChunk($chunk);
 
     /**
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param int $index
-     * @param string $folder
+     * @param UploadedFile $file
+     * @param int          $index
+     * @param string       $folder
      *
-     * @return \Jobtech\LaravelChunky\Chunk
+     * @return Chunk
      */
     public function addChunk(UploadedFile $file, int $index, string $folder): Chunk;
 
@@ -125,7 +130,7 @@ interface ChunkyManager
 
     /**
      * @param string $folder
-     * @param int $index
+     * @param int    $index
      *
      * @return bool
      */
@@ -133,18 +138,18 @@ interface ChunkyManager
 
     /**
      * @param string $folder
-     * @param int $chunk_size
-     * @param int $total_size
+     * @param int    $chunk_size
+     * @param int    $total_size
      *
      * @return bool
      */
     public function checkChunksIntegrity(string $folder, int $chunk_size, int $total_size): bool;
 
     /**
-     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
-     * @param string|null $folder
+     * @param AddChunkRequest $request
+     * @param string|null     $folder
      *
-     * @return \Jobtech\LaravelChunky\Chunk
+     * @return Chunk
      */
     public function handle(AddChunkRequest $request, ?string $folder = null): Chunk;
 

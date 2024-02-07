@@ -2,6 +2,13 @@
 
 Every major / minor version release will be documented in the changelog.
 
+## v3.0.0 - 2020-12-10
+- Require laravel 10
+- Add docker container based on php 8.1 and composer 2.22 to improve developer experience
+
+## v2.0.0 - 2020-12-10
+- Require laravel 9
+
 ## v1.4.1 - 2020-12-10
 Bug fix for the chunks listing. This error was due to the alphabetical order of files when listed from the chunk's folder.
 

@@ -2,16 +2,20 @@
 
 namespace Jobtech\LaravelChunky\Tests\Unit;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Jobtech\LaravelChunky\Chunk;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Testing\File;
+use Illuminate\Http\UploadedFile;
 use Jobtech\LaravelChunky\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class ChunkTest extends TestCase
 {
     /**
-     * @var \Illuminate\Http\Testing\File
+     * @var File
      */
     private $upload;
 
@@ -22,7 +26,7 @@ class ChunkTest extends TestCase
         $this->upload = UploadedFile::fake()->image('foo.png');
     }
 
-    public function indexProvider()
+    public static function indexProvider()
     {
         return [
             [1],
@@ -35,7 +39,7 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_has_attributes()
+    public function chunkHasAttributes()
     {
         $chunk = new Chunk(0, 'foo.ext', 'foo');
 
@@ -55,11 +59,12 @@ class ChunkTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider indexProvider
      *
      * @param $index
      */
-    public function chunk_has_attributes_from_file($index)
+    public function chunkHasAttributesFromFile($index)
     {
         $chunk = new Chunk($index, $this->upload);
 
@@ -72,7 +77,7 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_transformed_into_an_array()
+    public function chunkIsTransformedIntoAnArray()
     {
         $chunk = new Chunk(0, $this->upload);
 
@@ -81,23 +86,23 @@ class ChunkTest extends TestCase
             'path' => $this->upload->getRealPath(),
             'name' => 'foo',
             'extension' => 'png',
-            'index'     => 0,
-            'last'      => false,
+            'index' => 0,
+            'last' => false,
         ];
 
         $this->assertEquals($result, $chunk->toArray());
     }
 
     /** @test */
-    public function chunk_toggles_file_info_when_transformed_into_an_array()
+    public function chunkTogglesFileInfoWhenTransformedIntoAnArray()
     {
         $chunk = new Chunk(0, $this->upload);
 
         $result = [
             'name' => 'foo',
             'extension' => 'png',
-            'index'     => 0,
-            'last'      => false,
+            'index' => 0,
+            'last' => false,
         ];
 
         $this->assertEquals($result, $chunk->hideFileInfo()->toArray());
@@ -109,7 +114,7 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_encoded_as_json()
+    public function chunkIsEncodedAsJson()
     {
         $chunk = new Chunk(0, $this->upload);
         $path = json_encode($this->upload->getRealPath());
@@ -120,7 +125,7 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_toggles_file_info_when_is_encoded_as_json()
+    public function chunkTogglesFileInfoWhenIsEncodedAsJson()
     {
         $chunk = new Chunk(0, $this->upload);
         $path = json_encode($this->upload->getRealPath());
@@ -133,7 +138,7 @@ class ChunkTest extends TestCase
     }
 
     /** @test */
-    public function chunk_is_transformed_into_a_json_resource()
+    public function chunkIsTransformedIntoAJsonResource()
     {
         $mock = $this->mock(Request::class);
         $chunk = new Chunk(0, $this->upload);

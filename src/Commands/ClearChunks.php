@@ -26,14 +26,12 @@ class ClearChunks extends Command
     protected $description = 'Delete all chunks and relative folder.';
 
     /**
-     * @var \Jobtech\LaravelChunky\Contracts\ChunkyManager
+     * @var ChunkyManager
      */
     private $manager;
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -43,7 +41,7 @@ class ClearChunks extends Command
     /**
      * Execute the console command.
      *
-     * @param \Jobtech\LaravelChunky\Contracts\ChunkyManager $manager
+     * @param ChunkyManager $manager
      *
      * @return mixed
      */
@@ -51,14 +49,14 @@ class ClearChunks extends Command
     {
         $this->manager = $manager;
 
-        if (! $this->confirmToProceed()) {
+        if (!$this->confirmToProceed()) {
             return;
         }
 
         $root = $this->manager->chunksFolder();
         $folder = $this->argument('folder');
 
-        if (! empty($folder)) {
+        if (!empty($folder)) {
             $root .= $folder;
             $this->deleteFolder($root);
 
@@ -83,7 +81,7 @@ class ClearChunks extends Command
      */
     private function deleteFolder(string $folder)
     {
-        if (! $this->manager->deleteChunks($folder)) {
+        if (!$this->manager->deleteChunks($folder)) {
             $this->error("An error occurred while deleting folder {$folder}");
 
             return;

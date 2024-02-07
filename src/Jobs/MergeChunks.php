@@ -3,12 +3,12 @@
 namespace Jobtech\LaravelChunky\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Jobtech\LaravelChunky\Facades\Chunky;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
-use Jobtech\LaravelChunky\Facades\Chunky;
 
 class MergeChunks implements ShouldQueue
 {
@@ -30,8 +30,8 @@ class MergeChunks implements ShouldQueue
      *
      * @param string $chunks_folder
      * @param string $merge_path
-     * @param int $chunk_size
-     * @param int $total_size
+     * @param int    $chunk_size
+     * @param int    $total_size
      */
     public function __construct(string $chunks_folder, string $merge_path, int $chunk_size, int $total_size)
     {
@@ -43,12 +43,10 @@ class MergeChunks implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle()
     {
-        if (! Chunky::checkChunksIntegrity($this->chunks_folder, $this->chunk_size, $this->total_size)) {
+        if (!Chunky::checkChunksIntegrity($this->chunks_folder, $this->chunk_size, $this->total_size)) {
             throw new ChunksIntegrityException('Chunks total file size doesnt match with original file size');
         }
 

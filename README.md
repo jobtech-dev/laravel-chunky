@@ -17,7 +17,6 @@
 [![MIT License](https://img.shields.io/github/license/jobtech-dev/laravel-chunky.svg?style=flat-square)](https://github.com/jobtech-dev/laravel-chunky/blob/master/LICENSE.txt)
 [![Build status](https://github.com/jobtech-dev/laravel-chunky/workflows/tests/badge.svg)](https://github.com/jobtech-dev/laravel-chunky/actions)
 [![StyleCI](https://github.styleci.io/repos/291024576/shield?branch=master)](https://github.styleci.io/repos/291024576?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jobtech-dev/laravel-chunky/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jobtech-dev/laravel-chunky/?branch=master)
 [![GitHub stars](https://img.shields.io/github/stars/jobtech-dev/laravel-chunky)](https://github.com/jobtech-dev/laravel-chunky/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/jobtech-dev/laravel-chunky)](https://github.com/jobtech-dev/laravel-chunky/issues)
 [![LinkedIn](https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555)](https://linkedin.com/in/jobtech-srl)
@@ -42,6 +41,7 @@
 
  Laravel      | laravel-chunky
 :-------------|:----------
+10.x          | 3.0.0
  9.x          | 2.0.0
  8.x          | 1.4.1
  7.x          | 1.4.1
@@ -477,6 +477,7 @@ We're working on:
 Please see [CHANGELOG.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CHANGELOG.md) for more information what has changed recently.
 
 ## Contributing
+This package comes with a docker container based on php 8.1 and composer 2.2. To start it simply run `make start`. To enter the container shell you can use `make shell`.
 
 Please see [CONTRIBUTING.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CONTRIBUTING.md) for more details.
 

@@ -8,36 +8,10 @@ use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 trait ChunkyRequestHelpers
 {
     /**
-     * Check if folder is a valid string, otherwise guess the folder from the
-     * request file input.
-     *
-     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
-     * @param string|null                                          $folder
-     *
-     * @return string
-     */
-    protected function checkFolder(AddChunkRequest $request, ?string $folder)
-    {
-        $file = $request->fileInput();
-
-        if ($folder !== null) {
-            return Str::slug($folder);
-        }
-
-        return $this->chunkFolderNameFor(
-            str_replace(
-                $file->guessExtension(),
-                '',
-                $file->getClientOriginalName()
-            )
-        );
-    }
-
-    /**
      * Retrieve last chunk index from chunk request by calculating the ceil value of
      * the total size of the file divided by the size of the single chunk.
      *
-     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
+     * @param AddChunkRequest $request
      *
      * @return int
      */
@@ -57,7 +31,7 @@ trait ChunkyRequestHelpers
     /**
      * Check if current index refers to the last chunk.
      *
-     * @param \Jobtech\LaravelChunky\Http\Requests\AddChunkRequest $request
+     * @param AddChunkRequest $request
      *
      * @return bool
      */
@@ -67,5 +41,31 @@ trait ChunkyRequestHelpers
             + ($this->settings->defaultIndex() - 1);
 
         return $request->indexInput() == $last_index;
+    }
+
+    /**
+     * Check if folder is a valid string, otherwise guess the folder from the
+     * request file input.
+     *
+     * @param AddChunkRequest $request
+     * @param string|null     $folder
+     *
+     * @return string
+     */
+    protected function checkFolder(AddChunkRequest $request, ?string $folder)
+    {
+        $file = $request->fileInput();
+
+        if ($folder !== null) {
+            return Str::slug($folder);
+        }
+
+        return $this->chunkFolderNameFor(
+            str_replace(
+                $file->guessExtension(),
+                '',
+                $file->getClientOriginalName()
+            )
+        );
     }
 }

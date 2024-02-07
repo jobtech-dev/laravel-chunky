@@ -2,16 +2,16 @@
 
 namespace Jobtech\LaravelChunky;
 
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Jsonable;
-use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Traits\ForwardsCalls;
-use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
+use Illuminate\Contracts\Support\Responsable;
 use Symfony\Component\HttpFoundation\File\File;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Jobtech\LaravelChunky\Http\Resources\ChunkResource;
 
 class Chunk implements Arrayable, Jsonable, Responsable
 {
@@ -23,7 +23,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
     /** @var int */
     private $index;
 
-    /** @var \Symfony\Component\HttpFoundation\File\File|string */
+    /** @var string|\Symfony\Component\HttpFoundation\File\File */
     private $path;
 
     /** @var string|null */
@@ -78,6 +78,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
 
     /**
      * @param string|null $suffix
+     *
      * @return string
      */
     public function getFilename($suffix = null): string
@@ -190,10 +191,10 @@ class Chunk implements Arrayable, Jsonable, Responsable
         $extension = $this->getExtension();
 
         $data = [
-            'name'      => $this->getName(),
+            'name' => $this->getName(),
             'extension' => $extension,
-            'index'     => $this->getIndex(),
-            'last'      => $this->isLast(),
+            'index' => $this->getIndex(),
+            'last' => $this->isLast(),
         ];
 
         if ($this->show_file_info) {
@@ -226,18 +227,18 @@ class Chunk implements Arrayable, Jsonable, Responsable
      */
     public function toResource(): JsonResource
     {
-        /** @var \Illuminate\Http\Resources\Json\JsonResource $resource */
+        /** @var JsonResource $resource */
         $resource = config('chunky.resource', ChunkResource::class);
 
         return new $resource($this);
     }
 
     /**
-     * @param \Symfony\Component\HttpFoundation\File\File|string $file
-     * @param int $index
-     * @param array $options
+     * @param string|\Symfony\Component\HttpFoundation\File\File $file
+     * @param int                                                $index
+     * @param array                                              $options
      *
-     * @return \Jobtech\LaravelChunky\Chunk
+     * @return Chunk
      */
     public static function create($file, int $index, $options = [])
     {

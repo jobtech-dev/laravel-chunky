@@ -2,23 +2,21 @@
 
 namespace Jobtech\LaravelChunky;
 
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Filesystem\Factory;
-use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Filesystem\Factory;
+use Illuminate\Contracts\Container\Container;
 use Jobtech\LaravelChunky\Commands\ClearChunks;
-use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
-use Jobtech\LaravelChunky\Support\ChunksFilesystem;
-use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Jobtech\LaravelChunky\Support\TempFilesystem;
+use Jobtech\LaravelChunky\Support\MergeFilesystem;
 use Laravel\Lumen\Application as LumenApplication;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
+use Illuminate\Foundation\Application as LaravelApplication;
+use Jobtech\LaravelChunky\Contracts\ChunkyManager as ChunkyManagerContract;
 
 class ChunkyServiceProvider extends ServiceProvider
 {
     /**
      * Boot the application services.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -27,8 +25,6 @@ class ChunkyServiceProvider extends ServiceProvider
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register()
     {
