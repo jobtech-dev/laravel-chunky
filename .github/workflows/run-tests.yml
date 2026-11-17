@@ -9,12 +9,23 @@ on:
       - master
       - develop
 jobs:
+  verify-development-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Verify the development image uses patched PHP
+        run: |
+          docker build --pull --tag laravel-chunky:ci .
+          docker run --rm laravel-chunky:ci php -r 'exit((int) (PHP_VERSION_ID < 80336));'
+
   run-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1']
+        php: ['8.3']
         laravel: [10.*]
         dependency-version: [prefer-stable]
         include:
@@ -28,25 +39,37 @@ jobs:
         run: sudo apt-get update --fix-missing
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ~/.composer/cache/files
           key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        env:
+          update: 'true'
         with:
           php-version: ${{ matrix.php }}
+          tools: composer:v2
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
           coverage: none
 
       - name: Install dependencies
         run: |
-            composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-            composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
+          # Allow the known unpatched Laravel 10 advisories only for CI dependency
+          # resolution. Composer still reports them in audits.
+          composer config --json policy.advisories.ignore-id '{
+            "PKSA-yxbx-3c9s-cjt9": {"on-audit": false},
+            "PKSA-d5tc-s1qs-h781": {"on-audit": false},
+            "PKSA-m5cs-t1y6-qpcs": {"on-audit": false},
+            "PKSA-3r5d-mb8f-1qw9": {"on-audit": false},
+            "PKSA-mdq4-51ck-6kdq": {"on-audit": false}
+          }'
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Execute tests
         run: vendor/bin/phpunit
