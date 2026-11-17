@@ -6,11 +6,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Jobtech\LaravelChunky\Chunk;
 use Illuminate\Support\Collection;
-use Keven\AppendStream\AppendStream;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\FilesystemException;
 use Jobtech\LaravelChunky\Events\ChunkAdded;
-use Keven\Flysystem\Concatenate\Concatenate;
 use Jobtech\LaravelChunky\Events\ChunkDeleted;
 use Symfony\Component\HttpFoundation\File\File;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
@@ -174,29 +172,62 @@ class ChunksFilesystem extends Filesystem
      */
     public function concatenate(string $chunk, array $chunks): bool
     {
-        foreach ($chunks as $path) {
-            if (!$this->filesystem()->disk($this->disk())->has($path)) {
-                throw new FileNotFoundException($path);
+        $disk = $this->filesystem()->disk($this->disk());
+        $temporaryPath = dirname($chunk).'/.chunky-'.bin2hex(random_bytes(8)).'.tmp';
+        $stream = $this->readConcatenatedStream($chunks);
+
+        try {
+            return $disk->writeStream($temporaryPath, $stream) && $disk->move($temporaryPath, $chunk);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
             }
+            $disk->delete($temporaryPath);
+        }
+    }
+
+    /**
+     * Open a rewound stream of the chunks in the supplied order. The caller closes it.
+     *
+     * @param string[] $chunks
+     *
+     * @return resource
+     *
+     * @throws ChunkyException|FileNotFoundException
+     */
+    public function readConcatenatedStream(array $chunks)
+    {
+        $disk = $this->filesystem()->disk($this->disk());
+        $stream = tmpfile();
+        if ($stream === false) {
+            throw new ChunkyException('Unable to open a temporary file for the merge');
         }
 
-        $overwrite = in_array($chunk, $chunks, true);
-        if ($overwrite) {
-            $this->filesystem()->disk($this->disk())->move($chunk, $chunkBackupPath = $chunk.'.backup');
-            $key = array_search($chunk, $chunks, true);
-            $chunks[$key] = $chunkBackupPath;
-        }
+        try {
+            foreach ($chunks as $path) {
+                $fragment = $disk->readStream($path);
+                if (!is_resource($fragment)) {
+                    throw new FileNotFoundException($path);
+                }
 
-        $stream = new AppendStream();
-        foreach ($chunks as $fragment) {
-            $stream->append($this->filesystem()->disk($this->disk())->readStream($fragment));
-        }
-        $this->filesystem()->disk($this->disk())->writeStream($chunk, $resource = $stream->getResource());
+                try {
+                    if (stream_copy_to_stream($fragment, $stream) === false) {
+                        throw new ChunkyException("Unable to copy chunk {$path}");
+                    }
+                } finally {
+                    fclose($fragment);
+                }
+            }
 
-        if ($overwrite) {
-            $this->filesystem()->disk($this->disk())->delete($chunkBackupPath);
-        }
+            if (!fflush($stream) || !rewind($stream)) {
+                throw new ChunkyException('Unable to prepare the merged stream');
+            }
 
-        return true;
+            return $stream;
+        } catch (\Throwable $exception) {
+            fclose($stream);
+
+            throw $exception;
+        }
     }
 }

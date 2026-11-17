@@ -308,7 +308,8 @@ class UploadController extends Controller {
 
 ### Merge handler
 
-If you need to merge chunks into a single file, you can call the `merge` function that will use the configured merge handler to concatenate all the uploaded chunks into a single file. 
+If you need to merge chunks into a single file, you can call the `merge` function that will use the configured merge handler to concatenate all the uploaded chunks into a single file.
+The default handler uses a local temporary file sized to the combined chunks. For remote sources, it also stages the result on the configured temporary disk before writing the final destination.
 
 ```
 public function chunkUpload(AddChunkRequest $request) {
@@ -468,7 +469,6 @@ See the [open issues](https://github.com/jobtech-dev/laravel-chunky/issues) for 
 We're working on:
 
 * Integrate frontend chunk upload (Not sure if necessary... there are so many packages that does it).
-* Custom concatenation, at the moment we're using a third party package.
 * Better tests.
 * Laravel 5.5+ compatibility.
 
@@ -500,7 +500,7 @@ Thanks to:
 * Filippo Galante ([ilGala](https://github.com/ilgala)) 
 * [All contributors](https://github.com/jobtech-dev/laravel-chunky/graphs/contributors)
 
-We've used these packages for the chunks concatenation:
+Earlier releases used this package for chunk concatenation:
 
 * Keven Godet - [Flysystem concatenate](https://github.com/kevengodet/flysystem-concatenate)
 

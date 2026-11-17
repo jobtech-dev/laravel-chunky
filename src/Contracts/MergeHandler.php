@@ -2,6 +2,7 @@
 
 namespace Jobtech\LaravelChunky\Contracts;
 
+use Illuminate\Foundation\Bus\PendingDispatch;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
@@ -25,7 +26,7 @@ interface MergeHandler
      * @param AddChunkRequest $request
      * @param string          $folder
      *
-     * @return \Illuminate\Foundation\Bus\PendingDispatch|string
+     * @return PendingDispatch|string
      */
     public function dispatchMerge(AddChunkRequest $request, string $folder);
 

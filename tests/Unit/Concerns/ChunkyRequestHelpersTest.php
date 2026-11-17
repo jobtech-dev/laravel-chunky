@@ -26,26 +26,6 @@ class ChunkyRequestHelpersTest extends TestCase
         ));
     }
 
-    public static function indexProvider(): array
-    {
-        return [
-            [2000, 2000, 1],
-            [2000, 4000, 2],
-            [2000, 4001, 3],
-            [2000, 5000, 3],
-        ];
-    }
-
-    public static function lastIndexProvider(): array
-    {
-        return [
-            [ChunkySettings::INDEX_ZERO, 2000, 2000, true],
-            [ChunkySettings::INDEX_ZERO, 2000, 4000, false],
-            [0, 2000, 2000, true],
-            [0, 2000, 4000, false],
-        ];
-    }
-
     /** @test */
     public function managerReturns1OnTotalSizeLowerThanChunkSize()
     {
@@ -84,6 +64,16 @@ class ChunkyRequestHelpersTest extends TestCase
         $this->assertEquals($result, $this->manager->lastIndexFrom($request));
     }
 
+    public static function indexProvider(): array
+    {
+        return [
+            [2000, 2000, 1],
+            [2000, 4000, 2],
+            [2000, 4001, 3],
+            [2000, 5000, 3],
+        ];
+    }
+
     /**
      * @test
      *
@@ -109,5 +99,15 @@ class ChunkyRequestHelpersTest extends TestCase
         });
 
         $this->assertEquals($result, $this->manager->isLastIndex($request));
+    }
+
+    public static function lastIndexProvider(): array
+    {
+        return [
+            [ChunkySettings::INDEX_ZERO, 2000, 2000, true],
+            [ChunkySettings::INDEX_ZERO, 2000, 4000, false],
+            [0, 2000, 2000, true],
+            [0, 2000, 4000, false],
+        ];
     }
 }

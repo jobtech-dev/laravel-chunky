@@ -23,7 +23,7 @@ class Chunk implements Arrayable, Jsonable, Responsable
     /** @var int */
     private $index;
 
-    /** @var string|\Symfony\Component\HttpFoundation\File\File */
+    /** @var File|string */
     private $path;
 
     /** @var string|null */
@@ -234,9 +234,9 @@ class Chunk implements Arrayable, Jsonable, Responsable
     }
 
     /**
-     * @param string|\Symfony\Component\HttpFoundation\File\File $file
-     * @param int                                                $index
-     * @param array                                              $options
+     * @param File|string $file
+     * @param int         $index
+     * @param array       $options
      *
      * @return Chunk
      */
