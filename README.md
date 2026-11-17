@@ -477,7 +477,9 @@ We're working on:
 Please see [CHANGELOG.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CHANGELOG.md) for more information what has changed recently.
 
 ## Contributing
-This package comes with a docker container based on php 8.1 and composer 2.2. To start it simply run `make start`. To enter the container shell you can use `make shell`.
+The development container uses PHP 8.3 and Composer 2.2.
+On an existing checkout, run `docker compose build --pull` to rebuild with the updated base image, then `docker compose up -d` to recreate the container.
+For a fresh checkout, run `make start`. Use `make shell` to enter the container.
 
 Please see [CONTRIBUTING.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CONTRIBUTING.md) for more details.
 
