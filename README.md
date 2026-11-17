@@ -308,7 +308,8 @@ class UploadController extends Controller {
 
 ### Merge handler
 
-If you need to merge chunks into a single file, you can call the `merge` function that will use the configured merge handler to concatenate all the uploaded chunks into a single file. 
+If you need to merge chunks into a single file, you can call the `merge` function that will use the configured merge handler to concatenate all the uploaded chunks into a single file.
+The default handler uses a local temporary file sized to the combined chunks. For remote sources, it also stages the result on the configured temporary disk before writing the final destination.
 
 ```
 public function chunkUpload(AddChunkRequest $request) {
@@ -468,7 +469,6 @@ See the [open issues](https://github.com/jobtech-dev/laravel-chunky/issues) for 
 We're working on:
 
 * Integrate frontend chunk upload (Not sure if necessary... there are so many packages that does it).
-* Custom concatenation, at the moment we're using a third party package.
 * Better tests.
 * Laravel 5.5+ compatibility.
 
@@ -477,7 +477,9 @@ We're working on:
 Please see [CHANGELOG.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CHANGELOG.md) for more information what has changed recently.
 
 ## Contributing
-This package comes with a docker container based on php 8.1 and composer 2.2. To start it simply run `make start`. To enter the container shell you can use `make shell`.
+The development container uses PHP 8.3 and Composer 2.2.
+On an existing checkout, run `docker compose build --pull` to rebuild with the updated base image, then `docker compose up -d` to recreate the container.
+For a fresh checkout, run `make start`. Use `make shell` to enter the container.
 
 Please see [CONTRIBUTING.md](https://github.com/jobtech-dev/laravel-chunky/blob/master/CONTRIBUTING.md) for more details.
 
@@ -498,7 +500,7 @@ Thanks to:
 * Filippo Galante ([ilGala](https://github.com/ilgala)) 
 * [All contributors](https://github.com/jobtech-dev/laravel-chunky/graphs/contributors)
 
-We've used these packages for the chunks concatenation:
+Earlier releases used this package for chunk concatenation:
 
 * Keven Godet - [Flysystem concatenate](https://github.com/kevengodet/flysystem-concatenate)
 

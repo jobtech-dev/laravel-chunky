@@ -154,6 +154,6 @@ class ChunksFilesystemTest extends TestCase
             'chunks/foo/2_chunk.txt',
         ]);
 
-        Storage::assertExists('chunks/foo/concatenated.txt');
+        $this->assertSame('HelloHelloHello', Storage::get('chunks/foo/concatenated.txt'));
     }
 }

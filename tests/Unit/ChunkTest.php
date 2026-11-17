@@ -26,18 +26,6 @@ class ChunkTest extends TestCase
         $this->upload = UploadedFile::fake()->image('foo.png');
     }
 
-    public static function indexProvider()
-    {
-        return [
-            [1],
-            [2],
-            [3],
-            [10],
-            [100],
-            [1000],
-        ];
-    }
-
     /** @test */
     public function chunkHasAttributes()
     {
@@ -74,6 +62,18 @@ class ChunkTest extends TestCase
         $this->assertEquals('foo', $chunk->getName());
 
         $this->assertNull($chunk->getDisk());
+    }
+
+    public static function indexProvider()
+    {
+        return [
+            [1],
+            [2],
+            [3],
+            [10],
+            [100],
+            [1000],
+        ];
     }
 
     /** @test */

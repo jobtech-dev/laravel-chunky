@@ -11,8 +11,10 @@ use Jobtech\LaravelChunky\ChunkyManager;
 use Jobtech\LaravelChunky\ChunkySettings;
 use Jobtech\LaravelChunky\Tests\TestCase;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
+use Illuminate\Contracts\Filesystem\Factory;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
 use Jobtech\LaravelChunky\Handlers\MergeHandler;
+use Jobtech\LaravelChunky\Support\ChunksFilesystem;
 use Jobtech\LaravelChunky\Exceptions\ChunkyException;
 use Jobtech\LaravelChunky\Http\Requests\AddChunkRequest;
 use Jobtech\LaravelChunky\Exceptions\ChunksIntegrityException;
@@ -121,7 +123,40 @@ class MergeHandlerTest extends TestCase
 
         Event::assertDispatched(ChunksMerged::class);
         Storage::assertMissing('chunks/foo');
-        Storage::assertExists($path);
+        $this->assertSame('HelloHelloHello', Storage::get($path));
+    }
+
+    /** @test */
+    public function handlerCanRetryStagedMergeAfterDestinationWriteFails()
+    {
+        $this->app->bind(ChunksFilesystem::class, function ($app) {
+            $filesystem = \Mockery::mock(ChunksFilesystem::class, [$app->make(Factory::class)])->makePartial();
+            $filesystem->shouldReceive('isLocal')->andReturnFalse();
+
+            return $filesystem;
+        });
+        config()->set('chunky.disks.tmp.disk', 'staging');
+        $staging = Storage::fake('staging');
+        $handler = new MergeHandler();
+        $handler->mergeFilesystem()->folder('result');
+
+        // A directory at the output path blocks the first write.
+        Storage::makeDirectory('result/merge.txt');
+        try {
+            $handler->merge('foo', 'merge.txt');
+            $this->fail('Expected the destination write to fail');
+        } catch (ChunkyException $exception) {
+            $this->assertSame('An error occurred while moving merge to destination', $exception->getMessage());
+        }
+        $this->assertSame('Hello', Storage::get('chunks/foo/0_chunk.txt'));
+        $this->assertSame([], $staging->allFiles());
+
+        Storage::deleteDirectory('result/merge.txt');
+        $path = $handler->merge('foo', 'merge.txt');
+
+        $this->assertSame('HelloHelloHello', Storage::get($path));
+        $this->assertSame([], $staging->allFiles());
+        Storage::assertMissing('chunks/foo');
     }
 
     /** @test */
@@ -147,7 +182,7 @@ class MergeHandlerTest extends TestCase
             'merge.txt'
         );
 
-        $this->assertTrue(Storage::disk('s3_disk')->exists('test/merge.txt'));
+        $this->assertSame('HelloHelloHello', Storage::disk('s3_disk')->get('test/merge.txt'));
 
         Storage::disk('s3_disk')->delete(['test/foo/0_foo.txt', 'test/foo/1_foo.txt', 'test/foo/2_foo.txt', 'test/foo', 'test/merge.txt']);
     }

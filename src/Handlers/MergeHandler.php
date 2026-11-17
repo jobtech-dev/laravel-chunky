@@ -3,9 +3,7 @@
 namespace Jobtech\LaravelChunky\Handlers;
 
 use Jobtech\LaravelChunky\Chunk;
-use Illuminate\Support\Collection;
 use Illuminate\Container\Container;
-use Keven\AppendStream\AppendStream;
 use Jobtech\LaravelChunky\Jobs\MergeChunks;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Jobtech\LaravelChunky\Events\ChunksMerged;
@@ -24,7 +22,6 @@ use Jobtech\LaravelChunky\Contracts\MergeHandler as MergeHandlerContract;
  * @method \Jobtech\LaravelChunky\Support\MergeFilesystem  mergeFilesystem()
  * @method array                                           mergeOptions()
  * @method \Illuminate\Support\Collection                  listChunks(?string $folder = null)
- * @method resource|null                                   readChunk($chunk)
  * @method bool                                            deleteChunks(string $folder)
  * @method bool                                            isValidChunksFolder(string $folder)
  * @method bool                                            checkChunksIntegrity(string $folder, int $chunk_size, int $total_size)
@@ -114,7 +111,6 @@ class MergeHandler implements MergeHandlerContract
             throw new ChunkyException("Invalid chunks folder {$chunks_folder}");
         }
 
-        /** @var resource $origin */
         $path = $this->concatenate($chunks_folder, $merge_path);
 
         // Final check and cleanup
@@ -143,53 +139,54 @@ class MergeHandler implements MergeHandlerContract
      *
      * @return string
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileExistsException|\Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws ChunkyException|FileExistsException|FileNotFoundException
      */
     private function concatenate(string $folder, string $target): string
     {
-        if (!$this->chunksFilesystem()->isLocal()) {
-            return $this->temporaryConcatenate($target, $this->listChunks($folder));
+        $chunks = $this->listChunks($folder)->map(fn (Chunk $chunk) => $chunk->getPath())->all();
+        if ($chunks === []) {
+            throw new ChunkyException("No chunks found in {$folder}");
         }
 
-        $chunks = $this->listChunks($folder)->map(function (Chunk $item) {
-            return $item->getPath();
-        });
-        $merge = $chunks->first();
+        $chunksFilesystem = $this->chunksFilesystem();
+        $stream = $chunksFilesystem->readConcatenatedStream($chunks);
 
-        if (!$this->chunksFilesystem()->concatenate($merge, $chunks->toArray())) {
-            throw new ChunkyException('Unable to concatenate chunks');
+        try {
+            if ($chunksFilesystem->isLocal()) {
+                return $this->mergeFilesystem()->store($target, $stream, $this->mergeOptions());
+            }
+
+            return $this->storeStagedMerge($target, $stream);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
         }
-
-        return $this->mergeFilesystem()
-            ->store(
-                $target,
-                $this->readChunk($merge),
-                $this->mergeOptions()
-            );
     }
 
     /**
-     * @param string     $target
-     * @param Collection $chunks
-     *
-     * @return string
-     *
-     * @throws FileExistsException
-     * @throws FileNotFoundException
+     * @param resource $stream
+     * @param string   $target
      */
-    private function temporaryConcatenate(string $target, Collection $chunks)
+    private function storeStagedMerge(string $target, $stream): string
     {
-        $stream = new AppendStream();
-        $chunks->each(function (Chunk $chunk) use ($stream) {
-            $path = $this->temp_filesystem->store('tmp-'.$chunk->getFilename(), $this->chunksFilesystem()->readChunk($chunk->getPath()));
-            $stream->append($this->temp_filesystem->readFile($path));
-        });
+        $temporaryFilesystem = clone $this->temp_filesystem;
+        try {
+            $temporaryPath = $temporaryFilesystem->store('merge-'.bin2hex(random_bytes(8)), $stream);
+            $stagedStream = $temporaryFilesystem->readFile($temporaryPath);
+            if (!is_resource($stagedStream)) {
+                throw new ChunkyException('Unable to read the staged merge');
+            }
 
-        $tmp_merge = $this->temp_filesystem->store($target, $stream->getResource());
-        $path = $this->mergeFilesystem()->store($target, $this->temp_filesystem->readFile($tmp_merge), $this->mergeOptions());
-
-        $this->temp_filesystem->clean();
-
-        return $path;
+            try {
+                return $this->mergeFilesystem()->store($target, $stagedStream, $this->mergeOptions());
+            } finally {
+                if (is_resource($stagedStream)) {
+                    fclose($stagedStream);
+                }
+            }
+        } finally {
+            $temporaryFilesystem->clean();
+        }
     }
 }
